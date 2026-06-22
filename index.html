@@ -643,7 +643,7 @@ function toggleSet(exId,idx){
   const s=state.logs[exId].sets[idx];
   s.done=!s.done;
   saveState();
-  if(s.done){showToast('set done');triggerRest(60);}
+  if(s.done)triggerRest(60);
   renderTrain();
 }
 
@@ -713,7 +713,7 @@ let timerInt=null;
 function triggerRest(sec){
   closeTimer();
   const bar=document.getElementById('timerBar'),clk=document.getElementById('timerClock');
-  if(!bar||!clk){showToast('timerBar missing');return;}
+  if(!bar||!clk)return;
   let left=sec;clk.textContent=left;bar.classList.add('show');bar.style.display='flex';
   if(navigator.vibrate)navigator.vibrate([80,40,80]);
   timerInt=setInterval(()=>{
@@ -721,7 +721,7 @@ function triggerRest(sec){
     if(left<=0){closeTimer();if(navigator.vibrate)navigator.vibrate(500);showToast('休息结束 💪');}
   },1000);
 }
-function closeTimer(){clearInterval(timerInt);const b=document.getElementById('timerBar');b.classList.remove('show');b.style.display='none';}
+function closeTimer(){clearInterval(timerInt);const b=document.getElementById('timerBar');if(b){b.classList.remove('show');b.style.display='none';}}
 
 // ============================================================
 // FINISH WORKOUT
