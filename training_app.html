@@ -115,6 +115,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:h
 /* Timer Bar */
 .timer-bar{position:fixed;bottom:calc(52px+env(safe-area-inset-bottom,0px));left:0;width:100%;background:var(--accent);color:#000;padding:8px 16px;font-size:13px;font-weight:700;display:none;justify-content:space-between;align-items:center;z-index:101;box-shadow:0 -4px 12px rgba(0,0,0,.5)}
 .timer-bar.show{display:flex!important}
+#view-train:not(.active)~.timer-bar.show{display:none!important}
 .timer-close{background:none;border:none;font-size:16px;font-weight:700;cursor:pointer;color:#000;padding:0 8px}
 /* Watch Card */
 .watch-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-top:20px}
@@ -712,6 +713,7 @@ function setW(w,idx,exId){
 let timerInt=null;
 function triggerRest(sec){
   closeTimer();
+  if(!document.getElementById('view-train').classList.contains('active'))return;
   const bar=document.getElementById('timerBar'),clk=document.getElementById('timerClock');
   let left=sec;clk.textContent=left;bar.classList.add('show');
   if(navigator.vibrate)navigator.vibrate([80,40,80]);
@@ -765,6 +767,7 @@ function finishWorkout(){
 // HISTORY
 // ============================================================
 function renderHistory(){
+  closeTimer();
   const el=document.getElementById('historyList');
   if(!state.history||state.history.length===0){
     el.innerHTML='<div class="hist-empty">暂无训练记录<br>开始你的第一次训练吧</div>';return;
