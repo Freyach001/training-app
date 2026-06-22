@@ -643,7 +643,7 @@ function toggleSet(exId,idx){
   const s=state.logs[exId].sets[idx];
   s.done=!s.done;
   saveState();
-  if(s.done)triggerRest(60);
+  if(s.done){showToast('set done');triggerRest(60);}
   renderTrain();
 }
 
@@ -713,6 +713,7 @@ let timerInt=null;
 function triggerRest(sec){
   closeTimer();
   const bar=document.getElementById('timerBar'),clk=document.getElementById('timerClock');
+  if(!bar||!clk){showToast('timerBar missing');return;}
   let left=sec;clk.textContent=left;bar.classList.add('show');bar.style.display='flex';
   if(navigator.vibrate)navigator.vibrate([80,40,80]);
   timerInt=setInterval(()=>{
