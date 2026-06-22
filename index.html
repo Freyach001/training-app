@@ -713,14 +713,14 @@ let timerInt=null;
 function triggerRest(sec){
   closeTimer();
   const bar=document.getElementById('timerBar'),clk=document.getElementById('timerClock');
-  let left=sec;clk.textContent=left;bar.classList.add('show');
+  let left=sec;clk.textContent=left;bar.classList.add('show');bar.style.display='flex';
   if(navigator.vibrate)navigator.vibrate([80,40,80]);
   timerInt=setInterval(()=>{
     left--;clk.textContent=left;
     if(left<=0){closeTimer();if(navigator.vibrate)navigator.vibrate(500);showToast('休息结束 💪');}
   },1000);
 }
-function closeTimer(){clearInterval(timerInt);document.getElementById('timerBar').classList.remove('show')}
+function closeTimer(){clearInterval(timerInt);const b=document.getElementById('timerBar');b.classList.remove('show');b.style.display='none';}
 
 // ============================================================
 // FINISH WORKOUT
