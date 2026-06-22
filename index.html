@@ -113,10 +113,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);padding-bott
 .qt.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent);font-weight:700}
 .qt .sub{font-size:9px;color:var(--text3);font-weight:400}
 .qt.active .sub{color:var(--accent)}
-/* Timer Bar */
-.timer-bar{position:fixed;top:calc(60px+env(safe-area-inset-top,0px));left:0;width:100%;background:var(--accent);color:#000;padding:8px 16px;font-size:13px;font-weight:700;display:none;justify-content:space-between;align-items:center;z-index:9999;box-shadow:0 -4px 12px rgba(0,0,0,.5);border:3px solid red}
-.timer-bar.show{display:flex}
-.timer-close{background:none;border:none;font-size:16px;font-weight:700;cursor:pointer;color:#000;padding:0 8px}
 /* Watch Card */
 .watch-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-top:20px}
 .watch-card h3{font-size:14px;font-weight:800;display:flex;align-items:center;gap:6px;margin-bottom:10px}
@@ -234,19 +230,57 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);padding-bott
       数据仅存本地浏览器，不会上传
     </div>
   </div>
+
+  <!-- View: Weight -->
+  <div class="view" id="view-weight">
+    <h2 style="font-size:18px;font-weight:800;margin-bottom:14px;">体重记录</h2>
+
+    <!-- Cycle settings -->
+    <div class="session-panel open" id="cyclePanel">
+      <div class="panel-header" onclick="togglePanel('cyclePanel')">
+        <div class="panel-title">🔄 生理周期设置</div>
+        <div class="panel-toggle-icon">▼</div>
+      </div>
+      <div class="panel-content">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div class="watch-inp"><label>最近月经开始日</label><input type="date" id="inpCycleStart"></div>
+          <div class="watch-inp"><label>周期长度 (天)</label><input type="number" id="inpCycleLen" step="1"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div class="watch-inp"><label>基线体重 (kg)</label><input type="number" id="inpStartBase" step="0.1"></div>
+          <div class="watch-inp"><label>月减脂 (kg/月)</label><input type="number" id="inpFatLoss" step="0.1"></div>
+        </div>
+        <button class="btn-submit" onclick="saveCycleSettings()">保存设置</button>
+      </div>
+    </div>
+
+    <!-- Prediction card (JS rendered) -->
+    <div id="predictionCard"></div>
+
+    <!-- Add weight -->
+    <div class="ex-card" style="margin-bottom:16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div class="watch-inp"><label>日期</label><input type="date" id="weightDate"></div>
+        <div class="watch-inp"><label>体重 (kg)</label><input type="number" id="weightValue" step="0.1" placeholder="--"></div>
+      </div>
+      <button class="btn-submit" onclick="addWeight()">记录体重</button>
+    </div>
+
+    <!-- History list (JS rendered) -->
+    <div id="weightList"></div>
+  </div>
 </div>
 
 <!-- Dock -->
 <div class="dock">
   <button class="dock-item active" data-view="train"><svg viewBox="0 0 24 24"><path d="M6 3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3zm3 6h6m-6 3h6m-6 3h3"/></svg>训练</button>
   <button class="dock-item" data-view="history"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>历史</button>
+  <button class="dock-item" data-view="weight"><svg viewBox="0 0 24 24"><path d="M12 3v4m0 0a8 8 0 0 0-8 8h16a8 8 0 0 0-8-8z"/></svg>体重</button>
   <button class="dock-item" data-view="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>设置</button>
 </div>
 
 <div id="toast"></div>
 
-<!-- Timer -->
-<div class="timer-bar" id="timerBar"><div>⏱ 休息 <span id="timerClock">60</span>s</div><button class="timer-close" onclick="closeTimer()">✕</button></div>
 
 <script>
 // ============================================================
@@ -471,14 +505,14 @@ function svgCapsule(type){
 // STATE
 // ============================================================
 const SK='tr_app_v2';
-let state={currentDay:1,history:[],logs:{}};
+let state={currentDay:1,history:[],logs:{},weights:[],cycleStart:'2026-05-23',cycleLen:32,periodDays:5,fatLossPerMonth:0.5,startBase:62};
 loadState();
 let curDay=state.currentDay||1;
 let activeSet=null; // {exId, idx}
 
 function loadState(){
   const r=localStorage.getItem(SK);
-  if(r)try{const p=JSON.parse(r);if(p.logs)state=p;if(!state.history)state.history=[]}catch(e){}
+  if(r)try{const p=JSON.parse(r);if(p.logs)state=p;if(!state.history)state.history=[];if(!state.weights)state.weights=[];if(!state.cycleStart){state.cycleStart='2026-05-23';state.cycleLen=32;state.periodDays=5;state.fatLossPerMonth=0.5;state.startBase=62}}catch(e){}
 }
 function saveState(){state.currentDay=curDay;localStorage.setItem(SK,JSON.stringify(state))}
 function todayKey(){return new Date().toISOString().slice(0,10)}
@@ -493,6 +527,7 @@ function switchView(id){
   document.getElementById('view-'+id).classList.add('active');
   document.querySelector(`.dock-item[data-view="${id}"]`).classList.add('active');
   if(id==='history')renderHistory();
+  if(id==='weight')renderWeight();
 }
 
 function switchDay(n){
@@ -639,12 +674,18 @@ function activateSet(exId,idx){
   renderTrain(); // re-render to show stepper
 }
 
+function getRestSec(exId){
+  if(exId==='d2-pu')return 120;
+  const core=exId.replace(/^d\d-/,'');
+  if(['gb','hs','lp','sr','vr'].includes(core))return 90;
+  return 60;
+}
 function toggleSet(exId,idx){
   ensureLogExists(exId);
   const s=state.logs[exId].sets[idx];
   s.done=!s.done;
   saveState();
-  if(s.done)triggerRest(60);
+  if(s.done)triggerRest(getRestSec(exId));
   renderTrain();
 }
 
@@ -713,15 +754,34 @@ function setW(w,idx,exId){
 let timerInt=null;
 function triggerRest(sec){
   closeTimer();
-  const bar=document.getElementById('timerBar'),clk=document.getElementById('timerClock');
-  let left=sec;clk.textContent=left;bar.classList.add('show');
-  if(navigator.vibrate)navigator.vibrate([80,40,80]);
-  timerInt=setInterval(()=>{
-    left--;clk.textContent=left;
-    if(left<=0){closeTimer();if(navigator.vibrate)navigator.vibrate(500);showToast('休息结束 💪');}
+  var left=sec;
+  var bar=document.createElement('div');
+  bar.id='restTimer';
+  bar.style.position='fixed';
+  bar.style.bottom='calc(56px + env(safe-area-inset-bottom, 0px))';
+  bar.style.left='0';
+  bar.style.width='100%';
+  bar.style.zIndex='99999';
+  bar.style.background='#f97316';
+  bar.style.color='#000';
+  bar.style.padding='12px 16px';
+  bar.style.fontSize='15px';
+  bar.style.fontWeight='700';
+  bar.style.display='flex';
+  bar.style.justifyContent='space-between';
+  bar.style.alignItems='center';
+  bar.style.boxSizing='border-box';
+  bar.innerHTML='<span>⏱ 组间休息 <b style="font-size:22px">'+left+'</b>s</span><button id="restClose" style="background:none;border:none;font-size:20px;cursor:pointer;color:#000;padding:0 4px;line-height:1">✕</button>';
+  document.body.appendChild(bar);
+  document.getElementById('restClose').onclick=closeTimer;
+  timerInt=setInterval(function(){
+    left--;
+    bar.innerHTML='<span>⏱ 组间休息 <b style="font-size:22px">'+left+'</b>s</span><button id="restClose" style="background:none;border:none;font-size:20px;cursor:pointer;color:#000;padding:0 4px;line-height:1">✕</button>';
+    document.getElementById('restClose').onclick=closeTimer;
+    if(left<=0){closeTimer();showToast('休息结束');}
   },1000);
 }
-function closeTimer(){clearInterval(timerInt);document.getElementById('timerBar').classList.remove('show')}
+function closeTimer(){clearInterval(timerInt);var tb=document.getElementById('restTimer');if(tb)tb.remove()}
 
 // ============================================================
 // FINISH WORKOUT
@@ -782,6 +842,150 @@ function renderHistory(){
 }
 
 function delHist(i){if(confirm('删除这条记录？')){state.history.splice(i,1);saveState();renderHistory();showToast('已删除')}}
+
+// ============================================================
+// CYCLE & PREDICTION
+// ============================================================
+function getCycleDay(dateStr,cycleStart,cycleLen){
+  var d=new Date(dateStr+'T00:00:00'),s=new Date(cycleStart+'T00:00:00');
+  var diff=Math.floor((d-s)/86400000);
+  return diff<0?-1:(diff%cycleLen)+1;
+}
+function getPhase(cd,pd){
+  if(cd<=0)return 'unknown';
+  if(cd<=pd)return 'period';
+  if(cd<=14)return 'follicular';
+  if(cd<=16)return 'ovulation';
+  if(cd<=26)return 'luteal';
+  return 'late-luteal';
+}
+function phaseLabel(p){return{period:'月经期',follicular:'卵泡期',ovulation:'排卵期',luteal:'黄体期','late-luteal':'黄体晚期',unknown:'未设置'}[p]||p}
+function phaseColor(p){return{period:'#D85A30',follicular:'#1D9E75',ovulation:'#378ADD',luteal:'#EF9F27','late-luteal':'#D4537E',unknown:'#52525b'}[p]||'#52525b'}
+function phaseNote(p){return{period:'月经期体重偏高，经后消肿会明显下降',follicular:'卵泡期体重接近真实水平，训练状态好',ovulation:'排卵期体重平稳',luteal:'黄体期积水增加，体重缓慢回升','late-luteal':'黄体晚期水分高峰，秤上数字不代表真实体重',unknown:''}[p]||''}
+function getRetention(p){return{period:1.8,follicular:0.1,ovulation:0.3,luteal:0.7,'late-luteal':1.8,unknown:0}[p]||0}
+function getTrainingDay(dateStr){
+  var base=new Date(2026,5,23),d=new Date(dateStr+'T00:00:00');
+  var diff=Math.floor((d-base)/86400000);
+  return ['D1腿臀','休息','D2背肩','休息','D3轻训','休息'][((diff%6)+6)%6];
+}
+function predictWeight(dateStr,s){
+  var ref=new Date('2026-05-23T00:00:00'),d=new Date(dateStr+'T00:00:00');
+  var dayOffset=Math.floor((d-ref)/86400000);
+  var base=s.startBase-(dayOffset*s.fatLossPerMonth/30);
+  var cd=getCycleDay(dateStr,s.cycleStart,s.cycleLen);
+  var p=getPhase(cd,s.periodDays);
+  var ret=getRetention(p);
+  return{base:parseFloat(base.toFixed(1)),predicted:parseFloat((base+ret).toFixed(1)),low:parseFloat((base+ret-0.4).toFixed(1)),high:parseFloat((base+ret+0.4).toFixed(1)),phase:p,cycleDay:cd};
+}
+
+// ============================================================
+// WEIGHT
+// ============================================================
+function renderWeight(){
+  closeTimer();
+  var today=todayKey();
+  document.getElementById('weightDate').value=today;
+  document.getElementById('weightValue').value='';
+
+  // Cycle settings form
+  document.getElementById('inpCycleStart').value=state.cycleStart;
+  document.getElementById('inpCycleLen').value=state.cycleLen;
+  document.getElementById('inpStartBase').value=state.startBase;
+  document.getElementById('inpFatLoss').value=state.fatLossPerMonth;
+
+  // Prediction card
+  var pred=predictWeight(today,state);
+  var trainDay=getTrainingDay(today);
+  var pCn=phaseLabel(pred.phase);
+  var pColor=phaseColor(pred.phase);
+  var note=phaseNote(pred.phase);
+  var tRec=state.weights&&state.weights.find(function(w){return w.date===today});
+
+  var diffStr='';
+  if(tRec){
+    var diff=(tRec.weight-pred.predicted).toFixed(1);
+    var ds=diff>0?'+':'';
+    diffStr='<div style="text-align:center;border-left:1px solid var(--border);padding-left:12px">'+
+      '<div style="font-size:10px;color:var(--text2);margin-bottom:2px">实际体重</div>'+
+      '<div style="font-size:22px;font-weight:800;color:var(--text)">'+tRec.weight+'<span style="font-size:12px;color:var(--text2);font-weight:400"> kg</span></div>'+
+      '<div style="font-size:12px;font-weight:700;margin-top:2px;color:'+(diff>0?'#ef4444':'#22c55e')+'">差值 '+ds+diff+'kg</div>'+
+      '<div style="font-size:10px;color:var(--green);margin-top:1px">✓ 今日已记录</div></div>';
+  }else{
+    diffStr='<div style="text-align:center;border-left:1px solid var(--border);padding-left:12px">'+
+      '<div style="font-size:10px;color:var(--text2);margin-bottom:2px">实际体重</div>'+
+      '<div style="font-size:14px;color:var(--text3);font-weight:400">今日未记录</div></div>';
+  }
+
+  document.getElementById('predictionCard').innerHTML=
+    '<div class="ex-card" style="margin-bottom:16px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+        '<span style="font-size:14px;font-weight:700">📊 今日预测</span>'+
+        '<span style="font-size:11px;padding:2px 10px;border-radius:10px;background:'+pColor+'22;color:'+pColor+';font-weight:600">'+pCn+' 第'+pred.cycleDay+'天</span></div>'+
+      '<div style="font-size:11px;color:var(--text2);margin-bottom:10px">'+trainDay+' · 预测区间 '+pred.low+'-'+pred.high+'kg</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px">'+
+        '<div style="text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:2px">预测体重</div>'+
+        '<div style="font-size:22px;font-weight:800;color:var(--accent)">'+pred.predicted+'<span style="font-size:12px;color:var(--text2);font-weight:400"> kg</span></div></div>'+
+        diffStr+'</div>'+
+      '<div style="font-size:11px;color:var(--text3);padding-top:8px;border-top:1px solid var(--border);line-height:1.5">💡 '+note+'</div></div>';
+
+  // History list
+  var el=document.getElementById('weightList');
+  var aw=state.weights||[];
+  if(!aw.length){
+    el.innerHTML='<div class="hist-empty">暂无体重记录<br>记录后会自动与本日预测对比</div>';return;
+  }
+  aw.sort(function(a,b){return b.timestamp-a.timestamp});
+  el.innerHTML=aw.map(function(w,i){
+    var wp=getCycleDay(w.date,state.cycleStart,state.cycleLen);
+    var wpPhase=getPhase(wp,state.periodDays);
+    var wpCn=phaseLabel(wpPhase);
+    var wpColor=phaseColor(wpPhase);
+    var wPred=predictWeight(w.date,state);
+    var diff=(w.weight-wPred.predicted).toFixed(1);
+    var ds=diff>0?'+':'';
+    return '<div class="hist-item">'+
+      '<div class="hist-header"><div class="hist-date">'+w.date.replace(/-/g,'/')+'</div>'+
+        '<button style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px" onclick="delWeight('+i+')">删除</button></div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between">'+
+        '<div style="display:flex;align-items:baseline;gap:8px">'+
+          '<span style="font-size:24px;font-weight:800;color:var(--accent)">'+w.weight+'</span>'+
+          '<span style="font-size:12px;color:var(--text2)">kg</span></div>'+
+        '<div style="text-align:right">'+
+          '<span style="font-size:10px;padding:1px 8px;border-radius:8px;background:'+wpColor+'22;color:'+wpColor+'">'+wpCn+'</span>'+
+          '<div style="font-size:10px;color:var(--text3);margin-top:2px">预测 '+wPred.predicted+' · 差值 '+ds+diff+'</div></div></div></div>';
+  }).join('');
+  saveState();
+}
+
+function addWeight(){
+  var date=document.getElementById('weightDate').value;
+  var weight=parseFloat(document.getElementById('weightValue').value);
+  if(!date||!weight||weight<=0){showToast('请输入有效日期和体重');return;}
+  if(!state.weights)state.weights=[];
+  state.weights.push({date:date,weight:weight,timestamp:Date.now()});
+  saveState();
+  renderWeight();
+  showToast('已记录');
+}
+
+function delWeight(i){
+  if(!state.weights[i])return;
+  if(confirm('删除此条体重记录？')){
+    state.weights.splice(i,1);
+    saveState();
+    renderWeight();
+  }
+}
+
+function saveCycleSettings(){
+  state.cycleStart=document.getElementById('inpCycleStart').value;
+  state.cycleLen=parseInt(document.getElementById('inpCycleLen').value)||32;
+  state.startBase=parseFloat(document.getElementById('inpStartBase').value)||62;
+  state.fatLossPerMonth=parseFloat(document.getElementById('inpFatLoss').value)||0.5;
+  saveState();
+  renderWeight();
+  showToast('设置已保存');
+}
 
 // ============================================================
 // SETTINGS
