@@ -113,8 +113,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:h
 .qt .sub{font-size:9px;color:var(--text3);font-weight:400}
 .qt.active .sub{color:var(--accent)}
 /* Timer Bar */
-.timer-bar{position:fixed;bottom:calc(52px+env(safe-area-inset-bottom,0px));left:0;width:100%;background:var(--accent);color:#000;padding:8px 16px;font-size:13px;font-weight:700;display:none;justify-content:space-between;align-items:center;z-index:101;box-shadow:0 -4px 12px rgba(0,0,0,.5)}
-.timer-bar.show{display:flex!important}
+.timer-bar{position:fixed;bottom:calc(52px+env(safe-area-inset-bottom,0px));left:0;width:100%;background:var(--accent);color:#000;padding:8px 16px;font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center;z-index:101;box-shadow:0 -4px 12px rgba(0,0,0,.5);transform:translateY(120%);transition:transform .25s}
+.timer-bar.show{transform:translateY(0)}
 .timer-close{background:none;border:none;font-size:16px;font-weight:700;cursor:pointer;color:#000;padding:0 8px}
 /* Watch Card */
 .watch-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-top:20px}
@@ -714,14 +714,14 @@ function triggerRest(sec){
   closeTimer();
   const bar=document.getElementById('timerBar'),clk=document.getElementById('timerClock');
   if(!bar||!clk)return;
-  let left=sec;clk.textContent=left;bar.classList.add('show');bar.style.display='flex';
+  let left=sec;clk.textContent=left;bar.classList.add('show');
   if(navigator.vibrate)navigator.vibrate([80,40,80]);
   timerInt=setInterval(()=>{
     left--;clk.textContent=left;
     if(left<=0){closeTimer();if(navigator.vibrate)navigator.vibrate(500);showToast('休息结束 💪');}
   },1000);
 }
-function closeTimer(){clearInterval(timerInt);const b=document.getElementById('timerBar');if(b){b.classList.remove('show');b.style.display='none';}}
+function closeTimer(){clearInterval(timerInt);const b=document.getElementById('timerBar');if(b)b.classList.remove('show');}
 
 // ============================================================
 // FINISH WORKOUT
