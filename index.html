@@ -113,7 +113,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:h
 .qt .sub{font-size:9px;color:var(--text3);font-weight:400}
 .qt.active .sub{color:var(--accent)}
 /* Timer Bar */
-.timer-bar{position:fixed;bottom:calc(52px+env(safe-area-inset-bottom,0px));left:0;width:100%;background:var(--accent);color:#000;padding:8px 16px;font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center;z-index:101;box-shadow:0 -4px 12px rgba(0,0,0,.5)}
+.timer-bar{position:fixed;bottom:calc(52px+env(safe-area-inset-bottom,0px));left:0;width:100%;background:var(--accent);color:#000;padding:8px 16px;font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center;z-index:9999;box-shadow:0 -4px 12px rgba(0,0,0,.5);border:3px solid red}
 .timer-close{background:none;border:none;font-size:16px;font-weight:700;cursor:pointer;color:#000;padding:0 8px}
 /* Watch Card */
 .watch-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-top:20px}
@@ -235,7 +235,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:h
 </div>
 
 <!-- Timer -->
-<div class="timer-bar" id="timerBar"><div>组间休息: <span id="timerClock">60</span>s</div><button class="timer-close" onclick="closeTimer()">✕</button></div>
+<div class="timer-bar" id="timerBar"><div style="color:blue;font-size:20px">⏱ TIMER TEST <span id="timerClock">60</span>s</div><button class="timer-close" onclick="closeTimer()">✕</button></div>
 
 <!-- Dock -->
 <div class="dock">
