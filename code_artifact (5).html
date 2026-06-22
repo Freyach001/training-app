@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="极客训练">
+<meta name="theme-color" content="#09090b">
+<link rel="manifest" href="data:application/json,{}">
+<title>Training App · Pro</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          brand: {
+            DEFAULT: '#f97316', // 极客暖橙色
+            light: 'rgba(249, 115, 22, 0.15)',
+          },
+          dark: {
+            bg: '#09090b',
+            surface: '#121214',
+            card: '#18181b',
+            hover: '#242427',
+          }
+        }
+      }
+    }
+  }
+</script>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+body {
+  background-color: #09090b;
+  color: #f4f4f5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+  line-height: 1.5;
+  padding-bottom: 90px;
+}
+/* 顶部渐变安全头部 */
+.safe-header {
+  background: rgba(9, 9, 11, 0.85);
+  backdrop-filter: blur(16px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 16px 20px;
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
+}
+.view {
+  display: none;
+}
+.view.active {
+  display: block;
+}
+/* 今日热身与拉伸面板 */
+.session-panel {
+  background: rgba(249, 115, 22, 0.03);
+  border: 1px solid rgba(249, 115, 22, 0.12);
+  transition: all 0.3s;
+}
+.session-panel.stretching {
+  background: rgba(34, 197, 94, 0.02);
+  border-color: rgba(34, 197, 94, 0.12);
+}
+.panel-content {
+  display: none;
+}
+.session-panel.open .panel-content {
+  display: block;
+}
+/* 动作卡片退景效果 */
+.exercise-card {
+  background: #18181b;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.25s ease;
+}
+.exercise-card.completed {
+  opacity: 0.55;
+  border-color: rgba(34, 197, 94, 0.2);
+}
+.guide-panel {
+  display: none;
+}
+.guide-panel.active {
+  display: block;
+}
+.stepper-overlay {
+  display: none;
+}
+.stepper-overlay.active {
+  display: block;
+}
+/* 组间倒计时条 */
+.timer-bar {
+  position: fixed;
+  top: calc(56px + env(safe-area-inset-top, 0px));
+  left: 0;
+  width: 100%;
+  background: #f97316;
+  color: #000;
+  transform: translateY(-150%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 99;
+}
+.timer-bar.show {
+  transform: translateY(0);
+}
+/* 极客风自定义模态框遮罩 */
+.custom-modal {
+  display: none; /* 仅作为后备，主要靠 Tailwind 的 hidden 类管理显示 */
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+}
+.custom-modal.active {
+  display: flex;
+}
+</style>
+</head>
+<body class="bg-dark-bg text-zinc-100 antialiased selection:bg-brand selection:text-white">
+
+<style>
+/* 底部导航 Dock 栏 */
+.dock {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(18, 18, 20, 0.9);
+  backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  z-index: 100;
+}
+.dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #52525b;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.2s;
+  width: 25%;
+}
+.dock-item.active {
+  color: #f97316;
+}
+.dock-item svg {
+  width: 20px;
+  height: 20px;
+  margin-bottom: 4px;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  fill: none;
+}
+/* 轻量级消息提示 */
+#toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #ffffff;
+  color: #000000;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1000;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+#toast.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+</style>
+
+<!-- 科学组间休息倒计时条 -->
+<div class="timer-bar flex justify-between items-center px-4 py-2 text-sm font-bold shadow-lg" id="timerBar">
+  <div>⏳ 组间休息中: <span id="timerClock" class="font-mono text-base">60</span> 秒</div>
+  <button class="bg-black/10 hover:bg-black/20 text-black w-6 h-6 rounded-full flex items-center justify-center font-bold" onclick="closeTimer()">✕</button>
+</div>
+
+<!-- 全局应用状态顶部栏 -->
+<div class="safe-header flex items-center justify-between">
+  <div class="brand-title flex items-center gap-2 font-black text-lg tracking-tight">
+    <div class="brand-dot w-2 h-2 rounded-full bg-brand shadow-[0_0_8px_#f97316]"></div>
+    Change Pro 龙之梦 · 复健
+  </div>
+  <div class="today-chip bg-dark-surface border border-zinc-800 text-zinc-400 px-3 py-1.5 rounded-full text-xs font-semibold" id="todayLabel">
+    --/-- 周--
+  </div>
+</div>
+
+<div class="app-container max-w-xl mx-auto px-4 py-4">
+
+  <!-- ==================== VIEW 1: 训练看板 (Workout) ==================== -->
+  <div class="view active" id="view-train">
+    <!-- 循环计划天数快速切换 tabs -->
+    <div class="day-tabs flex bg-dark-surface border border-zinc-800 p-1 rounded-xl mb-5">
+      <div class="day-tab flex-1 text-center py-2.5 text-xs font-bold text-zinc-400 rounded-lg cursor-pointer transition-all active" data-day="1" onclick="switchDay(1)">Day 1: 腿臀核心</div>
+      <div class="day-tab flex-1 text-center py-2.5 text-xs font-bold text-zinc-400 rounded-lg cursor-pointer transition-all" data-day="2" onclick="switchDay(2)">Day 2: 背肩手臂</div>
+      <div class="day-tab flex-1 text-center py-2.5 text-xs font-bold text-zinc-400 rounded-lg cursor-pointer transition-all" data-day="3" onclick="switchDay(3)">Day 3: 轻训有氧</div>
+    </div>
+
+    <!-- 今日推荐热身方案 -->
+    <div class="session-panel open rounded-xl p-4 mb-4" id="warmup-panel">
+      <div class="panel-header flex justify-between items-center cursor-pointer" onclick="toggleSessionPanel('warmup-panel')">
+        <div class="panel-title flex items-center gap-2 text-sm font-bold">🔥 每次训练通用热身 (5-8分钟)</div>
+        <div class="panel-toggle-icon text-xs text-zinc-500 transition-transform">▼</div>
+      </div>
+      <div class="panel-content border-t border-white/5 mt-3 pt-3 text-xs text-zinc-400" id="warmup-content">
+        <!-- 动态JS载入 -->
+      </div>
+    </div>
+
+    <!-- 核心训练卡片动态渲染容器 -->
+    <div id="exercise-list">
+      <!-- JS动态注入 -->
+    </div>
+
+    <!-- 今日推荐拉伸放松方案 -->
+    <div class="session-panel stretching open rounded-xl p-4 mb-4" id="stretch-panel">
+      <div class="panel-header flex justify-between items-center cursor-pointer" onclick="toggleSessionPanel('stretch-panel')">
+        <div class="panel-title flex items-center gap-2 text-sm font-bold text-emerald-400">🧘 训练后拉伸放松 (8-10分钟)</div>
+        <div class="panel-toggle-icon text-xs text-zinc-500 transition-transform">▼</div>
+      </div>
+      <div class="panel-content border-t border-white/5 mt-3 pt-3 text-xs text-zinc-400" id="stretch-content">
+        <!-- 动态JS载入 -->
+      </div>
+    </div>
+
+    <!-- 康复注意事项快读卡片 -->
+    <div class="session-panel rounded-xl p-4 mb-6" style="background: rgba(239, 68, 68, 0.02); border-color: rgba(239, 68, 68, 0.15);" id="precautions-panel">
+      <div class="panel-header flex justify-between items-center cursor-pointer" onclick="toggleSessionPanel('precautions-panel')">
+        <div class="panel-title flex items-center gap-2 text-sm font-bold text-red-400">⚠️ 极客复健注意事项</div>
+        <div class="panel-toggle-icon text-xs text-zinc-500 transition-transform">▼</div>
+      </div>
+      <div class="panel-content border-t border-white/5 mt-3 pt-3 text-xs text-zinc-400 leading-relaxed">
+        <p class="mb-2"><strong>肩部弹响：</strong>面拉和外旋用极轻重量。若弹响伴随刺痛或卡顿，请立即停止并去康复科复诊。</p>
+        <p class="mb-2"><strong>进阶节奏：</strong>前2周适应期千万不要加重，2周后无不适每次仅允许增加 5%-10% 负荷。</p>
+        <p class="mb-2"><strong>推胸等动作：</strong>至少坚持 4-6 周，待弹响明显减少且完全无痛后，再考虑从绳索夹胸轻量尝试。</p>
+        <p><strong>高蛋白保肌：</strong>每天每公斤体重 1.6-2.0g 蛋白质，在温和热量缺口下，减脂保肌两不误。</p>
+      </div>
+    </div>
+
+    <!-- Apple Watch 数据录入与今日归档按钮 -->
+    <div class="watch-stats-card rounded-2xl border border-zinc-800 p-5 mb-8">
+      <h3 class="text-sm font-extrabold flex items-center gap-2 text-brand mb-4">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="6" y="2" width="12" height="20" rx="4"/><circle cx="12" cy="12" r="3"/></svg>
+        记录 Apple Watch 今日数据
+      </h3>
+      <div class="watch-stats-grid grid grid-cols-3 gap-3">
+        <div class="watch-input-box bg-black/40 border border-zinc-800 p-3 rounded-xl text-center">
+          <label class="block text-[10px] text-zinc-400 font-bold mb-1 uppercase tracking-wider">时长 (min)</label>
+          <input type="number" id="watch-duration" class="w-full bg-transparent border-none text-center font-bold text-lg text-white focus:outline-none" value="45">
+        </div>
+        <div class="watch-input-box bg-black/40 border border-zinc-800 p-3 rounded-xl text-center">
+          <label class="block text-[10px] text-zinc-400 font-bold mb-1 uppercase tracking-wider">心率 (bpm)</label>
+          <input type="number" id="watch-hr" class="w-full bg-transparent border-none text-center font-bold text-lg text-white focus:outline-none" value="125">
+        </div>
+        <div class="watch-input-box bg-black/40 border border-zinc-800 p-3 rounded-xl text-center">
+          <label class="block text-[10px] text-zinc-400 font-bold mb-1 uppercase tracking-wider">卡路里 (kcal)</label>
+          <input type="number" id="watch-cal" class="w-full bg-transparent border-none text-center font-bold text-lg text-white focus:outline-none" value="320">
+        </div>
+      </div>
+      <button class="submit-btn w-full bg-brand text-black font-extrabold py-3.5 rounded-xl mt-5 hover:scale-[0.99] active:scale-[0.97] transition-transform" onclick="saveWorkoutSession()">完成今日训练并归档</button>
+    </div>
+  </div>
+
+  <!-- ==================== VIEW 2: 历史记录 (History) ==================== -->
+  <div class="view" id="view-history">
+    <h2 class="text-xl font-extrabold mb-5 tracking-tight">历史训练归档</h2>
+    <div id="history-list" class="space-y-4">
+      <!-- 动态渲染历史归档数据 -->
+    </div>
+  </div>
+
+  <!-- ==================== VIEW 3: 设置备份 (Settings) ==================== -->
+  <div class="view" id="view-settings">
+    <h2 class="text-xl font-extrabold mb-5 tracking-tight">数据备份与管理</h2>
+    
+    <div class="settings-group bg-dark-card border border-zinc-800 p-5 rounded-2xl mb-5">
+      <div class="settings-title font-bold text-sm text-brand mb-4 uppercase tracking-wider">数据传输</div>
+      <div class="settings-row flex justify-between items-center border-b border-white/5 py-3">
+        <div class="text-sm font-medium">导出备份文件 (JSON)</div>
+        <button class="settings-action-btn bg-white/5 hover:bg-white/10 text-white border border-zinc-800 px-4 py-1.5 rounded-lg text-xs font-semibold" onclick="exportData()">立即导出</button>
+      </div>
+      <div class="settings-row flex justify-between items-center py-3">
+        <div class="text-sm font-medium">导入备份数据</div>
+        <button class="settings-action-btn bg-white/5 hover:bg-white/10 text-white border border-zinc-800 px-4 py-1.5 rounded-lg text-xs font-semibold" onclick="importData()">上传覆盖</button>
+      </div>
+    </div>
+
+    <div class="settings-group bg-dark-card border border-red-500/10 p-5 rounded-2xl">
+      <div class="settings-title font-bold text-sm text-red-500 mb-4 uppercase tracking-wider">危险区域</div>
+      <div class="settings-row flex justify-between items-center py-2">
+        <div class="text-sm font-medium text-red-200">清空所有历史数据</div>
+        <button class="settings-action-btn text-red-500 hover:bg-red-500/10 border border-red-500/20 px-4 py-1.5 rounded-lg text-xs font-bold" onclick="handleClearAllClick()">彻底清除</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 底部 Dock 导航栏 -->
+<div class="dock">
+  <div class="dock-item active" data-view="train" onclick="switchView('train')">
+    <svg viewBox="0 0 24 24"><path d="M6 3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3zm3 6h6m-6 3h6m-6 3h3"/></svg>
+    训练记录
+  </div>
+  <div class="dock-item" data-view="history" onclick="switchView('history')">
+    <svg viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+    历史记录
+  </div>
+  <div class="dock-item" data-view="settings" onclick="switchView('settings')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 1 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    数据传输
+  </div>
+</div>
+
+<!-- 统一轻量消息提示 Toast -->
+<div id="toast">已同步更新</div>
+
+<!-- 统一轻量极客自定义确认框 Modal 遮罩（彻底解决无 alert() / confirm() 规范痛点） -->
+<div id="custom-modal" class="fixed inset-0 z-[1000] hidden items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+  <div class="bg-dark-card border border-zinc-800 w-full max-w-sm rounded-2xl p-6 shadow-2xl scale-100 transition-transform">
+    <h3 id="modal-title" class="text-base font-bold text-white mb-2">确认提示</h3>
+    <p id="modal-msg" class="text-xs text-zinc-400 leading-relaxed mb-6">确认执行此操作吗？</p>
+    <div class="flex gap-3 justify-end">
+      <button id="modal-cancel-btn" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold px-4 py-2 rounded-lg" onclick="closeCustomModal()">取消</button>
+      <button id="modal-confirm-btn" class="bg-brand text-black text-xs font-black px-5 py-2 rounded-lg">确认</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// ============================================================
+const EXERCISES_DATABASE = {
+  1: [
+    { id: 101, name: "诺德士臀推机", target: "臀大肌专项", setsCount: 4, repsCount: 12, defaultWeight: 50, tips: ["顶峰收缩2秒，不过度顶髋","下背和肩胛顶端卡死固定器"], svgType: "hipthrust" },
+    { id: 102, name: "双向哈克深蹲", target: "股四头肌/面向前", setsCount: 4, repsCount: 10, defaultWeight: 50, tips: ["下蹲至大腿平行地面即可","膝盖沿着脚尖朝向推出，背部贴实靠垫"], svgType: "hacksquat" },
+    { id: 103, name: "诺德士倒蹬器", target: "腿部发展", setsCount: 3, repsCount: 15, defaultWeight: 50, tips: ["可交替高低脚位，重点刺激不同区域","缓慢离心下放，严禁膝超伸锁死"], svgType: "legpress" },
+    { id: 104, name: "诺德士坐姿腿屈伸", target: "股四头肌孤立", setsCount: 3, repsCount: 12, defaultWeight: 30, tips: ["轻重量控制，顶峰收缩1秒","勾脚尖上抬，动作顶点微做大腿内旋"], svgType: "legext" },
+    { id: 105, name: "山羊挺身（上斜款）", target: "臀大肌/腘绳肌及核心", setsCount: 3, repsCount: 12, defaultWeight: 0, tips: ["用臀部 and 腿后侧发力，严禁弓背","双手抱胸，下放至微拉扯感即起"], svgType: "hyperext" },
+    { id: 106, name: "死虫式", target: "核心稳定组合", setsCount: 3, repsCount: 12, defaultWeight: 0, tips: ["对侧手脚同步伸展，下腰部紧死地贴在垫面上","配合呼吸，每侧控制12次"], svgType: "deadbug" },
+    { id: 107, name: "诺德士卷腹器械", target: "核心腹直肌", setsCount: 3, repsCount: 12, defaultWeight: 20, tips: ["固定轨迹降低腰部代偿","呼气向下挤压腹肌"], svgType: "crunch" }
+  ],
+  2: [
+    { id: 201, name: "诺德士坐姿划船", target: "背阔肌/中背部", setsCount: 4, repsCount: 12, defaultWeight: 40, tips: ["沉肩挺胸，手肘贴身","感受肩胛骨向中间收缩内收"], svgType: "rowing" },
+    { id: 202, name: "诺德士高位下拉", target: "背阔肌/宽握", setsCount: 3, repsCount: 10, defaultWeight: 40, tips: ["只拉到上胸即可，感受后背收缩","全程沉肩，严禁耸肩挤压肩峰空间"], svgType: "latpulldown" },
+    { id: 203, name: "悍马站姿划船", target: "后背厚度", setsCount: 3, repsCount: 12, defaultWeight: 40, tips: ["微前倾，核心收紧","沉肩收肩胛，肘关节朝斜后方拉"], svgType: "rowing" },
+    { id: 204, name: "龙门架面拉", target: "三角肌后束/肩袖", setsCount: 3, repsCount: 15, defaultWeight: 15, tips: ["绳索调至额头高度","手肘向外完全打开，用轻重量"], svgType: "facepull" },
+    { id: 205, name: "龙门架肩袖外旋", target: "肩袖小肌群激活", setsCount: 2, repsCount: 15, defaultWeight: 5, tips: ["手肘夹紧在肋骨旁成90度","仅小臂做外旋，极轻重量，控制离心"], svgType: "externalrotation" },
+    { id: 206, name: "牧师凳弯举机", target: "肱二头肌专项", setsCount: 3, repsCount: 12, defaultWeight: 20, tips: ["大臂后侧贴紧牧师凳斜面","控制下方速度，避免完全锁死"], svgType: "preachercurl" },
+    { id: 207, name: "臂屈伸机", target: "肱三头肌专项", setsCount: 3, repsCount: 12, defaultWeight: 20, tips: ["挺胸向下按压，手臂完全打直","顶峰挤压肱三头肌"], svgType: "tricepext" }
+  ],
+  3: [
+    { id: 301, name: "诺德士倒蹬器 (轻量)", target: "轻型下肢训练", setsCount: 3, repsCount: 15, defaultWeight: 25, tips: ["采用第一天大重量的50-60%训练","保持轻快、平缓节奏"], svgType: "legpress" },
+    { id: 302, name: "诺德士坐姿小腿", target: "小腿后侧", setsCount: 3, repsCount: 15, defaultWeight: 20, tips: ["顶峰停顿一秒，完成深拉伸与挤压","不利用反弹的爆发力"], svgType: "calfraise" },
+    { id: 303, name: "悍马站姿背阔下压", target: "背阔肌激活", setsCount: 2, repsCount: 12, defaultWeight: 15, tips: ["使用极轻重量，重点找背阔肌拉伸与收缩感","大臂尽量保持伸直"], svgType: "latdown" },
+    { id: 304, name: "平板支撑", target: "核心等长收缩", setsCount: 3, repsCount: 45, defaultWeight: 0, tips: ["保持核心收紧不塌腰，头、背、臀在同一直线上","每组静态支撑30-45秒"], svgType: "plank" },
+    { id: 305, name: "有氧运动 (划船机)", target: "有氧心肺", setsCount: 1, repsCount: 25, defaultWeight: 0, tips: ["中等强度保持20-30分钟，划船机优先","腿部蹬直后再展臂拉桨"], svgType: "cardio" }
+  ]
+};
+
+// ============================================================
+// 临场热身与拉伸细节库
+// ============================================================
+const SESSION_DATA = {
+  1: {
+    warmup: [
+      "跑步机快走或慢跑 3分钟 (把整体体温与心率温和地拉起来)",
+      "肩胛激活：肩胛绕环 10次×2组 (手臂自然下垂，大范围旋转，找肩胛缝里的滑动感)",
+      "猫牛式 10次 (四肢撑地配合呼吸，向上猫式弓背拉伸，下放牛式塌腰，松解脊柱)",
+      "臀桥 15次 (双脚蹬地，用臀大肌主动推起身体，激活骨盆后倾稳定机制)",
+      "空蹲 10次 (徒手找髋、膝、踝关节完美的联动惯性，下蹲角度适度)",
+      "【第一天额外专用】侧卧蚌式开合 每侧15次 (在大腿上加阻力带，精准激活臀中肌)"
+    ],
+    stretch: [
+      "臀肌拉伸：仰卧4字拉伸 每侧30秒×2 (双手抱住大腿后侧向胸口拉拢)",
+      "腘绳肌拉伸：仰卧单腿抬高 每侧30秒×2 (用伸展带或双手卡主腘绳肌)",
+      "髋屈肌拉伸：弓步压髋 每侧30秒×2 (后腿跪地向前顶跨)",
+      "股四头肌拉伸：站姿单腿后屈 每侧30秒×2 (手向后拉脚踝，挺胸直立)",
+      "诺德士专业腰腿拉伸器 5分钟 (重点放松髋屈肌和腘绳肌区域)"
+    ]
+  },
+  2: {
+    warmup: [
+      "跑步机快走或慢跑 3分钟 (基本体温拉高，为上肢关节囊创造良好环境)",
+      "肩胛激活：肩胛绕环 10次×2组 (手臂完全自然下垂，画圆，不可耸肩)",
+      "猫牛式 10次 (四肢撑地，深呼吸配合完成腰椎-胸椎的波浪运动)",
+      "臀桥 15次 (激活中枢并打通全身动力链)",
+      "空蹲 10次 (调整呼吸节奏)",
+      "【第二天额外专用】弹力带面拉 15次×2组 (提前高频、小重量激活肩袖与中下斜方肌)",
+      "【第二天额外专用】小幅度手臂环绕 10次×2 (大臂伸直，向前向后各10次，<strong>控制幅度在小到中等，避免在无激活状态下压迫肩峰</strong>)"
+    ],
+    stretch: [
+      "胸大肌拉伸：靠墙单臂展开 每侧30秒×2 (借墙面缓慢转身拉伸，改善圆烟)",
+      "胸小肌拉伸：双手扣头顶 肘向后打开 30秒×2 (配合深呼吸顶峰拉伸)",
+      "上斜方肌拉伸：头侧倾 手轻压头部 每侧30秒×2 (肩部自然下沉下放)",
+      "背阔肌拉伸：抓固定物前倾悬挂 30秒×2 (找脊柱侧弯及背部拉开的感觉)",
+      "手臂交叉拉伸：每侧30秒 (三角肌后束，手臂内扣)"
+    ]
+  },
+  3: {
+    warmup: [
+      "【强度减半】跑步机慢走 3分钟即可，松快为主",
+      "肩胛激活：肩胛绕环 10次×1组",
+      "猫牛式 10次 (慢速)",
+      "臀桥 10次",
+      "空蹲 8次"
+    ],
+    stretch: [
+      "🔥 【今日最完整】以上 Day 1 + Day 2 的拉伸放松动作各完整执行一遍",
+      "诺德士专业腰腿拉伸器 5分钟 (深度全身拉伸)",
+      "泡沫轴滚压：泡沫轴压大腿后侧、侧侧、臀部、胸椎，每侧深度滚压1-2分钟"
+    ]
+  }
+};
+
+// ============================================================
+// SVG 人体动作写实高亮渲染器
+// ============================================================
+function generateProfessionalSVG(type) {
+  const baseSVG = `<svg viewBox="0 0 140 120" width="100%" height="120" style="background:#131316; border-radius:8px;">`;
+  const footerSVG = `</svg>`;
+  
+  const styles = `
+    <defs>
+      <radialGradient id="muscleGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#f97316" stop-opacity="0.8"/>
+        <stop offset="100%" stop-color="#ea580c" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="shadow">
+        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.5"/>
+      </filter>
+    </defs>
+  `;
+
+  let content = "";
+
+  switch (type) {
+    case "hacksquat":
+      content = `
+        <!-- 滑轨与背靠 -->
+        <line x1="40" y1="20" x2="110" y2="90" stroke="#3f3f46" stroke-width="6" stroke-linecap="round"/>
+        <line x1="85" y1="55" x2="105" y2="75" stroke="#27272a" stroke-width="12" stroke-linecap="round"/>
+        <line x1="30" y1="90" x2="60" y2="105" stroke="#52525b" stroke-width="4"/>
+        
+        <!-- 股四头肌发力区域发光 -->
+        <circle cx="72" cy="74" r="14" fill="url(#muscleGlow)"/>
+        
+        <!-- 精细骨架结构与厚度表现 -->
+        <circle cx="95" cy="40" r="7" fill="#f4f4f5" filter="url(#shadow)"/>
+        <rect x="85" y="47" width="10" height="24" rx="5" fill="#f4f4f5" transform="rotate(45 90 59)" filter="url(#shadow)"/>
+        <!-- 肌肉高亮 -->
+        <rect x="70" y="65" width="8" height="22" rx="4" fill="#f97316" transform="rotate(-15 74 76)"/>
+        <rect x="52" y="80" width="8" height="22" rx="4" fill="#f4f4f5" transform="rotate(45 56 91)"/>
+        <path d="M102 38 L112 48 M112 48 L108 52 M112 48 L108 44" stroke="#f97316" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <text x="10" y="22" fill="#f97316" font-size="9" font-weight="800">股四头肌 Quads</text>
+        <text x="10" y="34" fill="#71717a" font-size="8">下蹲平行地，蹬地挺直</text>
+      `;
+      break;
+
+    case "hipthrust":
+      content = `
+        <rect x="25" y="65" width="24" height="40" rx="4" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>
+        <circle cx="68" cy="62" r="14" fill="url(#muscleGlow)"/>
+        <circle cx="40" cy="46" r="7" fill="#f4f4f5"/>
+        <rect x="44" y="54" width="26" height="10" rx="4" fill="#f4f4f5" filter="url(#shadow)"/>
+        <!-- 臀肌高亮 -->
+        <rect x="65" y="55" width="12" height="11" rx="4" fill="#f97316" filter="url(#shadow)"/>
+        <rect x="74" y="55" width="20" height="8" rx="4" fill="#a1a1aa"/>
+        <rect x="91" y="60" width="8" height="24" rx="4" fill="#f4f4f5"/>
+        <circle cx="69" cy="49" r="6" fill="#3f3f46"/>
+        <line x1="69" y1="36" x2="69" y2="62" stroke="#52525b" stroke-width="3"/>
+        <path d="M68 76 L68 86 M64 78 L68 74 L72 78" stroke="#f97316" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <text x="10" y="22" fill="#f97316" font-size="9" font-weight="800">臀大肌 Glutes</text>
+        <text x="10" y="34" fill="#71717a" font-size="8">骨盆后倾，夹紧挺髋</text>
+      `;
+      break;
+
+    case "legpress":
+      content = `
+        <line x1="30" y1="100" x2="110" y2="40" stroke="#27272a" stroke-width="4"/>
+        <rect x="35" y="45" width="30" height="45" rx="3" fill="rgba(255,255,255,0.04)" transform="rotate(-15 50 65)"/>
+        <circle cx="70" cy="55" r="15" fill="url(#muscleGlow)"/>
+        <circle cx="45" cy="55" r="7" fill="#f4f4f5"/>
+        <rect x="48" y="60" width="10" height="22" rx="4" fill="#f4f4f5" transform="rotate(35 53 71)"/>
+        <!-- 目标肌肉 -->
+        <rect x="64" y="48" width="8" height="24" rx="4" fill="#f97316" transform="rotate(-60 68 60)"/>
+        <rect x="85" y="42" width="7" height="22" rx="3" fill="#f4f4f5" transform="rotate(-5 88 53)"/>
+        <path d="M85 30 L95 24 M95 24 L91 22 M95 24 L93 28" stroke="#f97316" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <text x="10" y="22" fill="#f97316" font-size="9" font-weight="800">大腿复合 Leg Press</text>
+        <text x="10" y="34" fill="#71717a" font-size="8">离心慢放，膝盖勿锁死</text>
+      `;
+      break;
+
+    case "legext":
+      content = `
+        <rect x="75" y="70" width="25" height="35" rx="4" fill="#27272a"/>
+        <circle cx="68" cy="62" r="14" fill="url(#muscleGlow)"/>
+        <circle cx="68" cy="38" r="7" fill="#f4f4f5"/>
+        <rect x="64" y="46" width="10" height="26" rx="5" fill="#f4f4f5"/>
+        <!-- 股四高亮 -->
+        <rect x="64" y="68" width="22" height="8" rx="4" fill="#f97316"/>
+        <rect x="82" y="72" width="8" height="22" rx="3" fill="#f4f4f5" transform="rotate(25 86 83)"/>
+        <path d="M96 70 A 20 20 0 0 1 110 50" stroke="#f97316" stroke-width="2" fill="none"/>
+        <text x="10" y="22" fill="#f97316" font-size="9" font-weight="800">股四头肌 Quads</text>
+        <text x="10" y="34" fill="#71717a" font-size="8">小腿直抬，顶点用力收缩</text>
+      `;
+      break;
+
+    case "hyperext":
+      content = `
+        <line x1="40" y1="70" x2="100" y2="40" stroke="#3f3f46" stroke-width="6"/>
+        <circle cx="58" cy="46" r="13" fill="url(#muscleGlow)"/>
+        <circle cx="44" cy="32" r="7" fill="#f4f4f5"/>
+        <rect x="48" y="38" width="24" height="8" rx="4" fill="#f4f4f5" transform="rotate(-30 60 42)"/>
+        <!-- 下背、臀部高亮 -->
+        <rect x="68" y="38" width="8" height="24" rx="4" fill="#f97316" transform="rotate(30 72 50)"/>
+        <rect x="82" y="52" width="8" height="24" rx="4" fill="#f4f4f5" transform="rotate(30 86 64)"/>
+        <text x="10" y="22" fill="#f97316" font-size="9" font-weight="800">后侧链 Posterior</text>
+        <text x="10" y="34" fill="#71717a" font-size="8">臀腿后侧拉伸，禁过度仰背</text>
+      `;
+      break;
+
+    case "deadbug":
+      content = `
+        <line x1="20" y1="90" x2="120" y2="90" stroke="#3f3f46" stroke-width="2"/>
+        <circle cx="70" cy="70" r="13" fill="url(#muscleGlow)"/>
+        <circle cx="50" cy="72" r="7" fill="#f4f4f5"/>
+        <!-- 腹部高亮 -->
+        <rect x="58" y="72" width="24" height="10" rx="4" fill="#f97316"/>
+        <line x1="60" y1="70" x2="45" y2="50" stroke="#a1a1aa" stroke-width="4" stroke-linecap="round"/>
+        <line x1="80" y1="75" x2="95" y2="55" stroke="#f4f4f5" stroke-width="4" stroke-linecap="round"/>
+        <text x="10" y="22" fill="#f97316" font-size="9" font-weight="800">深层核心 Core</text>
+        <text x="10" y="34" fill="#71717a" font-size="8">对侧手脚同伸，后腰紧压地面</text>
+      `;
+      break;
+
+    case "crunch":
+      content = `
+        <circle cx="70" cy="55" r="12" fill="url(#muscleGlow)"/>
+        <circle cx="68" cy="36" r="7" fill="#f4f4f5"/>
+        <!-- 腹直肌高亮 -->
+        <rect x="63" y="44" width="10" height="24" rx="4" fill="#f97316" transform="rotate(15 68 56)"/>
+        <rect x="70" y="66" width="18" height="8" rx="4" fill="#a1a1aa"/>
+        <rect x="85" y="70" width="8" height="22" rx="3" fill="#f4f4f5"/>
+        <text x="10" y="22" fill="#f97316" font-size="9" font-weight="800">腹直肌 Abs</text>
+        <text x="10" y="34" fill="#71717a" font-size="8">胸椎向前屈卷，拒绝髋屈肌代偿</text>
+      `;
+      break;
+
+    case "latpulldown":
+      content = `
+        <line x1="75" y1="105" x2="115" y2="105" stroke="#27272a" stroke-width="4"/>
+        <rect x="80" y="65" width="12" height="40" rx="2" fill="#27272a"/>
+        <line x1="50" y1="15" x2="110" y2="15" stroke="#3f3f46" stroke-width="3"/>
+        <!-- 背阔肌高亮 -->
+        <circle cx="65" cy="54" r="13" fill="url(#muscleGlow)"/>
+        <circle cx="66" cy="34" r="7" fill="#f4f4f5"/>
+        <rect x="58" y="42" width="10" height="28" rx="5" fill="#f4f4f5" transform="rotate(10 63 56)"/>
+        <rect x="58" y="45" width="4" height="18" rx="2" fill="#f97316" transform="rotate(10 63 56)"/>
+        <rect x="66" y="68" width="18" height="8" rx="4" fill="#a1a1aa"/>
+        <rect x="82" y="70" width="8" height="25" rx="3" fill="#f4f4f5"/>
+        <line x1="64" y1="42" x2="74" y2="18" stroke="#f4f4f5" stroke-width="4" stroke-linecap="round"/>
+        <line x1="62" y1="18" x2="92" y2="18" stroke="#52525b" stroke-width="3"/>
+        <path d="M84 25 L84 35 M80 31 L84 35 L88 31" stroke="#f97316" stroke-width="2" fill="none"/>
+        <text x="10" y="22" fill="#f97316" font-size="9" font-weight="800">背阔肌 Lats</text>
+        <text x="10" y="34" fill="#71717a" font-size="8">下沉肩胛收缩，拉至锁骨即可</text>
+      `;
+      break;
+
+    case "rowing":
+      content = `
+        <line x1="30" y1="105" x2="110" y2="105" stroke="#27272a" stroke-width="4"/>
+        <rect x="30" y="75" width="8" height="30" fill="#3f3f46"/>
+        <!-- 背阔中叶高亮 -->
+        <circle cx="75" cy="56" r="13" fill="url(#muscleGlow)"/>
+        <circle cx="78" cy="34" r="7" fill="#f4f4f5"/>
+        <rect x="73" y="42" width="10" height="30" rx="5" fill="#f4f4f5"/>
+        <rect x="73" y="45" width="4" height="20" rx="2" fill="#f97316"/>
+        <rect x="58" y="68" width="20" height="8" rx="4" fill="#a1a1aa" transform="rotate(-15 68 72)"/>
+        <line x1="76" y1="48" x2="52" y2="58" stroke="#f4f4f5" stroke-width="4" stroke-linecap="round"/>
+        <line x1="34" y1="62" x2="52" y2="58" stroke="#a1a1aa" stroke-width="1.5"/>
+        <path d="M92 56 L102 56 M98 52 L102 56 L98 60" stroke="#f97316" stroke-width="2" fill="none"/>
+        <text x="10" y="22" fill="#f97316" font-size="9" font-weight="800">背阔肌 Lats</text>
+        <text x="10" y="34" fill="#71717a" font-size="8">沉肩拉回，手臂夹身挤压后背</text>
+      `;
+      break;
+
+    case "facepull":
+      content = `
+        <line x1="30" y1="20" x2="30" y2="105" stroke="#3f3f46" stroke-width="3"/>
+        <circle cx="30" cy="36" r="4" fill="#27272a"/>
+        <!-- 三角肌后束高亮 -->
+        <circle cx="75" cy="44" r="12" fill="url(#muscleGlow)"/>
+        <circle cx="78" cy="30" r="7" fill="#f4f4f5"/>
+        <rect x="73" y="38" width="11" height="32" rx="5" fill="#f4f4f5"/>
+        <rect x="73" y="39" width="4" height="15" rx="2" fill="#f97316"/>
+        <rect x="68" y="70" width="7" height="35" rx="3" fill="#a1a1aa" transform="rotate(15 71 85)"/>
+        <rect x="76" y="70" width="7" height="35" rx="3" fill="#a1a1aa" transform="rotate(-5 79 85)"/>
+        <line x1="76" y1="42" x2="52" y2="36" stroke="#f4f4f5" stroke-width="4" stroke-linecap="round"/>
+        <line x1="32" y1="36" x2="52" y2="36" stroke="#a1a1aa" stroke-dasharray="2,2"/>
+        <path d="M88 42 L98 42 M94 38 L98 42 L94 46" stroke="#f97316" stroke-width="2" fill="none"/>
+        <text x="10" y="22" fill="#f97316" font-size="9" font-weight="800">三角肌后束 Rear Delts</text>
+        <text x="10" y="34" fill="#71717a" font-size="8">额头高度，手肘向外展开</text>
+      `;
+      break;
+
+    case "externalrotation":
+      content = `
+        <!-- 肩袖肌群外展 -->
+        <circle cx="75" cy="46" r="10" fill="url(#muscleGlow)"/>
+        <circle cx="70" cy="32" r="7" fill="#f4f4f5"/>
+        <rect x="62" y="40" width="16" height="34" rx="6" fill="#f4f4f5"/>
+        <!-- 冈下肌/小圆肌高亮 -->
+        <rect x="62" y="40" width="3" height="12" rx="1.5" fill="#f97316"/>
+        <line x1="62" y1="44" x2="48" y2="58" stroke="#f4f4f5" stroke-width="4" stroke-linecap="round"/>
+        <line x1="48" y1="58" x2="32" y2="58" stroke="#f97316" stroke-width="4" stroke-linecap="round"/>
+        <text x="10" y="22" fill="#f97316" font-size="9" font-weight="800">肩袖 Rotator Cuff</text>
+        <text x="10" y="34" fill="#71717a" font-size="8">肘贴身体90度，阻力极小旋转</text>
+      `;
+      break;
+
+    case "preachercurl":
+      content = `
+        <rect x="40" y="55" width="28" height="32" rx="4" fill="#27272a"/>
+        <!-- 二头肌高亮 -->
+        <circle cx="72" cy="48" r="12" fill="url(#muscleGlow)"/>
+        <circle cx="68" cy="34" r="7" fill="#f4f4f5"/>
+        <rect x="64" y="42" width="12" height="30" rx="5" fill="#f4f4f5" transform="rotate(15 70 56)"/>
+        <rect x="68" y="44" width="5" height="15" rx="2" fill="#f97316" transform="rotate(15 70 56)"/>
+        <line x1="66" y1="46" x2="46" y2="52" stroke="#f4f4f5" stroke-width="4" stroke-linecap="round"/>
+        <text x="10" y="22" fill="#f97316" font-size="9" font-weight="800">肱二头肌 Biceps</text>
+        <text x="10" y="34" fill="#71717a" font-size="8">肘部牢固支撑，离心平缓释放</text>
+      `;
+      break;
+
+    case "tricepext":
+      content = `
+        <!-- 三头肌高亮 -->
+        <circle cx="68" cy="48" r="12" fill="url(#muscleGlow)"/>
+        <circle cx="68" cy="32" r="7" fill="#f4f4f5"/>
+        <rect x="62" y="40" width="12" height="32" rx="5" fill="#f4f4f5"/>
+        <rect x="62" y="42" width="5" height="18" rx="2" fill="#f97316"/>
+        <line x1="62" y1="44" x2="48" y2="58" stroke="#f4f4f5" stroke-width="4" stroke-linecap="round"/>
+        <line x1="48" y1="58" x2="42" y2="80" stroke="#f4f4f5" stroke-width="4" stroke-linecap="round"/>
+        <text x="10" y="22" fill="#f97316" font-size="9" font-weight="800">肱三头肌 Triceps</text>
+        <text x="10" y="34" fill="#71717a" font-size="8">手肘夹紧在身侧，向下打直并捏缩</text>
+      `;
+      break;
+
+    case "calfraise":
+      content = `
+        <rect x="35" y="90" width="70" height="15" rx="3" fill="#27272a"/>
+        <!-- 小腿肌群高亮 -->
+        <circle cx="72" cy="74" r="14" fill="url(#muscleGlow)"/>
+        <circle cx="70" cy="38" r="7" fill="#f4f4f5"/>
+        <rect x="64" y="46" width="12" height="28" rx="5" fill="#f4f4f5"/>
+        <rect x="64" y="74" width="8" height="20" rx="4" fill="#f97316"/>
+        <path d="M72 82 L72 94" stroke="#f97316" stroke-width="2" fill="none"/>
+        <text x="10" y="22" fill="#f97316" font-size="9" font-weight="800">腓肠肌/比目鱼肌 Calves</text>
+        <text x="10" y="34" fill="#71717a" font-size="8">下沉深度拉伸，顶峰全力收缩</text>
+      `;
+      break;
+
+    case "latdown":
+      content = `
+        <!-- 直臂背阔下压 -->
+        <circle cx="68" cy="48" r="12" fill="url(#muscleGlow)"/>
+        <circle cx="68" cy="32" r="7" fill="#f4f4f5"/>
+        <rect x="62" y="40" width="12" height="32" rx="5" fill="#f4f4f5"/>
+        <!-- 背阔肌边缘高亮 -->
+        <rect x="62" y="42" width="5" height="18" rx="2" fill="#f97316"/>
+        <line x1="62" y1="44" x2="40" y2="44" stroke="#f4f4f5" stroke-width="4" stroke-linecap="round"/>
+        <text x="10" y="22" fill="#f97316" font-size="9" font-weight="800">背阔肌下侧 Lower Lats</text>
+        <text x="10" y="34" fill="#71717a" font-size="8">肘微屈锁定，直臂拉向大腿</text>
+      `;
+      break;
+
+    case "plank":
+      content = `
+        <line x1="20" y1="95" x2="120" y2="95" stroke="#3f3f46" stroke-width="3"/>
+        <circle cx="70" cy="65" r="13" fill="url(#muscleGlow)"/>
+        <circle cx="45" cy="68" r="7" fill="#f4f4f5"/>
+        <!-- 核心肌群高亮 -->
+        <rect x="52" y="66" width="45" height="10" rx="4" fill="#f97316" transform="rotate(-5 70 70)"/>
+        <line x1="45" y1="74" x2="35" y2="90" stroke="#f4f4f5" stroke-width="4" stroke-linecap="round"/>
+        <text x="10" y="22" fill="#f97316" font-size="9" font-weight="800">核心深层 Core</text>
+        <text x="10" y="34" fill="#71717a" font-size="8">头臀脊柱呈直线，收紧盆底肌</text>
+      `;
+      break;
+
+    case "cardio":
+    default:
+      content = `
+        <circle cx="70" cy="55" r="22" stroke="url(#muscleGlow)" stroke-width="3" fill="none"/>
+        <circle cx="70" cy="55" r="30" stroke="#f97316" stroke-width="1" stroke-dasharray="4,4" fill="none"/>
+        <path d="M45 55 L58 55 L62 40 L68 70 L74 50 L78 58 L82 55 L95 55" stroke="#f4f4f5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <text x="10" y="22" fill="#f97316" font-size="9" font-weight="800">心肺/有氧 Cardio</text>
+        <text x="10" y="34" fill="#71717a" font-size="8">温和恒定心率，平稳脂肪代谢</text>
+      `;
+      break;
+  }
+
+  return `${baseSVG}${styles}${content}${footerSVG}`;
+}
+</script>
+
+<script>
+// ============================================================
+// ============================================================
+let state = {
+  currentDay: 1,
+  history: [],
+  logs: {} 
+};
+
+function loadState() {
+  const saved = localStorage.getItem('geek_training_state');
+  if (saved) {
+    try {
+      state = JSON.parse(saved);
+      if (!state.logs) state.logs = {};
+      if (!state.history) state.history = [];
+      if (!state.currentDay) state.currentDay = 1;
+    } catch (e) {
+      console.error("加载状态异常，已重置", e);
+    }
+  }
+}
+
+function saveState() {
+  localStorage.setItem('geek_training_state', JSON.stringify(state));
+}
+
+// ============================================================
+// 极客自定义极简弹窗管理器 (彻底干掉原生 alert 和 confirm)
+// ============================================================
+let customModalCallback = null;
+
+function showCustomConfirm(title, message, onConfirm) {
+  const modal = document.getElementById('custom-modal');
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-msg').innerHTML = message;
+  
+  const confirmBtn = document.getElementById('modal-confirm-btn');
+  
+  // 💡 修复核心：移除 Tailwind 隐藏类并添加 flex 显示类
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  
+  customModalCallback = () => {
+    onConfirm();
+    closeCustomModal();
+  };
+  confirmBtn.onclick = customModalCallback;
+}
+
+function closeCustomModal() {
+  const modal = document.getElementById('custom-modal');
+  
+  // 💡 修复核心：添加 Tailwind 隐藏类并移除 flex 显示类
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+  customModalCallback = null;
+}
+
+// ============================================================
+// ============================================================
+function switchView(viewId) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.dock-item').forEach(d => d.classList.remove('active'));
+  
+  document.getElementById(`view-${viewId}`).classList.add('active');
+  document.querySelector(`.dock-item[data-view="${viewId}"]`).classList.add('active');
+
+  if (viewId === 'history') {
+    renderHistory();
+  }
+}
+
+function switchDay(dayNum) {
+  state.currentDay = dayNum;
+  document.querySelectorAll('.day-tab').forEach(t => {
+    t.classList.toggle('active', parseInt(t.dataset.day) === dayNum);
+  });
+  saveState();
+  renderWorkoutScreen();
+}
+
+function toggleSessionPanel(id) {
+  const panel = document.getElementById(id);
+  panel.classList.toggle('open');
+}
+</script>
+
+<script>
+// ============================================================
+// ============================================================
+let activeEditingSet = null; 
+
+function renderWorkoutScreen() {
+  const listContainer = document.getElementById('exercise-list');
+  const dayExercises = EXERCISES_DATABASE[state.currentDay] || [];
+  
+  const warmupList = SESSION_DATA[state.currentDay]?.warmup || [];
+  document.getElementById('warmup-content').innerHTML = `
+    <ul class="panel-list">
+      ${warmupList.map(w => `<li>${w}</li>`).join('')}
+    </ul>
+  `;
+
+  const stretchList = SESSION_DATA[state.currentDay]?.stretch || [];
+  document.getElementById('stretch-content').innerHTML = `
+    <ul class="panel-list">
+      ${stretchList.map(s => `<li>${s}</li>`).join('')}
+    </ul>
+  `;
+
+  let html = "";
+  
+  dayExercises.forEach(ex => {
+    const hasLog = !!state.logs[ex.id];
+    const log = hasLog ? state.logs[ex.id] : {
+      sets: Array.from({ length: ex.setsCount }, () => ({
+        weight: ex.defaultWeight,
+        reps: ex.repsCount,
+        done: false
+      })),
+      isCompleted: false
+    };
+
+    const isExCompleted = log.isCompleted;
+
+    html += `
+      <div class="exercise-card ${isExCompleted ? 'completed' : ''} rounded-2xl p-4 mb-4 border border-zinc-800" id="card-${ex.id}">
+        <div class="card-header flex justify-between items-start mb-3">
+          <div class="title-area flex-1 pr-4">
+            <h3 class="exercise-title text-base font-bold text-white mb-1 flex items-center gap-1.5">
+              ${ex.name}
+              ${isExCompleted ? '<svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>' : ''}
+            </h3>
+            <div class="exercise-meta text-[11px] text-zinc-400 flex gap-3">
+              <span>${ex.target}</span>
+              <span>${ex.setsCount} 组 × ${ex.repsCount} 次</span>
+            </div>
+          </div>
+          <div class="status-indicator w-6 h-6 rounded-full border border-zinc-700 flex items-center justify-center cursor-pointer transition-all ${isExCompleted ? 'done bg-emerald-500 border-emerald-500 text-black font-bold' : 'text-transparent'}" onclick="toggleExerciseComplete(${ex.id})">
+            ✓
+          </div>
+        </div>
+
+        <button class="guide-toggle flex items-center gap-1 text-xs font-bold text-brand hover:text-brand/80 py-1 mb-3" onclick="toggleGuide(${ex.id})">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 9v4m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          姿势指导 & 发力说明
+        </button>
+        
+        <div class="guide-panel bg-black/40 rounded-xl p-3 mb-4 border border-white/5" id="guide-${ex.id}">
+          <div class="svg-wrapper bg-dark-bg p-3 rounded-lg flex justify-center mb-3">
+            ${generateProfessionalSVG(ex.svgType)}
+          </div>
+          <ol class="guide-points list-decimal pl-4 text-[11px] text-zinc-400 leading-relaxed">
+            ${ex.tips.map(t => `<li>${t}</li>`).join('')}
+          </ol>
+        </div>
+
+        <div class="sets-table">
+          ${log.sets.map((set, idx) => {
+            const isActive = activeEditingSet && activeEditingSet.exerciseId === ex.id && activeEditingSet.setIndex === idx;
+            return `
+              <div class="set-row grid grid-cols-[40px_1fr_1fr_40px] items-center py-2.5 border-b border-white/5 rounded-lg cursor-pointer ${set.done ? 'done text-zinc-500' : 'text-zinc-200'} ${isActive ? 'active bg-brand/10 border-brand/20' : ''}" 
+                   onclick="activateSetRow(${ex.id}, ${idx})">
+                <div class="set-num text-center text-xs font-black ${isActive ? 'text-brand' : 'text-zinc-500'}">S${idx + 1}</div>
+                <div class="set-val text-center text-sm font-semibold">${set.weight} <span class="text-[10px] text-zinc-400">lb</span></div>
+                <div class="set-val text-center text-sm font-semibold">${set.reps} <span class="text-[10px] text-zinc-400">次</span></div>
+                <div class="set-check flex justify-center">
+                  <button class="set-btn w-6 h-6 rounded-md border border-zinc-700 flex items-center justify-center text-transparent hover:border-brand ${set.done ? 'bg-emerald-500/10 border-emerald-500 text-emerald-500' : ''}" onclick="toggleSetDone(event, ${ex.id}, ${idx})">✓</button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        <div class="stepper-overlay" id="stepper-box-${ex.id}">
+          <!-- 智能步进器插槽 -->
+        </div>
+
+      </div>
+    `;
+  });
+  
+  listContainer.innerHTML = html;
+  
+  if (activeEditingSet) {
+    showStepperUI(activeEditingSet.exerciseId, activeEditingSet.setIndex);
+  }
+}
+
+function toggleGuide(id) {
+  const panel = document.getElementById(`guide-${id}`);
+  panel.classList.toggle('active');
+}
+</script>
+
+<script>
+// ============================================================
+// ============================================================
+function ensureLogExists(exId) {
+  if (!state.logs[exId]) {
+    const exDef = getExerciseDefinitionById(exId);
+    state.logs[exId] = {
+      sets: Array.from({ length: exDef.setsCount }, () => ({
+        weight: exDef.defaultWeight,
+        reps: exDef.repsCount,
+        done: false
+      })),
+      isCompleted: false
+    };
+  }
+}
+
+function getExerciseDefinitionById(exId) {
+  for (let key in EXERCISES_DATABASE) {
+    const found = EXERCISES_DATABASE[key].find(e => e.id === exId);
+    if (found) return found;
+  }
+  return null;
+}
+
+function activateSetRow(exId, setIndex) {
+  ensureLogExists(exId);
+  activeEditingSet = { exerciseId: exId, setIndex: setIndex };
+  
+  document.querySelectorAll('.stepper-overlay').forEach(box => box.classList.remove('active'));
+  document.querySelectorAll('.set-row').forEach(row => row.classList.remove('active'));
+
+  showStepperUI(exId, setIndex);
+  renderWorkoutScreen();
+}
+
+function showStepperUI(exId, setIndex) {
+  const container = document.getElementById(`stepper-box-${exId}`);
+  if (!container) return;
+
+  const setObj = state.logs[exId].sets[setIndex];
+  
+  let baseWeight = setObj.weight;
+  if (baseWeight <= 0) baseWeight = 50; 
+  
+  const anchor = Math.round(baseWeight / 10) * 10;
+  const quickWeights = [anchor - 20, anchor - 10, anchor, anchor + 10, anchor + 20].filter(w => w >= 0);
+
+  container.innerHTML = `
+    <div class="stepper-overlay active bg-dark-bg border border-zinc-800 p-4 rounded-xl mt-3">
+      <div class="stepper-title flex justify-between text-[11px] font-bold text-brand uppercase tracking-wider mb-3">
+        <span>调整 S${setIndex + 1} 参数</span>
+        <span class="text-zinc-500">免输纯控换挡</span>
+      </div>
+      
+      <div class="text-[10px] text-zinc-400 font-bold mb-1">负荷重量 (Weight)</div>
+      <div class="stepper-row flex items-center justify-between bg-black/40 border border-zinc-800 p-1 rounded-xl mb-3">
+        <button class="stepper-btn w-10 h-10 bg-dark-card hover:bg-zinc-800 text-white rounded-lg flex items-center justify-center font-bold text-lg" onclick="adjustValue(event, -5, 'weight')">−</button>
+        <div class="stepper-display text-lg font-extrabold font-mono">${setObj.weight}<span class="text-xs text-zinc-500 ml-1">lb</span></div>
+        <button class="stepper-btn w-10 h-10 bg-dark-card hover:bg-zinc-800 text-white rounded-lg flex items-center justify-center font-bold text-lg" onclick="adjustValue(event, 5, 'weight')">+</button>
+      </div>
+
+      <div class="quick-tags flex gap-2 overflow-x-auto pb-2">
+        ${quickWeights.map(w => `
+          <div class="quick-tag flex-shrink-0 px-3.5 py-1.5 bg-dark-card hover:bg-zinc-800 border border-zinc-800 rounded-full text-xs font-medium text-zinc-400 cursor-pointer transition-all ${w === setObj.weight ? 'active bg-brand/10 border-brand text-brand font-bold' : ''}" 
+               onclick="quickSelectWeight(event, ${w})">
+            ${w} lb
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="text-[10px] text-zinc-400 font-bold mt-2 mb-1">单组次数 (Reps)</div>
+      <div class="stepper-row flex items-center justify-between bg-black/40 border border-zinc-800 p-1 rounded-xl">
+        <button class="stepper-btn w-10 h-10 bg-dark-card hover:bg-zinc-800 text-white rounded-lg flex items-center justify-center font-bold text-lg" onclick="adjustValue(event, -1, 'reps')">−</button>
+        <div class="stepper-display text-lg font-extrabold font-mono">${setObj.reps}<span class="text-xs text-zinc-500 ml-1">次</span></div>
+        <button class="stepper-btn w-10 h-10 bg-dark-card hover:bg-zinc-800 text-white rounded-lg flex items-center justify-center font-bold text-lg" onclick="adjustValue(event, 1, 'reps')">+</button>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// ============================================================
+function adjustValue(event, delta, type) {
+  event.stopPropagation();
+  if (!activeEditingSet) return;
+  
+  const { exerciseId, setIndex } = activeEditingSet;
+  ensureLogExists(exerciseId);
+  const setObj = state.logs[exerciseId].sets[setIndex];
+  
+  if (type === 'weight') {
+    setObj.weight = Math.max(0, setObj.weight + delta);
+  } else {
+    setObj.reps = Math.max(1, setObj.reps + delta);
+  }
+  
+  saveState();
+  showStepperUI(exerciseId, setIndex);
+  renderWorkoutScreen();
+}
+
+function quickSelectWeight(event, weight) {
+  event.stopPropagation();
+  if (!activeEditingSet) return;
+  
+  const { exerciseId, setIndex } = activeEditingSet;
+  ensureLogExists(exerciseId);
+  state.logs[exerciseId].sets[setIndex].weight = weight;
+  
+  saveState();
+  showStepperUI(exerciseId, setIndex);
+  renderWorkoutScreen();
+}
+
+function toggleSetDone(event, exId, setIndex) {
+  event.stopPropagation();
+  ensureLogExists(exId);
+  const setObj = state.logs[exId].sets[setIndex];
+  setObj.done = !setObj.done;
+  
+  saveState();
+  renderWorkoutScreen();
+
+  if (setObj.done) {
+    triggerRestTimer(60); 
+  }
+}
+
+function toggleExerciseComplete(exId) {
+  ensureLogExists(exId);
+  const log = state.logs[exId];
+  log.isCompleted = !log.isCompleted;
+  
+  if (log.isCompleted) {
+    log.sets.forEach(s => s.done = true);
+    showToast("动作已标记完成 🎉");
+  } else {
+    log.sets.forEach(s => s.done = false);
+  }
+  
+  saveState();
+  renderWorkoutScreen();
+}
+</script>
+
+<script>
+// ============================================================
+// ============================================================
+let timerInterval = null;
+function triggerRestTimer(seconds) {
+  closeTimer(); 
+  
+  const timerBar = document.getElementById('timerBar');
+  const clock = document.getElementById('timerClock');
+  let left = seconds;
+  clock.textContent = left;
+  timerBar.classList.add('show');
+  
+  if (navigator.vibrate) {
+    navigator.vibrate([100, 50, 100]);
+  }
+
+  timerInterval = setInterval(() => {
+    left--;
+    clock.textContent = left;
+    if (left <= 0) {
+      closeTimer();
+      if (navigator.vibrate) navigator.vibrate(500);
+      showToast("休息结束，开始下一组！💪");
+    }
+  }, 1000);
+}
+
+function closeTimer() {
+  clearInterval(timerInterval);
+  document.getElementById('timerBar').classList.remove('show');
+}
+
+// ============================================================
+// ============================================================
+function saveWorkoutSession() {
+  const dayExercises = EXERCISES_DATABASE[state.currentDay] || [];
+  const details = [];
+  let totalSets = 0;
+  
+  dayExercises.forEach(ex => {
+    const log = state.logs[ex.id];
+    if (log) {
+      const activeSets = log.sets.filter(s => s.done);
+      if (activeSets.length > 0) {
+        totalSets += activeSets.length;
+        const setStrings = activeSets.map((s, i) => `S${i+1}:${s.weight}lb×${s.reps}`);
+        details.push({
+          name: ex.name,
+          summary: `${activeSets.length}组 (${setStrings.join(', ')})`
+        });
+      }
+    }
+  });
+
+  if (details.length === 0) {
+    showToast("请至少打勾完成一个动作中的任何一组再进行归档！");
+    return;
+  }
+
+  const duration = parseInt(document.getElementById('watch-duration').value) || 0;
+  const hr = parseInt(document.getElementById('watch-hr').value) || 0;
+  const cal = parseInt(document.getElementById('watch-cal').value) || 0;
+
+  const sessionRecord = {
+    date: new Date().toLocaleDateString('zh-CN', {month:'2-digit', day:'2-digit'}),
+    dayName: state.currentDay === 1 ? "Day 1 (腿臀核心)" : state.currentDay === 2 ? "Day 2 (背肩手臂)" : "Day 3 (轻训有氧)",
+    duration: duration,
+    hr: hr,
+    cal: cal,
+    totalSets: totalSets,
+    exercises: details,
+    timestamp: Date.now()
+  };
+
+  state.history.unshift(sessionRecord); 
+
+  state.logs = {};
+  activeEditingSet = null;
+
+  saveState();
+  showToast("今日训练成功归档！🎉");
+  renderWorkoutScreen();
+  switchView('history');
+}
+
+// ============================================================
+// ============================================================
+function renderHistory() {
+  const historyContainer = document.getElementById('history-list');
+  if (state.history.length === 0) {
+    historyContainer.innerHTML = `
+      <div class="text-center py-10 text-xs font-bold text-zinc-500 leading-loose">
+        暂无归档，开始你的第一次泵感复健吧！
+      </div>
+    `;
+    return;
+  }
+
+  historyContainer.innerHTML = state.history.map((record, index) => {
+    return `
+      <div class="history-item bg-dark-card border border-zinc-800 p-4 rounded-xl">
+        <div class="history-header flex justify-between items-center mb-2">
+          <div class="history-date text-sm font-black text-white flex items-center gap-2">
+            ${record.date} 
+            <span class="text-xs text-brand font-bold">${record.dayName}</span>
+          </div>
+          <button class="bg-transparent border-none text-zinc-500 hover:text-red-500 cursor-pointer text-xs font-bold" onclick="handleDeleteHistoryClick(${index})">删除</button>
+        </div>
+        
+        <div class="history-summary flex gap-2 mb-3">
+          <div class="summary-tag bg-white/5 text-[10px] text-zinc-300 px-2 py-0.5 rounded-full">⌚️ ${record.duration} min</div>
+          <div class="summary-tag bg-white/5 text-[10px] text-zinc-300 px-2 py-0.5 rounded-full">❤️ ${record.hr} bpm</div>
+          <div class="summary-tag bg-white/5 text-[10px] text-zinc-300 px-2 py-0.5 rounded-full">🔥 ${record.cal} kcal</div>
+          <div class="summary-tag bg-white/5 text-[10px] text-zinc-300 px-2 py-0.5 rounded-full">🎯 ${record.totalSets} 组</div>
+        </div>
+
+        <div class="border-t border-white/5 pt-2.5 space-y-1">
+          ${record.exercises.map(ex => `
+            <div class="history-ex-row flex justify-between text-xs text-zinc-400">
+              <span class="font-bold text-zinc-300">${ex.name}</span>
+              <span class="font-mono">${ex.summary}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+</script>
+
+<script>
+// ============================================================
+// ============================================================
+function handleDeleteHistoryClick(index) {
+  showCustomConfirm("确认删除", "确定要永久删除此条训练历史吗？此操作无法撤销。", () => {
+    state.history.splice(index, 1);
+    saveState();
+    renderHistory();
+    showToast("记录已删除");
+  });
+}
+
+function handleClearAllClick() {
+  showCustomConfirm("清除数据", "此操作将永久抹去你所有的历史数据且无法还原，确定执行吗？", () => {
+    localStorage.removeItem('geek_training_state');
+    showToast("已全部初始化");
+    window.location.reload();
+  });
+}
+
+function exportData() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+  const dlAnchorElem = document.createElement('a');
+  dlAnchorElem.setAttribute("href", dataStr);
+  dlAnchorElem.setAttribute("download", `geek_train_backup_${new Date().toISOString().slice(0,10)}.json`);
+  dlAnchorElem.click();
+}
+
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.readAsText(file, 'UTF-8');
+    reader.onload = readerEvent => {
+      try {
+        const parsed = JSON.parse(readerEvent.target.result);
+        if (parsed.history) {
+          state = parsed;
+          if (!state.logs) state.logs = {};
+          saveState();
+          showToast("备份数据成功导入");
+          window.location.reload();
+        } else {
+          showToast("非法的备份文件格式");
+        }
+      } catch (err) {
+        showToast("导入解析失败，请确保文件格式完整且无损");
+      }
+    };
+  };
+  input.click();
+}
+
+// ============================================================
+// ============================================================
+let toastTimer = null;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// ============================================================
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  loadState();
+
+  document.querySelectorAll('.dock-item').forEach(tab => {
+    tab.addEventListener('click', () => {
+      switchView(tab.dataset.view);
+    });
+  });
+
+  const now = new Date();
+  const weekdays = ['日','一','二','三','四','五','六'];
+  document.getElementById('todayLabel').textContent = `${now.getMonth() + 1}/${now.getDate()} 周${weekdays[now.getDay()]}`;
+
+  switchDay(state.currentDay || 1);
+});
+</script>
+</body>
+</html>
