@@ -28,14 +28,15 @@
   --radius-sm:8px;
   --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
 }
-body{background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:hidden;padding-bottom:80px;line-height:1.5}
+body{background:var(--bg);color:var(--text);font-family:var(--font);padding-bottom:80px;line-height:1.5}
+.container{max-width:600px;margin:0 auto;padding:16px;overflow-x:hidden}
 /* Safe Header */
 .safe-header{background:rgba(9,9,11,.85);backdrop-filter:blur(16px);position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border);padding:14px 20px;padding-top:calc(14px+env(safe-area-inset-top,0px));display:flex;align-items:center;justify-content:space-between}
 .brand{font-size:17px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
 .brand-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 8px var(--accent)}
 .today-chip{background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500}
 /* Container */
-.container{max-width:600px;margin:0 auto;padding:16px}
+.container{max-width:600px;margin:0 auto;padding:16px;overflow-x:hidden}
 /* Views */
 .view{display:none}
 .view.active{display:block}
@@ -113,7 +114,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:h
 .qt .sub{font-size:9px;color:var(--text3);font-weight:400}
 .qt.active .sub{color:var(--accent)}
 /* Timer Bar */
-.timer-bar{position:fixed;top:calc(60px+env(safe-area-inset-top,0px));left:0;width:100%;background:var(--accent);color:#000;padding:8px 16px;font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center;z-index:9999;box-shadow:0 -4px 12px rgba(0,0,0,.5);border:3px solid red}
+.timer-bar{position:fixed;top:calc(60px+env(safe-area-inset-top,0px));left:0;width:100%;background:var(--accent);color:#000;padding:8px 16px;font-size:13px;font-weight:700;display:none;justify-content:space-between;align-items:center;z-index:9999;box-shadow:0 -4px 12px rgba(0,0,0,.5);border:3px solid red}
+.timer-bar.show{display:flex}
 .timer-close{background:none;border:none;font-size:16px;font-weight:700;cursor:pointer;color:#000;padding:0 8px}
 /* Watch Card */
 .watch-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-top:20px}
@@ -234,9 +236,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:h
   </div>
 </div>
 
-<!-- Timer -->
-<div class="timer-bar" id="timerBar"><div style="color:blue;font-size:20px">⏱ TIMER TEST <span id="timerClock">60</span>s</div><button class="timer-close" onclick="closeTimer()">✕</button></div>
-
 <!-- Dock -->
 <div class="dock">
   <button class="dock-item active" data-view="train"><svg viewBox="0 0 24 24"><path d="M6 3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3zm3 6h6m-6 3h6m-6 3h3"/></svg>训练</button>
@@ -245,6 +244,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:h
 </div>
 
 <div id="toast"></div>
+
+<!-- Timer -->
+<div class="timer-bar" id="timerBar"><div>⏱ 休息 <span id="timerClock">60</span>s</div><button class="timer-close" onclick="closeTimer()">✕</button></div>
 
 <script>
 // ============================================================
