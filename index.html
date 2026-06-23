@@ -796,7 +796,7 @@ function finishWorkout(){
       const done=log.sets.filter(s=>s.done);
       if(done.length>0){
         totalSets+=done.length;
-        details.push({name:ex.name,summary:done.map((s,i)=>`S${i+1}:${s.weight>0?s.weight+'lb':'BW'}×${s.reps}`).join(', ')});
+        details.push({name:ex.name,target:ex.target,unit:ex.unit||'lb',sets:done.map(function(s){return{weight:s.weight,reps:s.reps}})});
       }
     }
   });
@@ -810,7 +810,7 @@ function finishWorkout(){
   const calC=parseInt(document.getElementById('inpCalC').value)||0;
 
   state.history.unshift({
-    date:todayKey(),dayName:day.label+' '+day.sub,dur,hr,cal,durC,hrC,calC,totalSets,details,timestamp:Date.now()
+    date:todayKey(),dayName:day.label+' '+day.sub,dayId:day.id,dur,hr,cal,durC,hrC,calC,totalSets,details,timestamp:Date.now()
   });
   // Clear logs for today
   day.exercises.forEach(ex=>delete state.logs[ex.id]);
@@ -832,7 +832,10 @@ function renderHistory(){
     el.innerHTML='<div class="hist-empty">暂无训练记录<br>开始你的第一次训练吧</div>';return;
   }
   el.innerHTML=state.history.map((r,i)=>{
-    const exRows=r.details.map(ex=>`<div class="hist-ex-row"><span style="font-weight:700;color:var(--text)">${ex.name}</span><span style="font-family:monospace;font-size:10px">${ex.summary}</span></div>`).join('');
+    const exRows=r.details.map(function(ex){
+      var str=ex.summary||(ex.sets?ex.sets.map(function(s,i){return'S'+(i+1)+':'+(s.weight>0?s.weight+ex.unit:'BW')+'×'+s.reps}).join(', '):'');
+      return '<div class="hist-ex-row"><span style="font-weight:700;color:var(--text)">'+ex.name+'</span><span style="font-family:monospace;font-size:10px">'+str+'</span></div>';
+    }).join('');
     return `<div class="hist-item">
       <div class="hist-header"><div class="hist-date">${r.date} <span style="font-size:11px;color:var(--accent);margin-left:4px">${r.dayName}</span></div>
         <button style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px" onclick="delHist(${i})">删除</button></div>
