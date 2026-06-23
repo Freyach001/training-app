@@ -863,10 +863,28 @@ function phaseLabel(p){return{period:'月经期',follicular:'卵泡期',ovulatio
 function phaseColor(p){return{period:'#D85A30',follicular:'#1D9E75',ovulation:'#378ADD',luteal:'#EF9F27','late-luteal':'#D4537E',unknown:'#52525b'}[p]||'#52525b'}
 function phaseNote(p){return{period:'月经期体重偏高，经后消肿会明显下降',follicular:'卵泡期体重接近真实水平，训练状态好',ovulation:'排卵期体重平稳',luteal:'黄体期积水增加，体重缓慢回升','late-luteal':'黄体晚期水分高峰，秤上数字不代表真实体重',unknown:''}[p]||''}
 function getRetention(p){return{period:1.8,follicular:0.1,ovulation:0.3,luteal:0.7,'late-luteal':1.8,unknown:0}[p]||0}
-function getTrainingDay(dateStr){
+function getTrainingCode(dateStr,cs,cl,pd){
   var base=new Date(2026,5,23),d=new Date(dateStr+'T00:00:00');
   var diff=Math.floor((d-base)/86400000);
-  return ['D1腿臀','休息','D2背肩','休息','D3轻训','休息'][((diff%6)+6)%6];
+  var idx=((diff%6)+6)%6;
+  var types=['D1','休息','D2','休息','D3','休息'];
+  var code=types[idx];
+  // Period D1-D3: D2/D3 may be rested
+  var cd=getCycleDay(dateStr,cs,cl);
+  if(cd>0&&cd<=3&&code!=='D1'&&code!=='休息')code='休息';
+  return code;
+}
+function getTrainingDay(dateStr,cs,cl,pd){
+  var labels={'D1':'D1腿臀+核心','D2':'D2背+肩胛+手臂','D3':'D3轻训+有氧','休息':'休息'};
+  return labels[getTrainingCode(dateStr,cs,cl,pd)]||'休息';
+}
+function getDOMS(dateStr,cs,cl,pd){
+  var d=new Date(dateStr+'T00:00:00');
+  d.setDate(d.getDate()-1);
+  var y=d.getFullYear(),m=d.getMonth()+1,dd=d.getDate();
+  var prev=y+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd;
+  var code=getTrainingCode(prev,cs,cl,pd);
+  return{'D1':0.5,'D2':0.15,'D3':0,'休息':0}[code]||0;
 }
 function predictWeight(dateStr,s){
   var ref=new Date('2026-05-23T00:00:00'),d=new Date(dateStr+'T00:00:00');
@@ -875,7 +893,9 @@ function predictWeight(dateStr,s){
   var cd=getCycleDay(dateStr,s.cycleStart,s.cycleLen);
   var p=getPhase(cd,s.periodDays);
   var ret=getRetention(p);
-  return{base:parseFloat(base.toFixed(1)),predicted:parseFloat((base+ret).toFixed(1)),low:parseFloat((base+ret-0.4).toFixed(1)),high:parseFloat((base+ret+0.4).toFixed(1)),phase:p,cycleDay:cd};
+  var doms=getDOMS(dateStr,s.cycleStart,s.cycleLen,s.periodDays);
+  var predicted=base+ret+doms;
+  return{base:parseFloat(base.toFixed(1)),predicted:parseFloat(predicted.toFixed(1)),low:parseFloat((predicted-0.4).toFixed(1)),high:parseFloat((predicted+0.4).toFixed(1)),phase:p,cycleDay:cd};
 }
 
 // ============================================================
@@ -895,10 +915,14 @@ function renderWeight(){
 
   // Prediction card
   var pred=predictWeight(today,state);
-  var trainDay=getTrainingDay(today);
+  var trainDay=getTrainingDay(today,state.cycleStart,state.cycleLen,state.periodDays);
   var pCn=phaseLabel(pred.phase);
   var pColor=phaseColor(pred.phase);
   var note=phaseNote(pred.phase);
+  var domsVal=getDOMS(today,state.cycleStart,state.cycleLen,state.periodDays);
+  var d=new Date(today+'T00:00:00');d.setDate(d.getDate()-1);
+  var prevTrain=getTrainingDay(d.toISOString().slice(0,10),state.cycleStart,state.cycleLen,state.periodDays);
+  var domsNote=domsVal>0?'昨日 '+prevTrain+' · DOMS +'+domsVal.toFixed(2).replace('0.','.')+'kg':'昨日 '+prevTrain+' · 无 DOMS 叠加';
   var tRec=state.weights&&state.weights.find(function(w){return w.date===today});
 
   var diffStr='';
@@ -926,7 +950,7 @@ function renderWeight(){
         '<div style="text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:2px">预测体重</div>'+
         '<div style="font-size:22px;font-weight:800;color:var(--accent)">'+pred.predicted+'<span style="font-size:12px;color:var(--text2);font-weight:400"> kg</span></div></div>'+
         diffStr+'</div>'+
-      '<div style="font-size:11px;color:var(--text3);padding-top:8px;border-top:1px solid var(--border);line-height:1.5">💡 '+note+'</div></div>';
+      '<div style="font-size:11px;color:var(--text3);padding-top:6px;border-top:1px solid var(--border);line-height:1.7">'+domsNote+'<br>💡 '+note+'</div></div>';
 
   // History list
   var el=document.getElementById('weightList');
