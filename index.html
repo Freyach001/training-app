@@ -752,9 +752,12 @@ function setW(w,idx,exId){
 // TIMER
 // ============================================================
 let timerInt=null;
+let timerSec=0;
+let timerStart=0;
 function triggerRest(sec){
   closeTimer();
-  var left=sec;
+  timerSec=sec;
+  timerStart=Date.now();
   var bar=document.createElement('div');
   bar.id='restTimer';
   bar.style.position='fixed';
@@ -771,17 +774,36 @@ function triggerRest(sec){
   bar.style.justifyContent='space-between';
   bar.style.alignItems='center';
   bar.style.boxSizing='border-box';
-  bar.innerHTML='<span>⏱ 组间休息 <b style="font-size:22px">'+left+'</b>s</span><button id="restClose" style="background:none;border:none;font-size:20px;cursor:pointer;color:#000;padding:0 4px;line-height:1">✕</button>';
+  bar.innerHTML='<span>⏱ 组间休息 <b style="font-size:22px">'+sec+'</b>s</span><button id="restClose" style="background:none;border:none;font-size:20px;cursor:pointer;color:#000;padding:0 4px;line-height:1">✕</button>';
   document.body.appendChild(bar);
   document.getElementById('restClose').onclick=closeTimer;
-  timerInt=setInterval(function(){
-    left--;
-    bar.innerHTML='<span>⏱ 组间休息 <b style="font-size:22px">'+left+'</b>s</span><button id="restClose" style="background:none;border:none;font-size:20px;cursor:pointer;color:#000;padding:0 4px;line-height:1">✕</button>';
-    document.getElementById('restClose').onclick=closeTimer;
-    if(left<=0){closeTimer();showToast('休息结束');}
-  },1000);
+  timerInt=setInterval(tickTimer,200);
+  document.addEventListener('visibilitychange',onVisChange);
 }
-function closeTimer(){clearInterval(timerInt);var tb=document.getElementById('restTimer');if(tb)tb.remove()}
+function tickTimer(){
+  var bar=document.getElementById('restTimer');
+  if(!bar)return;
+  var elapsed=Math.floor((Date.now()-timerStart)/1000);
+  var left=Math.max(0,timerSec-elapsed);
+  bar.innerHTML='<span>⏱ 组间休息 <b style="font-size:22px">'+left+'</b>s</span><button id="restClose" style="background:none;border:none;font-size:20px;cursor:pointer;color:#000;padding:0 4px;line-height:1">✕</button>';
+  var btn=document.getElementById('restClose');
+  if(btn)btn.onclick=closeTimer;
+  if(left<=0){
+    closeTimer();
+    if(navigator.vibrate)navigator.vibrate(400);
+    showToast('休息结束');
+  }
+}
+function onVisChange(){
+  if(document.visibilityState==='visible')tickTimer();
+}
+function closeTimer(){
+  clearInterval(timerInt);
+  timerInt=null;
+  document.removeEventListener('visibilitychange',onVisChange);
+  var tb=document.getElementById('restTimer');
+  if(tb)tb.remove();
+}
 
 // ============================================================
 // FINISH WORKOUT
