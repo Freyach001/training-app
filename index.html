@@ -892,20 +892,20 @@ function getDOMS(dateStr,cs,cl,pd){
 function predictWeight(dateStr,s){
   // Lookup table (user's precise values)
   var tbl={
-    '2026-06-23':{m:64.6,l:64.6,h:64.6,p:'late-luteal',cd:31},
-    '2026-06-24':{m:65.2,l:65.0,h:65.4,p:'late-luteal',cd:32},
-    '2026-06-25':{m:64.75,l:64.4,h:65.1,p:'period',cd:1},
-    '2026-06-26':{m:64.05,l:63.7,h:64.4,p:'period',cd:2},
-    '2026-06-27':{m:63.4,l:63.0,h:63.8,p:'period',cd:3},
-    '2026-06-28':{m:62.8,l:62.4,h:63.2,p:'period',cd:4},
-    '2026-06-29':{m:62.5,l:62.1,h:62.9,p:'follicular',cd:5},
-    '2026-06-30':{m:62.75,l:62.4,h:63.1,p:'follicular',cd:6},
-    '2026-07-01':{m:62.2,l:61.9,h:62.5,p:'follicular',cd:7},
-    '2026-07-02':{m:62.0,l:61.7,h:62.3,p:'follicular',cd:8},
-    '2026-07-03':{m:61.8,l:61.5,h:62.1,p:'follicular',cd:9},
-    '2026-07-04':{m:61.5,l:61.2,h:61.8,p:'follicular',cd:10},
-    '2026-07-05':{m:61.6,l:61.3,h:61.9,p:'follicular',cd:11},
-    '2026-07-06':{m:62.3,l:62.0,h:62.6,p:'follicular',cd:12}
+    '2026-06-23':{m:64.1,l:63.8,h:64.4,p:'late-luteal',cd:31},    // 实测
+    '2026-06-24':{m:63.0,l:62.7,h:63.3,p:'late-luteal',cd:32},    // 实测
+    '2026-06-25':{m:62.8,l:62.3,h:63.3,p:'period',cd:1},
+    '2026-06-26':{m:63.0,l:62.5,h:63.5,p:'period',cd:2},
+    '2026-06-27':{m:62.7,l:62.2,h:63.2,p:'period',cd:3},
+    '2026-06-28':{m:62.3,l:61.8,h:62.8,p:'period',cd:4},
+    '2026-06-29':{m:62.0,l:61.5,h:62.5,p:'follicular',cd:5},
+    '2026-06-30':{m:61.7,l:61.2,h:62.2,p:'follicular',cd:6},
+    '2026-07-01':{m:61.5,l:61.0,h:62.0,p:'follicular',cd:7},
+    '2026-07-02':{m:61.3,l:60.8,h:61.8,p:'follicular',cd:8},
+    '2026-07-03':{m:61.2,l:60.7,h:61.7,p:'follicular',cd:9},
+    '2026-07-04':{m:61.0,l:60.5,h:61.5,p:'follicular',cd:10},
+    '2026-07-05':{m:61.0,l:60.5,h:61.5,p:'follicular',cd:11},
+    '2026-07-06':{m:61.0,l:60.5,h:61.5,p:'follicular',cd:12}
   };
   if(tbl[dateStr]){var e=tbl[dateStr];var lo=e.l===e.h?parseFloat((e.m-0.4).toFixed(1)):e.l;var hi=e.l===e.h?parseFloat((e.m+0.4).toFixed(1)):e.h;return{predicted:e.m,low:lo,high:hi,phase:e.p,cycleDay:e.cd};}
   // Fallback model for dates beyond table
