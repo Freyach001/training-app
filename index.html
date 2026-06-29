@@ -923,11 +923,11 @@ function predictWeight(dateStr,s){
     '2026-06-29':{m:63.5,l:63.0,h:64.0,p:'period',cd:5},        // 实测
     '2026-06-30':{m:63.0,l:62.5,h:63.5,p:'follicular',cd:6},   // 经后排水慢于预期
     '2026-07-01':{m:62.5,l:62.0,h:63.0,p:'follicular',cd:7},
-    '2026-07-02':{m:61.3,l:60.8,h:61.8,p:'follicular',cd:8},
-    '2026-07-03':{m:61.2,l:60.7,h:61.7,p:'follicular',cd:9},
-    '2026-07-04':{m:61.0,l:60.5,h:61.5,p:'follicular',cd:10},
-    '2026-07-05':{m:61.0,l:60.5,h:61.5,p:'follicular',cd:11},
-    '2026-07-06':{m:61.0,l:60.5,h:61.5,p:'follicular',cd:12}
+    '2026-07-02':{m:62.0,l:61.5,h:62.5,p:'follicular',cd:8},
+    '2026-07-03':{m:61.7,l:61.2,h:62.2,p:'follicular',cd:9},
+    '2026-07-04':{m:61.5,l:61.0,h:62.0,p:'follicular',cd:10},
+    '2026-07-05':{m:61.3,l:60.8,h:61.8,p:'follicular',cd:11},
+    '2026-07-06':{m:61.3,l:60.8,h:61.8,p:'follicular',cd:12}
   };
   if(tbl[dateStr]){var e=tbl[dateStr];var lo=e.l===e.h?parseFloat((e.m-0.4).toFixed(1)):e.l;var hi=e.l===e.h?parseFloat((e.m+0.4).toFixed(1)):e.h;return{predicted:e.m,low:lo,high:hi,phase:e.p,cycleDay:e.cd};}
   // Fallback model for dates beyond table
