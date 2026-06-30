@@ -512,7 +512,9 @@ let activeSet=null; // {exId, idx}
 
 function loadState(){
   const r=localStorage.getItem(SK);
-  if(r)try{const p=JSON.parse(r);if(p.logs)state=p;if(!state.history)state.history=[];if(!state.weights)state.weights=[];if(!state.cycleStart){state.cycleStart='2026-06-25';state.cycleLen=32;state.periodDays=5;state.fatLossPerMonth=0.5;state.startBase=61}}catch(e){}
+  if(r)try{const p=JSON.parse(r);if(p.logs)state=p;if(!state.history)state.history=[];if(!state.weights)state.weights=[];if(!state.cycleStart){state.cycleStart='2026-06-25';state.cycleLen=32;state.periodDays=5;state.fatLossPerMonth=0.5;state.startBase=62}}catch(e){}
+  // Migrate old default cycleStart
+  if(state.cycleStart==='2026-05-23')state.cycleStart='2026-06-25';
 }
 function saveState(){state.currentDay=curDay;localStorage.setItem(SK,JSON.stringify(state))}
 function todayKey(){return new Date().toISOString().slice(0,10)}
