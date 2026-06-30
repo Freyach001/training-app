@@ -518,6 +518,7 @@ function loadState(){
   if(state.cycleStart==='2026-05-23')state.cycleStart='2026-06-25';
   // Plan v2: clear stale exercise logs (default weights changed)
   if(!state.planVersion||state.planVersion<2){state.logs={};state._today={};state.planVersion=2;localStorage.setItem(SK,JSON.stringify(state))}
+}
 function saveState(){state.currentDay=curDay;localStorage.setItem(SK,JSON.stringify(state))}
 function todayKey(){return new Date().toISOString().slice(0,10)}
 
