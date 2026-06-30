@@ -299,7 +299,7 @@ const DAYS = [
    exercises:[
      {id:'d1-gb',name:'诺德士臀推机',target:'臀大肌',sets:4,reps:12,wt:45,unit:'kg',tips:['顶峰收缩2秒，臀部发力非腰部','上背靠稳，小腿垂直地面','不要过度顶髋']},
      {id:'d1-hs',name:'双向哈克深蹲(面向前)',target:'股四头肌',sets:3,reps:12,wt:100,tips:['下蹲至大腿平行地面即可','膝盖与脚尖方向一致','顶点不锁死','避免膝内扣']},
-     {id:'d1-lp',name:'坐姿腿蹬(多角度)',target:'臀腿',sets:4,reps:15,wt:80,tips:['S1热身60lb; S2高脚位(臀); S3标准(股四头); S4宽脚位脚尖朝外(内收)','膝盖友好固定轨迹','单组不重复，一触即走']},
+     {id:'d1-lp',name:'坐姿腿蹬(多角度)',target:'臀腿',sets:4,reps:15,wt:80,initWts:[60,80,80,80],tips:['S1热身60lb; S2高脚位(臀); S3标准(股四头); S4宽脚位脚尖朝外(内收)','膝盖友好固定轨迹','单组不重复，一触即走']},
      {id:'d1-lc',name:'诺德士坐姿腿弯举',target:'腘绳肌',sets:3,reps:12,wt:40,tips:['先确认是否与上次同一器械','感受腘绳肌收缩','控制离心慢放']},
 	     {id:'d1-le',name:'诺德士坐姿腿屈伸',target:'股四头肌',sets:3,reps:12,wt:30,tips:['30-40lb递增','顶峰收缩1秒','慢放不甩动']},
      {id:'d1-ad',name:'内收肌(向内夹)',target:'大腿内侧',sets:3,reps:12,wt:60,tips:['大腿内侧发力','慢放控制','最后吃力说明重量合适']},
@@ -596,7 +596,7 @@ function renderTrain(){
   let exHtml='';
   dayExs.forEach(ex=>{
     const hasLog=!!state.logs[ex.id];
-    const log=hasLog?state.logs[ex.id]:{sets:Array.from({length:ex.sets},()=>({weight:ex.wt,reps:ex.reps,done:false})),completed:false};
+    const log=hasLog?state.logs[ex.id]:{sets:Array.from({length:ex.sets},(_,i)=>({weight:ex.initWts?ex.initWts[i]:ex.wt,reps:ex.reps,done:false})),completed:false};
     const allDone=log.completed||(hasLog&&log.sets.every(s=>s.done));
 
     	    exHtml+=`<div class="ex-card${allDone?' completed':''}" id="card-${ex.id}">
@@ -663,7 +663,7 @@ function ensureLogExists(exId){
   if(!state.logs[exId]){
     const ex=DAYS.flatMap(d=>d.exercises).find(e=>e.id===exId);
     if(!ex)return;
-    state.logs[exId]={sets:Array.from({length:ex.sets},()=>({weight:ex.wt,reps:ex.reps,done:false})),completed:false};
+    state.logs[exId]={sets:Array.from({length:ex.sets},(_,i)=>({weight:ex.initWts?ex.initWts[i]:ex.wt,reps:ex.reps,done:false})),completed:false};
     saveState();
   }
 }
