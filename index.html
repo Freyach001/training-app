@@ -512,7 +512,7 @@ let activeSet=null; // {exId, idx}
 
 function loadState(){
   const r=localStorage.getItem(SK);
-  if(r)try{const p=JSON.parse(r);if(p.logs)state=p;if(!state.history)state.history=[];if(!state.weights)state.weights=[];if(!state.cycleStart){state.cycleStart='2026-05-23';state.cycleLen=32;state.periodDays=5;state.fatLossPerMonth=0.5;state.startBase=62}}catch(e){}
+  if(r)try{const p=JSON.parse(r);if(p.logs)state=p;if(!state.history)state.history=[];if(!state.weights)state.weights=[];if(!state.cycleStart){state.cycleStart='2026-06-25';state.cycleLen=32;state.periodDays=5;state.fatLossPerMonth=0.5;state.startBase=61}}catch(e){}
 }
 function saveState(){state.currentDay=curDay;localStorage.setItem(SK,JSON.stringify(state))}
 function todayKey(){return new Date().toISOString().slice(0,10)}
@@ -931,7 +931,7 @@ function predictWeight(dateStr,s){
   };
   if(tbl[dateStr]){var e=tbl[dateStr];var lo=e.l===e.h?parseFloat((e.m-0.4).toFixed(1)):e.l;var hi=e.l===e.h?parseFloat((e.m+0.4).toFixed(1)):e.h;return{predicted:e.m,low:lo,high:hi,phase:e.p,cycleDay:e.cd};}
   // Fallback model for dates beyond table
-  var ref=new Date('2026-05-23T00:00:00'),d=new Date(dateStr+'T00:00:00');
+  var ref=new Date('2026-06-25T00:00:00'),d=new Date(dateStr+'T00:00:00');
   var dayOffset=Math.floor((d-ref)/86400000);
   var base=s.startBase-(dayOffset*s.fatLossPerMonth/30);
   var cd=getCycleDay(dateStr,s.cycleStart,s.cycleLen);
