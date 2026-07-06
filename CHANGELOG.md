@@ -19,6 +19,8 @@
 - `ExerciseLog` 新增 `note`、`orderIndex` 字段
 - `HistoryRecord.details` 条目新增 `note`、`orderIndex` 字段
 - 归档逻辑：遍历 `state.logs` 全部动作（含 extra- 前缀），而非仅 `DAYS` 中的
+- 额外动作"靶肌肉"从下拉选择改为自由文本（不要求专业名称，填"臀""大腿""背"等即可）
+- 已完成动作从"不可点击"改为可重入只读查看
 
 ### Removed
 - SVG 胶囊体肌肉示意图（`svgCapsule` 函数保留为 dead code 未调用）
