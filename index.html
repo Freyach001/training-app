@@ -892,8 +892,6 @@ function delExtraEx(id){
 
 function showAddExForm(){
   // Build modal overlay
-  const muscles=['臀大肌','股四头肌','腘绳肌','臀中肌','臀腿','大腿内侧','臀腿后侧','中背部','背阔肌','上背部/肩胛','三角肌后束/肩袖','肩袖','肱二头肌','肱三头肌','腹直肌','腹斜肌','有氧'];
-  const units=['lb','kg'];
   const overlay=document.createElement('div');
   overlay.id='addExOverlay';
   overlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:99999;display:flex;align-items:center;justify-content:center';
@@ -907,10 +905,8 @@ function showAddExForm(){
       </div>
 
       <div style="margin-bottom:10px">
-        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">靶肌肉</div>
-        <select id="aexTarget" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:10px">
-          ${muscles.map(m=>'<option value="'+m+'">'+m+'</option>').join('')}
-        </select>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">练哪</div>
+        <input id="aexTarget" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:10px" placeholder="如 臀 / 大腿 / 背 / 核心">
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
