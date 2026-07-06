@@ -154,7 +154,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);padding-bott
 .ex-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
 .ex-item{display:flex;align-items:center;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);cursor:pointer;transition:.15s}
 .ex-item:active{transform:scale(.98)}
-.ex-item.done{opacity:.55;cursor:default;pointer-events:none}
+.ex-item.done{opacity:.55}
 .ex-item .ex-name{flex:1;font-size:15px;font-weight:600}
 .ex-item .ex-target{font-size:11px;color:var(--text2);margin-right:10px;white-space:nowrap}
 .ex-item .ex-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0 4px;margin-right:4px}
@@ -707,7 +707,7 @@ function renderExList(){
     const isExtra=ex.id.startsWith('extra-');
     const delBtn=isExtra?`<button class="ex-del" onclick="event.stopPropagation();delExtraEx('${ex.id}')">✕</button>`:'';
     const cls=completed?'ex-item done'+(isExtra?' extra':''):'ex-item'+(isExtra?' extra':'');
-    return `<div class="${cls}" onclick="${completed?'':'showCard(\''+ex.id+'\')'}">
+    return `<div class="${cls}" onclick="showCard('${ex.id}')">
       ${delBtn}
       <span class="ex-name">${ex.name}</span>
       <span class="ex-target">${ex.target} · ${ex.sets}×${ex.reps}</span>
@@ -765,23 +765,31 @@ function renderCard(){
   if(!log){hideCard();return;}
 
   const unit=ex.unit||'lb';
+  const readOnly=!!(log.completed||log.sets.every(s=>s.done));
 
   // Sets table
   let setsHtml=log.sets.map((s,idx)=>{
-    const isA=activeSet&&activeSet.exId===cardExId&&activeSet.idx===idx;
+    const isA=!readOnly&&activeSet&&activeSet.exId===cardExId&&activeSet.idx===idx;
     const doneCls=s.done?' done':'';
     const valW=s.weight>0?s.weight+' <span>'+unit+'</span>':'—';
     const valR=s.reps>0?s.reps+' <span>次</span>':'—';
-    return `<div class="set-row${doneCls}${isA?' active':''}" onclick="activateSet('${cardExId}',${idx})">
+    const clk=readOnly?'':` onclick="activateSet('${cardExId}',${idx})"`;
+    const chk=readOnly?'':` onclick="event.stopPropagation();toggleSet('${cardExId}',${idx})"`;
+    return `<div class="set-row${doneCls}${isA?' active':''}"${clk}>
       <div class="set-num">S${idx+1}</div>
       <div class="set-val">${valW}</div>
       <div class="set-val">${valR}</div>
-      <div class="set-chk"><button class="set-chk-btn" onclick="event.stopPropagation();toggleSet('${cardExId}',${idx})">✓</button></div>
+      <div class="set-chk"><button class="set-chk-btn"${chk}>${s.done?'✓':''}</button></div>
     </div>`;
   }).join('');
 
   // Tips
   const tipsHtml=ex.tips&&ex.tips.length?ex.tips.map(t=>'<li>'+t+'</li>').join(''):'';
+
+  // Buttons
+  const btnHtml=readOnly
+    ?`<button class="btn-done" onclick="hideCard()" style="flex:1">关闭</button>`
+    :`<button class="btn-reset" onclick="resetEx()">× 重置</button><button class="btn-done" onclick="completeEx()">✓ 完成此动作</button>`;
 
   document.getElementById('trainCard').innerHTML=`
     <div class="card-back" onclick="hideCard()">← 返回动作列表</div>
@@ -796,16 +804,16 @@ function renderCard(){
 
     <div class="note-box">
       <div class="label">📝 备注</div>
-      <textarea id="cardNote" placeholder="这组感觉如何？腰疼？重量轻松？记在这里…" oninput="saveNote()">${escHtml(log.note||'')}</textarea>
+      <textarea id="cardNote" placeholder="这组感觉如何？腰疼？重量轻松？记在这里…" oninput="saveNote()" ${readOnly?'readonly style="opacity:.6"':''}>${escHtml(log.note||'')}</textarea>
     </div>
 
     <div class="card-sets-box">
       <div class="st-label">
         <span>组次</span>
-        <span>点按组行调整重量/次数</span>
+        <span>${readOnly?'':'点按组行调整重量/次数'}</span>
       </div>
       ${setsHtml}
-      <div class="stepper-box${activeSet&&activeSet.exId===cardExId?' open':''}" id="stBox-${cardExId}"></div>
+      ${!readOnly?`<div class="stepper-box${activeSet&&activeSet.exId===cardExId?' open':''}" id="stBox-${cardExId}"></div>`:''}
     </div>
 
     <div class="card-actions">
