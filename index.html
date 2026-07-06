@@ -150,6 +150,52 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);padding-bott
 /* Warmup specific */
 .ex-card.warmup-card{border-left:3px solid var(--accent);opacity:.9}
 .ex-card.warmup-card .ex-name{font-size:14px}
+/* Exercise list (v3) */
+.ex-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.ex-item{display:flex;align-items:center;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);cursor:pointer;transition:.15s}
+.ex-item:active{transform:scale(.98)}
+.ex-item.done{opacity:.55;cursor:default;pointer-events:none}
+.ex-item .ex-name{flex:1;font-size:15px;font-weight:600}
+.ex-item .ex-target{font-size:11px;color:var(--text2);margin-right:10px;white-space:nowrap}
+.ex-item .ex-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0 4px;margin-right:4px}
+/* Status circles */
+.st-cir{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.st-cir.pending{border:2px solid var(--border);background:none;color:transparent}
+.st-cir.ip{border:2px solid var(--accent);background:var(--accent-light);color:var(--accent)}
+.st-cir.done{background:var(--green);border:2px solid var(--green);color:#000}
+/* Extra action row */
+.ex-item.extra .ex-del{display:block}
+.ex-item .ex-del{display:none}
+/* Add button */
+.btn-add{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px;border:1px dashed var(--border);border-radius:var(--radius-lg);background:none;color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;width:100%;margin-bottom:16px}
+.btn-add:active{border-color:var(--accent);color:var(--accent)}
+/* Card view */
+#trainCard{animation:fadeIn .2s ease;padding-top:0}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.card-back{display:flex;align-items:center;gap:6px;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;margin-bottom:14px;padding:4px 0;border:none;background:none}
+.card-back:active{opacity:.6}
+.card-title{font-size:22px;font-weight:800;margin-bottom:4px}
+.card-target{font-size:13px;color:var(--text2);margin-bottom:16px;display:flex;gap:12px}
+.card-target span{background:var(--surface);padding:2px 10px;border-radius:6px}
+/* Tips box */
+.tips-box{background:rgba(249,115,22,.03);border:1px solid rgba(249,115,22,.12);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px}
+.tips-box .label{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px}
+.tips-box ul{list-style:none;font-size:13px;color:var(--text2);line-height:1.8}
+.tips-box ul li::before{content:"•";color:var(--accent);font-weight:700;margin-right:4px}
+/* Note box */
+.note-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:16px}
+.note-box .label{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px}
+.note-box textarea{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;padding:10px;resize:none;height:56px;font-family:inherit;outline:none}
+.note-box textarea:focus{border-color:var(--accent)}
+/* Sets box in card */
+.card-sets-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:20px}
+.card-sets-box .st-label{font-size:11px;color:var(--text2);margin-bottom:8px;display:flex;justify-content:space-between}
+/* Card actions */
+.card-actions{display:flex;gap:10px;margin-top:4px}
+.btn-reset{flex:1;padding:14px;border-radius:var(--radius);font-size:14px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:none;color:var(--text2)}
+.btn-reset:active{background:rgba(255,255,255,.04)}
+.btn-done{flex:2;padding:14px;border-radius:var(--radius);font-size:14px;font-weight:700;cursor:pointer;border:none;background:var(--accent);color:#000}
+.btn-done:active{transform:scale(.98)}
 /* Scrollbar hide */
 .view::-webkit-scrollbar,.sets-table::-webkit-scrollbar{display:none}
 /* Day summary stats */
@@ -171,40 +217,46 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);padding-bott
 <div class="container">
   <!-- View: Train -->
   <div class="view active" id="view-train">
-    <div class="day-tabs" id="dayTabs"></div>
-    <div id="daySummary"></div>
-    <div id="warmupPanel" class="session-panel"></div>
-    <div id="exerciseList"></div>
-    <div id="cardioPanel" class="session-panel cardio"></div>
-    <div id="stretchPanel" class="session-panel stretch"></div>
-    <div class="session-panel caution" id="precautionsPanel">
-      <div class="panel-header" onclick="togglePanel('precautionsPanel')">
-        <div class="panel-title" style="color:#f87171">⚠️ 复健注意事项</div>
-        <div class="panel-toggle-icon">▼</div>
+    <!-- List View -->
+    <div id="trainList">
+      <div class="day-tabs" id="dayTabs"></div>
+      <div id="daySummary"></div>
+      <div id="exerciseList"></div>
+      <button class="btn-add" id="btnAddEx" onclick="showAddExForm()">+ 添加额外动作</button>
+      <div id="warmupPanel" class="session-panel"></div>
+      <div id="cardioPanel" class="session-panel cardio"></div>
+      <div id="stretchPanel" class="session-panel stretch"></div>
+      <div class="session-panel caution" id="precautionsPanel">
+        <div class="panel-header" onclick="togglePanel('precautionsPanel')">
+          <div class="panel-title" style="color:#f87171">⚠️ 复健注意事项</div>
+          <div class="panel-toggle-icon">▼</div>
+        </div>
+        <div class="panel-content" style="font-size:11.5px;line-height:1.7">
+          <p style="margin-bottom:6px"><b>肩部弹响：</b>面拉和外旋用极轻重量。若弹响伴随刺痛或卡顿，立即停止。</p>
+          <p style="margin-bottom:6px"><b>进阶节奏：</b>前2周适应期不加重量，2周后无不适再加5-10%。</p>
+          <p style="margin-bottom:6px"><b>推胸动作：</b>至少坚持4-6周、弹响明显减少且无痛后再考虑尝试。</p>
+          <p><b>高蛋白保肌：</b>每天每公斤体重1.6-2.0g蛋白质。</p>
+        </div>
       </div>
-      <div class="panel-content" style="font-size:11.5px;line-height:1.7">
-        <p style="margin-bottom:6px"><b>肩部弹响：</b>面拉和外旋用极轻重量。若弹响伴随刺痛或卡顿，立即停止。</p>
-        <p style="margin-bottom:6px"><b>进阶节奏：</b>前2周适应期不加重量，2周后无不适再加5-10%。</p>
-        <p style="margin-bottom:6px"><b>推胸动作：</b>至少坚持4-6周、弹响明显减少且无痛后再考虑尝试。</p>
-        <p><b>高蛋白保肌：</b>每天每公斤体重1.6-2.0g蛋白质。</p>
+      <div class="watch-card">
+        <h3><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="4"/><circle cx="12" cy="12" r="3"/></svg> Apple Watch 指标</h3>
+        <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;">🏋️ 无氧训练</div>
+        <div class="watch-grid" style="margin-bottom:14px">
+          <div class="watch-inp"><label>时长 (min)</label><input type="number" id="inpDur" placeholder="--"></div>
+          <div class="watch-inp"><label>心率 (bpm)</label><input type="number" id="inpHr" placeholder="--"></div>
+          <div class="watch-inp"><label>卡路里 (kcal)</label><input type="number" id="inpCal" placeholder="--"></div>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;">🏃 有氧训练</div>
+        <div class="watch-grid" style="margin-bottom:4px">
+          <div class="watch-inp"><label>时长 (min)</label><input type="number" id="inpDurC" placeholder="--"></div>
+          <div class="watch-inp"><label>心率 (bpm)</label><input type="number" id="inpHrC" placeholder="--"></div>
+          <div class="watch-inp"><label>卡路里 (kcal)</label><input type="number" id="inpCalC" placeholder="--"></div>
+        </div>
+        <button class="btn-submit" onclick="finishWorkout()">完成今日训练并归档</button>
       </div>
     </div>
-    <div class="watch-card">
-      <h3><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="4"/><circle cx="12" cy="12" r="3"/></svg> Apple Watch 指标</h3>
-      <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;">🏋️ 无氧训练</div>
-      <div class="watch-grid" style="margin-bottom:14px">
-        <div class="watch-inp"><label>时长 (min)</label><input type="number" id="inpDur" placeholder="--"></div>
-        <div class="watch-inp"><label>心率 (bpm)</label><input type="number" id="inpHr" placeholder="--"></div>
-        <div class="watch-inp"><label>卡路里 (kcal)</label><input type="number" id="inpCal" placeholder="--"></div>
-      </div>
-      <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;">🏃 有氧训练</div>
-      <div class="watch-grid" style="margin-bottom:4px">
-        <div class="watch-inp"><label>时长 (min)</label><input type="number" id="inpDurC" placeholder="--"></div>
-        <div class="watch-inp"><label>心率 (bpm)</label><input type="number" id="inpHrC" placeholder="--"></div>
-        <div class="watch-inp"><label>卡路里 (kcal)</label><input type="number" id="inpCalC" placeholder="--"></div>
-      </div>
-      <button class="btn-submit" onclick="finishWorkout()">完成今日训练并归档</button>
-    </div>
+    <!-- Card View (hidden by default) -->
+    <div id="trainCard" style="display:none"></div>
   </div>
 
   <!-- View: History -->
@@ -505,21 +557,50 @@ function svgCapsule(type){
 // ============================================================
 // STATE
 // ============================================================
-const SK='tr_app_v2';
-let state={currentDay:1,history:[],logs:{},weights:[],cycleStart:'2026-06-25',cycleLen:32,periodDays:5,fatLossPerMonth:0.5,startBase:62};
+const SK_V3='tr_app_v3';
+const SK_V2='tr_app_v2';
+let state={currentDay:1,history:[],logs:{},weights:[],cycleStart:'2026-06-25',cycleLen:32,periodDays:5,fatLossPerMonth:0.5,startBase:62,dataVersion:3};
 loadState();
 let curDay=state.currentDay||1;
 let activeSet=null; // {exId, idx}
 
-function loadState(){
-  const r=localStorage.getItem(SK);
-  if(r)try{const p=JSON.parse(r);if(p.logs)state=p;if(!state.history)state.history=[];if(!state.weights)state.weights=[];if(!state.cycleStart){state.cycleStart='2026-06-25';state.cycleLen=32;state.periodDays=5;state.fatLossPerMonth=0.5;state.startBase=62}}catch(e){}
-  // Migrate old default cycleStart
-  if(state.cycleStart==='2026-05-23')state.cycleStart='2026-06-25';
-  // Plan v2: clear stale exercise logs (default weights changed)
-  if(!state.planVersion||state.planVersion<2){state.logs={};state._today={};state.planVersion=2;localStorage.setItem(SK,JSON.stringify(state))}
+function ensureV3Struct(p){
+  // Ensure all exercise logs have note + orderIndex
+  if(p.logs)Object.values(p.logs).forEach(function(log){
+    if(log.note===undefined)log.note='';
+    if(log.orderIndex===undefined)log.orderIndex=-1;
+  });
+  // Ensure history details have note + orderIndex
+  if(p.history)p.history.forEach(function(rec){
+    if(rec.details)rec.details.forEach(function(det,i){
+      if(det.note===undefined)det.note='';
+      if(det.orderIndex===undefined)det.orderIndex=i;
+    });
+  });
+  p.dataVersion=3;
+  // Clean up v2 internal fields
+  delete p.planVersion;
+  return p;
 }
-function saveState(){state.currentDay=curDay;localStorage.setItem(SK,JSON.stringify(state))}
+
+function loadState(){
+  // Auto-migrate from tr_app_v2 if tr_app_v3 doesn't exist
+  const v3raw=localStorage.getItem(SK_V3);
+  if(v3raw){
+    try{const p=JSON.parse(v3raw);if(p.logs)state=ensureV3Struct(p)}catch(e){}
+  }else{
+    const v2raw=localStorage.getItem(SK_V2);
+    if(v2raw){
+      try{const p=JSON.parse(v2raw);if(p.logs){state=ensureV3Struct(p);localStorage.setItem(SK_V3,JSON.stringify(state));localStorage.removeItem(SK_V2)}}catch(e){}
+    }
+  }
+  // Defaults
+  if(!state.history)state.history=[];
+  if(!state.weights)state.weights=[];
+  if(!state.cycleStart){state.cycleStart='2026-06-25';state.cycleLen=32;state.periodDays=5;state.fatLossPerMonth=0.5;state.startBase=62}
+  if(state.cycleStart==='2026-05-23')state.cycleStart='2026-06-25';
+}
+function saveState(){state.currentDay=curDay;localStorage.setItem(SK_V3,JSON.stringify(state))}
 function todayKey(){return new Date().toISOString().slice(0,10)}
 
 // ============================================================
@@ -537,13 +618,20 @@ function switchView(id){
 
 function switchDay(n){
   curDay=n;
+  // Clear extra exercises when switching days
+  Object.keys(state.logs).forEach(function(id){
+    if(id.startsWith('extra-'))delete state.logs[id];
+  });
+  cardExId=null;activeSet=null;
+  document.getElementById('trainList').style.display='';
+  document.getElementById('trainCard').style.display='none';
   document.querySelectorAll('.day-tab').forEach(t=>t.classList.toggle('active',parseInt(t.dataset.day)===n));
   saveState();
   renderTrain();
 }
 
 // ============================================================
-// RENDER TRAIN
+// LIST VIEW
 // ============================================================
 function renderTrain(){
   const day=DAYS.find(d=>d.id===curDay)||DAYS[0];
@@ -553,10 +641,10 @@ function renderTrain(){
   ).join('');
 
   // Summary
-  const dayExs=day.exercises;
-  const allSets=dayExs.reduce((a,e)=>a+e.sets,0);
+  const allExes=getDayExercises(day);
+  const allSets=allExes.reduce((a,e)=>a+e.sets,0);
   let doneSets=0;
-  dayExs.forEach(e=>{
+  allExes.forEach(e=>{
     const log=state.logs[e.id];
     if(log)log.sets.forEach(s=>{if(s.done)doneSets++});
   });
@@ -572,7 +660,6 @@ function renderTrain(){
     warmHtml=`<div class="panel-header" onclick="togglePanel('warmupPanel')"><div class="panel-title">🔥 热身 (${day.warmup.length}项)</div><div class="panel-toggle-icon">▼</div></div><div class="panel-content"><ul class="panel-list">`;
     wu.forEach(w=>{warmHtml+=`<li>${w.name} — ${w.detail}</li>`});
     if(wx.length){warmHtml+=`</ul><br><b>本日专用：</b><ul class="panel-list">`;wx.forEach(w=>{warmHtml+=`<li>${w.name} — ${w.detail}</li>`})}
-    
     warmHtml+=`</div>`;
   }
   document.getElementById('warmupPanel').innerHTML=warmHtml;
@@ -593,36 +680,10 @@ function renderTrain(){
   document.getElementById('stretchPanel').innerHTML=
     `<div class="panel-header" onclick="togglePanel('stretchPanel')"><div class="panel-title">🧘 拉伸放松 (${day.stretch.length}项)</div><div class="panel-toggle-icon">▼</div></div><div class="panel-content"><ul class="panel-list">${day.stretch.map(s=>'<li>'+s+'</li>').join('')}</ul></div>`;
 
-  // Exercise cards
-  let exHtml='';
-  dayExs.forEach(ex=>{
-    const hasLog=!!state.logs[ex.id];
-    const log=hasLog?state.logs[ex.id]:{sets:Array.from({length:ex.sets},(_,i)=>({weight:ex.initWts?ex.initWts[i]:ex.wt,reps:ex.reps,done:false})),completed:false};
-    const allDone=log.completed||(hasLog&&log.sets.every(s=>s.done));
+  // Exercise name list (v3)
+  renderExList();
 
-    	    exHtml+=`<div class="ex-card${allDone?' completed':''}" id="card-${ex.id}">
-	      <div class="card-header">
-	        <div class="title-area">
-	          <div class="ex-name">${ex.name}${allDone?' <span style="color:var(--green)">✓</span>':''}</div>
-	          <div class="ex-meta"><span>${ex.target}</span><span>${ex.sets}×${ex.reps}</span></div>
-	        </div>
-	        <div class="status-cir${allDone?' done':''}" onclick="event.stopPropagation();toggleExComplete('${ex.id}')">${allDone?'✓':''}</div>
-	      </div>
-	      <div class="card-tips"><ol class="tips-list">${ex.tips.map(t=>`<li>${t}</li>`).join('')}</ol></div>
-	      <div class="sets-table">${log.sets.map((s,idx)=>{
-	        const isA=activeSet&&activeSet.exId===ex.id&&activeSet.idx===idx;
-	        return `<div class="set-row${s.done?' done':''}${isA?' active':''}" onclick="activateSet('${ex.id}',${idx})">
-	          <div class="set-num">S${idx+1}</div>
-	          <div class="set-val">${s.weight>0?s.weight:'BW'}${s.weight>0?' <span>'+(ex.unit||'lb')+'</span>':''}</div>
-	          <div class="set-val">${s.reps} <span>${typeof ex.reps==='string'?'':'次'}</span></div>
-	          <div class="set-chk"><button class="set-chk-btn" onclick="event.stopPropagation();toggleSet('${ex.id}',${idx})">✓</button></div>
-	        </div>`;
-	      }).join('')}</div>
-	      <div class="stepper-box${activeSet&&activeSet.exId===ex.id?' open':''}" id="stBox-${ex.id}"></div>
-	    </div>`;  });
-  document.getElementById('exerciseList').innerHTML=exHtml;
-
-  // Load AW data from today's record
+  // AW data
   const rec=getTRec();
   document.getElementById('inpDur').value=rec.dur||'';
   document.getElementById('inpHr').value=rec.hr||'';
@@ -630,9 +691,162 @@ function renderTrain(){
   document.getElementById('inpDurC').value=rec.durC||'';
   document.getElementById('inpHrC').value=rec.hrC||'';
   document.getElementById('inpCalC').value=rec.calC||'';
+}
 
-  // Render active stepper if any
-  if(activeSet)renderStepper(activeSet.exId,activeSet.idx);
+function renderExList(){
+  const day=DAYS.find(d=>d.id===curDay)||DAYS[0];
+  const allExes=getDayExercises(day);
+  const html=allExes.map(ex=>{
+    const log=state.logs[ex.id];
+    const completed=log&&(log.completed||log.sets.every(s=>s.done));
+    const inProgress=log&&!completed&&log.sets.some(s=>s.done);
+    let statusClass='pending',statusText='';
+    if(completed){statusClass='done';statusText='✓'}
+    else if(inProgress){statusClass='ip';statusText='⋯'}
+    // Extra exercise has a delete button
+    const isExtra=ex.id.startsWith('extra-');
+    const delBtn=isExtra?`<button class="ex-del" onclick="event.stopPropagation();delExtraEx('${ex.id}')">✕</button>`:'';
+    const cls=completed?'ex-item done'+(isExtra?' extra':''):'ex-item'+(isExtra?' extra':'');
+    return `<div class="${cls}" onclick="${completed?'':'showCard(\''+ex.id+'\')'}">
+      ${delBtn}
+      <span class="ex-name">${ex.name}</span>
+      <span class="ex-target">${ex.target} · ${ex.sets}×${ex.reps}</span>
+      <span class="st-cir ${statusClass}">${statusText}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('exerciseList').innerHTML=html;
+}
+
+function getDayExercises(day){
+  // DAYS exercises + any extra logs under this day
+  const exes=[...day.exercises];
+  // Add extra exercises that have logs
+  Object.keys(state.logs).forEach(function(id){
+    if(id.startsWith('extra-'))exes.push(getExById(id));
+  });
+  return exes;
+}
+
+function getExById(id){
+  // Check DAYS first
+  const fromDay=DAYS.flatMap(d=>d.exercises).find(e=>e.id===id);
+  if(fromDay)return fromDay;
+  // Extra exercise: reconstruct from log (name stored in target field workaround)
+  const log=state.logs[id];
+  if(!log)return null;
+  // For extra exercises we store metadata in the log
+  return {id:id,name:log._name||id,target:log._target||'',sets:log._totalSets||log.sets.length,reps:log._reps||12,unit:log._unit||'lb',tips:[]};
+}
+
+// ============================================================
+// CARD VIEW
+// ============================================================
+let cardExId=null;
+
+function showCard(exId){
+  closeTimer();
+  cardExId=exId;
+  document.getElementById('trainList').style.display='none';
+  document.getElementById('trainCard').style.display='block';
+  renderCard();
+}
+
+function hideCard(){
+  cardExId=null;activeSet=null;
+  document.getElementById('trainList').style.display='';
+  document.getElementById('trainCard').style.display='none';
+}
+
+function renderCard(){
+  const ex=getExById(cardExId);
+  if(!ex){hideCard();return;}
+  ensureLogExists(cardExId);
+  const log=state.logs[cardExId];
+  if(!log){hideCard();return;}
+
+  const unit=ex.unit||'lb';
+
+  // Sets table
+  let setsHtml=log.sets.map((s,idx)=>{
+    const isA=activeSet&&activeSet.exId===cardExId&&activeSet.idx===idx;
+    const doneCls=s.done?' done':'';
+    const valW=s.weight>0?s.weight+' <span>'+unit+'</span>':'—';
+    const valR=s.reps>0?s.reps+' <span>次</span>':'—';
+    return `<div class="set-row${doneCls}${isA?' active':''}" onclick="activateSet('${cardExId}',${idx})">
+      <div class="set-num">S${idx+1}</div>
+      <div class="set-val">${valW}</div>
+      <div class="set-val">${valR}</div>
+      <div class="set-chk"><button class="set-chk-btn" onclick="event.stopPropagation();toggleSet('${cardExId}',${idx})">✓</button></div>
+    </div>`;
+  }).join('');
+
+  // Tips
+  const tipsHtml=ex.tips&&ex.tips.length?ex.tips.map(t=>'<li>'+t+'</li>').join(''):'';
+
+  document.getElementById('trainCard').innerHTML=`
+    <div class="card-back" onclick="hideCard()">← 返回动作列表</div>
+
+    <div class="card-title">${ex.name}</div>
+    <div class="card-target">
+      <span>🎯 ${ex.target}</span>
+      <span>${ex.sets}×${ex.reps}</span>
+    </div>
+
+    ${tipsHtml?`<div class="tips-box"><div class="label">💡 发力要点</div><ul>${tipsHtml}</ul></div>`:''}
+
+    <div class="note-box">
+      <div class="label">📝 备注</div>
+      <textarea id="cardNote" placeholder="这组感觉如何？腰疼？重量轻松？记在这里…" oninput="saveNote()">${escHtml(log.note||'')}</textarea>
+    </div>
+
+    <div class="card-sets-box">
+      <div class="st-label">
+        <span>组次</span>
+        <span>点按组行调整重量/次数</span>
+      </div>
+      ${setsHtml}
+      <div class="stepper-box${activeSet&&activeSet.exId===cardExId?' open':''}" id="stBox-${cardExId}"></div>
+    </div>
+
+    <div class="card-actions">
+      <button class="btn-reset" onclick="resetEx()">× 重置</button>
+      <button class="btn-done" onclick="completeEx()">✓ 完成此动作</button>
+    </div>`;
+
+  if(activeSet&&activeSet.exId===cardExId)renderStepper(cardExId,activeSet.idx);
+}
+
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function saveNote(){
+  const v=document.getElementById('cardNote').value;
+  if(state.logs[cardExId])state.logs[cardExId].note=v;
+  saveState();
+}
+
+function resetEx(){
+  if(!cardExId)return;
+  const log=state.logs[cardExId];
+  if(log){log.sets.forEach(s=>s.done=false);log.completed=false;log.note='';log.orderIndex=-1;}
+  activeSet=null;
+  saveState();
+  renderCard();
+  renderExList();
+}
+
+function completeEx(){
+  if(!cardExId)return;
+  const log=state.logs[cardExId];
+  if(!log)return;
+  // Auto-done all sets if none done
+  if(!log.sets.some(s=>s.done))log.sets.forEach(s=>s.done=true);
+  log.completed=true;
+  if(log.orderIndex<0)log.orderIndex=Date.now();
+  activeSet=null;
+  saveState();
+  hideCard();
+  renderExList();
+  showToast('✓ '+getExById(cardExId).name+' 已完成');
 }
 
 function getTRec(){
@@ -662,21 +876,97 @@ function saveAW(){
 // ============================================================
 function ensureLogExists(exId){
   if(!state.logs[exId]){
-    const ex=DAYS.flatMap(d=>d.exercises).find(e=>e.id===exId);
+    const ex=getExById(exId);
     if(!ex)return;
-    state.logs[exId]={sets:Array.from({length:ex.sets},(_,i)=>({weight:ex.initWts?ex.initWts[i]:ex.wt,reps:ex.reps,done:false})),completed:false};
+    const sets=Array.from({length:ex.sets},(_,i)=>({weight:ex.initWts?ex.initWts[i]:ex.wt,reps:ex.reps,done:false}));
+    state.logs[exId]={sets,completed:false,note:'',orderIndex:-1};
     saveState();
   }
 }
 
 function togglePanel(id){document.getElementById(id).classList.toggle('open')}
 
+function delExtraEx(id){
+  if(state.logs[id]){delete state.logs[id];saveState();renderExList();showToast('已删除');}
+}
+
+function showAddExForm(){
+  // Build modal overlay
+  const muscles=['臀大肌','股四头肌','腘绳肌','臀中肌','臀腿','大腿内侧','臀腿后侧','中背部','背阔肌','上背部/肩胛','三角肌后束/肩袖','肩袖','肱二头肌','肱三头肌','腹直肌','腹斜肌','有氧'];
+  const units=['lb','kg'];
+  const overlay=document.createElement('div');
+  overlay.id='addExOverlay';
+  overlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:99999;display:flex;align-items:center;justify-content:center';
+  overlay.innerHTML=`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;width:90%;max-width:360px">
+      <div style="font-size:16px;font-weight:800;margin-bottom:16px">+ 添加额外动作</div>
+
+      <div style="margin-bottom:10px">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">动作名称</div>
+        <input id="aexName" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:10px" placeholder="如 Glute Press">
+      </div>
+
+      <div style="margin-bottom:10px">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">靶肌肉</div>
+        <select id="aexTarget" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:10px">
+          ${muscles.map(m=>'<option value="'+m+'">'+m+'</option>').join('')}
+        </select>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:4px">组数</div>
+          <input id="aexSets" type="number" value="3" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:10px">
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:4px">次数</div>
+          <input id="aexReps" type="number" value="12" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:10px">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+        <div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:4px">默认重量</div>
+          <input id="aexWt" type="number" value="30" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:10px">
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:4px">单位</div>
+          <select id="aexUnit" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:10px">
+            ${units.map(u=>'<option value="'+u+'">'+u+'</option>').join('')}
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px">
+        <button onclick="document.getElementById('addExOverlay').remove()" style="flex:1;padding:12px;border-radius:8px;font-size:14px;font-weight:700;border:1px solid var(--border);background:none;color:var(--text2);cursor:pointer">取消</button>
+        <button onclick="submitAddEx()" style="flex:2;padding:12px;border-radius:8px;font-size:14px;font-weight:700;border:none;background:var(--accent);color:#000;cursor:pointer">确认添加</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function submitAddEx(){
+  const name=document.getElementById('aexName').value.trim();
+  if(!name){showToast('请输入动作名称');return;}
+  const target=document.getElementById('aexTarget').value;
+  const sets=parseInt(document.getElementById('aexSets').value)||3;
+  const reps=parseInt(document.getElementById('aexReps').value)||12;
+  const wt=parseFloat(document.getElementById('aexWt').value)||30;
+  const unit=document.getElementById('aexUnit').value;
+  const id='extra-'+Date.now();
+  state.logs[id]={sets:Array.from({length:sets},()=>({weight:wt,reps,done:false})),completed:false,note:'',orderIndex:-1,_name:name,_target:target,_totalSets:sets,_reps:reps,_unit:unit};
+  saveState();
+  renderExList();
+  document.getElementById('addExOverlay').remove();
+  showToast('已添加 '+name);
+}
+
 function activateSet(exId,idx){
   ensureLogExists(exId);
   activeSet={exId,idx};
   document.querySelectorAll('.stepper-box').forEach(b=>b.classList.remove('open'));
   document.querySelectorAll('.set-row').forEach(r=>r.classList.remove('active'));
-  renderTrain(); // re-render to show stepper
+  reRender();
 }
 
 function getRestSec(exId){
@@ -685,29 +975,30 @@ function getRestSec(exId){
   if(['gb','hs','lp','sr','vr'].includes(core))return 90;
   return 60;
 }
+function reRender(){
+  // Intelligently update the visible view
+  if(cardExId&&document.getElementById('trainCard').style.display==='block'){
+    renderCard();
+    renderExList();
+  }else{
+    renderTrain();
+  }
+}
+
 function toggleSet(exId,idx){
   ensureLogExists(exId);
   const s=state.logs[exId].sets[idx];
   s.done=!s.done;
   saveState();
   if(s.done)triggerRest(getRestSec(exId));
-  renderTrain();
-}
-
-function toggleExComplete(exId){
-  ensureLogExists(exId);
-  const log=state.logs[exId];
-  log.completed=!log.completed;
-  log.sets.forEach(s=>s.done=log.completed);
-  saveState();
-  renderTrain();
+  reRender();
 }
 
 function renderStepper(exId,idx){
   const box=document.getElementById('stBox-'+exId);
   if(!box)return;
   const s=state.logs[exId].sets[idx];
-  const ex=DAYS.flatMap(d=>d.exercises).find(e=>e.id===exId);
+  const ex=getExById(exId);
   const unit=(ex&&ex.unit)||'lb';
   const step=unit==='kg'?2.5:5;
   const tagStep=unit==='kg'?5:10;
@@ -735,7 +1026,7 @@ function renderStepper(exId,idx){
 function adj(idx,sign,exId,field='weight'){
   const s=state.logs[exId].sets[idx];
   if(field==='weight'){
-    const ex=DAYS.flatMap(d=>d.exercises).find(e=>e.id===exId);
+    const ex=getExById(exId);
     const step=(ex&&ex.unit==='kg')?2.5:5;
     s.weight=Math.max(0,Math.round((s.weight+sign*step)/step)*step);
   }else{
@@ -743,14 +1034,14 @@ function adj(idx,sign,exId,field='weight'){
   }
   saveState();
   renderStepper(exId,idx);
-  renderTrain();
+  reRender();
 }
 
 function setW(w,idx,exId){
   state.logs[exId].sets[idx].weight=w;
   saveState();
   renderStepper(exId,idx);
-  renderTrain();
+  reRender();
 }
 
 // ============================================================
@@ -816,18 +1107,26 @@ function closeTimer(){
 function finishWorkout(){
   const day=DAYS.find(d=>d.id===curDay);
   if(!day)return;
+
+  // Collect all logs with done sets (DAYS exercises + extra)
   const details=[];let totalSets=0;
-  day.exercises.forEach(ex=>{
-    const log=state.logs[ex.id];
-    if(log){
-      const done=log.sets.filter(s=>s.done);
-      if(done.length>0){
-        totalSets+=done.length;
-        details.push({name:ex.name,target:ex.target,unit:ex.unit||'lb',sets:done.map(function(s){return{weight:s.weight,reps:s.reps}})});
-      }
-    }
+  Object.keys(state.logs).forEach(function(id){
+    const log=state.logs[id];
+    if(!log)return;
+    const done=log.sets.filter(s=>s.done);
+    if(done.length===0)return;
+    const ex=getExById(id);
+    if(!ex)return;
+    totalSets+=done.length;
+    details.push({
+      name:ex.name,
+      target:ex.target||'',
+      unit:ex.unit||'lb',
+      sets:done.map(function(s){return{weight:s.weight,reps:s.reps}}),
+      note:log.note||'',
+      orderIndex:log.orderIndex>=0?log.orderIndex:details.length
+    });
   });
-  if(details.length===0){showToast('至少完成一组再归档');return;}
 
   const dur=parseInt(document.getElementById('inpDur').value)||0;
   const hr=parseInt(document.getElementById('inpHr').value)||0;
@@ -836,13 +1135,23 @@ function finishWorkout(){
   const hrC=parseInt(document.getElementById('inpHrC').value)||0;
   const calC=parseInt(document.getElementById('inpCalC').value)||0;
 
+  // Pure cardio: allow archive with only AW cardio data
+  const hasStrength=details.length>0;
+  const hasCardio=durC>0||hrC>0||calC>0;
+  if(!hasStrength&&!hasCardio){showToast('至少完成一组或记录有氧数据');return;}
+
+  const dayName=hasStrength?(day.label+' '+day.sub):'有氧日';
+  const dayId=hasStrength?day.id:0;
+
   state.history.unshift({
-    date:todayKey(),dayName:day.label+' '+day.sub,dayId:day.id,dur,hr,cal,durC,hrC,calC,totalSets,details,timestamp:Date.now()
+    date:todayKey(),dayName,dayId,dur,hr,cal,durC,hrC,calC,totalSets,details,timestamp:Date.now()
   });
-  // Clear logs for today
-  day.exercises.forEach(ex=>delete state.logs[ex.id]);
+  // Clear ALL logs
+  state.logs={};
   state._today={};
-  activeSet=null;
+  cardExId=null;activeSet=null;
+  document.getElementById('trainList').style.display='';
+  document.getElementById('trainCard').style.display='none';
   saveState();
   showToast('🎉 训练已归档');
   renderTrain();
@@ -861,7 +1170,9 @@ function renderHistory(){
   el.innerHTML=state.history.map((r,i)=>{
     const exRows=r.details.map(function(ex){
       var str=ex.summary||(ex.sets?ex.sets.map(function(s,i){return'S'+(i+1)+':'+(s.weight>0?s.weight+ex.unit:'BW')+'×'+s.reps}).join(', '):'');
-      return '<div class="hist-ex-row"><span style="font-weight:700;color:var(--text)">'+ex.name+'</span><span style="font-family:monospace;font-size:10px">'+str+'</span></div>';
+      var noteHtml=ex.note?'<div style="font-size:11px;color:var(--text2);padding:4px 0 0 0;border-top:1px solid rgba(255,255,255,.03);margin-top:4px">📝 '+escHtml(ex.note)+'</div>':'';
+      return '<div class="hist-ex-row"><span style="font-weight:700;color:var(--text)">'+ex.name+'</span><span style="font-family:monospace;font-size:10px">'+str+'</span></div>'+
+        (noteHtml?noteHtml:'');
     }).join('');
     return `<div class="hist-item">
       <div class="hist-header"><div class="hist-date">${r.date} <span style="font-size:11px;color:var(--accent);margin-left:4px">${r.dayName}</span></div>
@@ -1083,8 +1394,12 @@ function importJSON(){
     reader.onload=ev=>{
       try{
         const p=JSON.parse(ev.target.result);
-        if(p.history&&p.logs){state=p;saveState();showToast('导入成功');renderAll();}
-        else showToast('格式错误');
+        if(p.history&&p.logs){
+          state=ensureV3Struct(p);
+          saveState();
+          showToast('导入成功');
+          renderAll();
+        }else showToast('格式错误');
       }catch(e){showToast('解析失败')}
     };
     reader.readAsText(e.target.files[0]);
@@ -1092,7 +1407,7 @@ function importJSON(){
   inp.click();
 }
 function clearAll(){
-  if(confirm('确定清除所有数据？不可恢复！')){localStorage.removeItem(SK);location.reload()}
+  if(confirm('确定清除所有数据？不可恢复！')){localStorage.removeItem(SK_V3);localStorage.removeItem(SK_V2);location.reload()}
 }
 
 // ============================================================
