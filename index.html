@@ -1,1443 +1,1660 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Training App">
-<meta name="theme-color" content="#09090b">
-<title>Training App · Change Pro</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{
-  --bg:#09090b;
-  --surface:#121214;
-  --card:#18181b;
-  --border:rgba(255,255,255,.06);
-  --hover:#242427;
-  --accent:#f97316;
-  --accent-light:rgba(249,115,22,.15);
-  --text:#f4f4f5;
-  --text2:#a1a1aa;
-  --text3:#52525b;
-  --green:#22c55e;
-  --green-light:rgba(34,197,94,.12);
-  --radius-lg:16px;
-  --radius:12px;
-  --radius-sm:8px;
-  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-}
-body{background:var(--bg);color:var(--text);font-family:var(--font);padding-bottom:80px;line-height:1.5}
-.container{max-width:600px;margin:0 auto;padding:16px;overflow-x:hidden}
-/* Safe Header */
-.safe-header{background:rgba(9,9,11,.85);backdrop-filter:blur(16px);position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border);padding:14px 20px;padding-top:calc(14px+env(safe-area-inset-top,0px));display:flex;align-items:center;justify-content:space-between}
-.brand{font-size:17px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
-.brand-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 8px var(--accent)}
-.today-chip{background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500}
-/* Container */
-.container{max-width:600px;margin:0 auto;padding:16px;overflow-x:hidden}
-/* Views */
-.view{display:none}
-.view.active{display:block}
-/* Day Tabs */
-.day-tabs{display:flex;background:var(--surface);border:1px solid var(--border);padding:4px;border-radius:var(--radius);margin-bottom:16px}
-.day-tab{flex:1;text-align:center;padding:10px 4px;font-size:12px;font-weight:600;color:var(--text2);border-radius:var(--radius-sm);cursor:pointer;transition:.2s;border:none;background:none}
-.day-tab.active{background:var(--card);color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.4)}
-.day-tab .sub{display:block;font-size:9px;font-weight:400;color:var(--text3);margin-top:1px}
-.day-tab.active .sub{color:var(--accent)}
-/* Session Panels (warmup/stretch/precautions) */
-.session-panel{background:rgba(249,115,22,.03);border:1px solid rgba(249,115,22,.12);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:16px}
-.session-panel.stretch{background:rgba(34,197,94,.02);border-color:rgba(34,197,94,.12)}
-.session-panel.cardio{background:rgba(249,115,22,.02);border-color:rgba(249,115,22,.12)}
-.session-panel.caution{background:rgba(239,68,68,.02);border-color:rgba(239,68,68,.15)}
-.panel-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
-.panel-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
-.panel-toggle-icon{font-size:12px;color:var(--text3);transition:transform .2s}
-.session-panel.open .panel-toggle-icon{transform:rotate(180deg)}
-.panel-content{display:none;margin-top:10px;border-top:1px solid rgba(255,255,255,.03);padding-top:10px;font-size:12px;color:var(--text2);line-height:1.8}
-.session-panel.open .panel-content{display:block}
-.panel-list{list-style:none;display:flex;flex-direction:column;gap:6px}
-.panel-list li{display:flex;align-items:flex-start;gap:6px}
-.panel-list li::before{content:"•";color:var(--accent);font-weight:700}
-.session-panel.stretch .panel-list li::before{color:var(--green)}
-/* Exercise Card */
-.ex-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:16px;transition:.25s;position:relative;overflow:hidden}
-.ex-card.completed{opacity:.55;border-color:rgba(34,197,94,.2)}
-.card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;cursor:pointer}
-.title-area{flex:1}
-.ex-name{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:3px}
-.ex-meta{font-size:12px;color:var(--text2);display:flex;gap:12px}
-.ex-meta span{background:var(--surface);padding:1px 8px;border-radius:4px}
-/* Status Circle */
-.status-cir{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;flex-shrink:0;font-size:11px;color:transparent;background:none}
-.status-cir.done{background:var(--green);border-color:var(--green);color:#000}
-/* Guide Toggle */
-.guide-btn{background:none;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;padding:4px 0;margin-bottom:10px}
-.guide-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2.5;fill:none}
-.guide-panel{display:none;background:rgba(0,0,0,.2);border-radius:var(--radius);padding:12px;margin-bottom:14px;border:1px solid rgba(255,255,255,.03)}
-.guide-panel.open{display:block}
-.svg-wrap{background:#0f0f11;border-radius:var(--radius-sm);padding:10px;display:flex;justify-content:center;margin-bottom:8px}
-.svg-wrap svg{width:100%;height:auto;max-height:130px}
-.card-tips{font-size:12px;color:var(--text2);padding:10px 0;border-top:1px solid var(--border);margin-bottom:10px}
-.tips-list{font-size:12px;color:var(--text2);padding-left:16px;line-height:1.8}
-/* Sets Table */
-.sets-table{display:flex;flex-direction:column;gap:4px;margin-bottom:4px}
-.set-row{display:grid;grid-template-columns:36px 1fr 1fr 32px;align-items:center;padding:8px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:.15s;gap:6px;border:1px solid transparent}
-.set-row:hover{background:rgba(255,255,255,.02)}
-.set-row.active{background:var(--accent-light);border-color:rgba(249,115,22,.2)}
-.set-row.done{opacity:.5}
-.set-num{font-size:12px;font-weight:700;color:var(--text3);text-align:center}
-.set-row.active .set-num{color:var(--accent)}
-.set-val{font-size:14px;font-weight:600;text-align:center}
-.set-val span{font-size:10px;color:var(--text2);margin-left:1px}
-.set-chk{display:flex;justify-content:center}
-.set-chk-btn{width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:transparent;font-size:12px;font-weight:700}
-.set-row.done .set-chk-btn{background:var(--green-light);border-color:var(--green);color:var(--green)}
-/* Stepper Overlay */
-.stepper-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-top:10px;display:none;animation:slideUp .2s ease-out}
-.stepper-box.open{display:block}
-@keyframes slideUp{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
-.st-title{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;display:flex;justify-content:space-between}
-.st-title span{color:var(--text3);font-weight:400;text-transform:none}
-.st-row{display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.2);border-radius:var(--radius);padding:4px;border:1px solid var(--border);margin-bottom:10px}
-.st-btn{width:44px;height:44px;border-radius:var(--radius-sm);border:none;background:var(--card);color:var(--text);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.1s}
-.st-btn:active{background:var(--accent);color:#000}
-.st-val{font-size:20px;font-weight:800;font-family:monospace}
-.st-val span{font-size:12px;color:var(--text2);margin-left:2px}
-/* Quick Tags */
-.quick-tags{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px}
-.quick-tags::-webkit-scrollbar{display:none}
-.qt{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 14px;background:var(--card);border:1px solid var(--border);border-radius:20px;color:var(--text2);font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer;transition:.15s;flex-shrink:0}
-.qt:active{transform:scale(.95)}
-.qt.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent);font-weight:700}
-.qt .sub{font-size:9px;color:var(--text3);font-weight:400}
-.qt.active .sub{color:var(--accent)}
-/* Watch Card */
-.watch-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-top:20px}
-.watch-card h3{font-size:14px;font-weight:800;display:flex;align-items:center;gap:6px;margin-bottom:10px}
-.watch-card h3 svg{width:16px;height:16px;stroke:var(--accent);stroke-width:2.5;fill:none}
-.watch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.watch-inp{background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:var(--radius);padding:8px;text-align:center}
-.watch-inp label{display:block;font-size:10px;color:var(--text2);margin-bottom:3px}
-.watch-inp input{width:100%;background:none;border:none;color:var(--text);font-size:15px;font-weight:700;text-align:center;outline:none}
-/* Submit */
-.btn-submit{width:100%;background:var(--accent);color:#000;border:none;padding:14px;border-radius:var(--radius);font-size:15px;font-weight:700;margin-top:14px;cursor:pointer;transition:transform .1s}
-.btn-submit:active{transform:scale(.98)}
-/* History */
-.hist-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px}
-.hist-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.hist-date{font-size:14px;font-weight:700}
-.hist-tags{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-.hist-tag{background:rgba(255,255,255,.04);font-size:10px;padding:2px 8px;border-radius:12px;color:var(--text2)}
-.hist-ex-row{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);padding:4px 0;border-top:1px solid rgba(255,255,255,.02)}
-.hist-empty{padding:40px 10px;text-align:center;color:var(--text3);font-weight:700;line-height:2}
-/* Settings */
-.set-group{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:16px}
-.set-title{font-size:13px;font-weight:700;margin-bottom:10px;color:var(--accent)}
-.set-row2{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.03)}
-.set-row2:last-child{border-bottom:none}
-.set-action{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);padding:5px 14px;border-radius:var(--radius-sm);font-size:11px;cursor:pointer}
-/* Dock */
-.dock{position:fixed;bottom:0;left:0;width:100%;background:rgba(18,18,20,.9);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 0;padding-bottom:calc(8px+env(safe-area-inset-bottom,0px));z-index:100}
-.dock-item{display:flex;flex-direction:column;align-items:center;color:var(--text3);font-size:9px;font-weight:700;cursor:pointer;transition:.2s;background:none;border:none;gap:3px;width:25%}
-.dock-item.active{color:var(--accent)}
-.dock-item svg{width:20px;height:20px;stroke:currentColor;stroke-width:2.2;fill:none}
-/* Toast */
-#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(255,255,255,.95);color:#000;padding:10px 20px;border-radius:20px;font-size:12px;font-weight:700;opacity:0;visibility:hidden;transition:all .25s cubic-bezier(.16,1,.3,1);z-index:1000;white-space:nowrap}
-#toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
-@media(min-width:600px){.container{border-left:1px solid var(--border);border-right:1px solid var(--border)}}
-/* Warmup specific */
-.ex-card.warmup-card{border-left:3px solid var(--accent);opacity:.9}
-.ex-card.warmup-card .ex-name{font-size:14px}
-/* Exercise list (v3) */
-.ex-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
-.ex-item{display:flex;align-items:center;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);cursor:pointer;transition:.15s}
-.ex-item:active{transform:scale(.98)}
-.ex-item.done{opacity:.55}
-.ex-item .ex-name{flex:1;font-size:15px;font-weight:600}
-.ex-item .ex-target{font-size:11px;color:var(--text2);margin-right:10px;white-space:nowrap}
-.ex-item .ex-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0 4px;margin-right:4px}
-/* Status circles */
-.st-cir{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
-.st-cir.pending{border:2px solid var(--border);background:none;color:transparent}
-.st-cir.ip{border:2px solid var(--accent);background:var(--accent-light);color:var(--accent)}
-.st-cir.done{background:var(--green);border:2px solid var(--green);color:#000}
-/* Extra action row */
-.ex-item.extra .ex-del{display:block}
-.ex-item .ex-del{display:none}
-/* Add button */
-.btn-add{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px;border:1px dashed var(--border);border-radius:var(--radius-lg);background:none;color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;width:100%;margin-bottom:16px}
-.btn-add:active{border-color:var(--accent);color:var(--accent)}
-/* Card view */
-#trainCard{animation:fadeIn .2s ease;padding-top:0}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.card-back{display:flex;align-items:center;gap:6px;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;margin-bottom:14px;padding:4px 0;border:none;background:none}
-.card-back:active{opacity:.6}
-.card-title{font-size:22px;font-weight:800;margin-bottom:4px}
-.card-target{font-size:13px;color:var(--text2);margin-bottom:16px;display:flex;gap:12px}
-.card-target span{background:var(--surface);padding:2px 10px;border-radius:6px}
-/* Tips box */
-.tips-box{background:rgba(249,115,22,.03);border:1px solid rgba(249,115,22,.12);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px}
-.tips-box .label{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px}
-.tips-box ul{list-style:none;font-size:13px;color:var(--text2);line-height:1.8}
-.tips-box ul li::before{content:"•";color:var(--accent);font-weight:700;margin-right:4px}
-/* Note box */
-.note-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:16px}
-.note-box .label{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px}
-.note-box textarea{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;padding:10px;resize:none;height:56px;font-family:inherit;outline:none}
-.note-box textarea:focus{border-color:var(--accent)}
-/* Sets box in card */
-.card-sets-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:20px}
-.card-sets-box .st-label{font-size:11px;color:var(--text2);margin-bottom:8px;display:flex;justify-content:space-between}
-/* Card actions */
-.card-actions{display:flex;gap:10px;margin-top:4px}
-.btn-reset{flex:1;padding:14px;border-radius:var(--radius);font-size:14px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:none;color:var(--text2)}
-.btn-reset:active{background:rgba(255,255,255,.04)}
-.btn-done{flex:2;padding:14px;border-radius:var(--radius);font-size:14px;font-weight:700;cursor:pointer;border:none;background:var(--accent);color:#000}
-.btn-done:active{transform:scale(.98)}
-/* Scrollbar hide */
-.view::-webkit-scrollbar,.sets-table::-webkit-scrollbar{display:none}
-/* Day summary stats */
-.day-summary{display:flex;gap:10px;margin-bottom:16px}
-.day-stat{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px;text-align:center}
-.day-stat .num{font-size:20px;font-weight:800;color:var(--accent)}
-.day-stat .lbl{font-size:10px;color:var(--text3);margin-top:2px}
-</style>
-</head>
-<body>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Training App">
+  <meta name="theme-color" content="#f0f9ff">
+  <title>Training App · Change Pro</title>
 
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
 
-<!-- Header -->
-<div class="safe-header">
-  <div class="brand"><span class="brand-dot"></span>Training App</div>
-  <div class="today-chip" id="todayLabel"></div>
-</div>
-
-<div class="container">
-  <!-- View: Train -->
-  <div class="view active" id="view-train">
-    <!-- List View -->
-    <div id="trainList">
-      <div class="day-tabs" id="dayTabs"></div>
-      <div id="daySummary"></div>
-      <div id="exerciseList"></div>
-      <button class="btn-add" id="btnAddEx" onclick="showAddExForm()">+ 添加额外动作</button>
-      <div id="warmupPanel" class="session-panel"></div>
-      <div id="cardioPanel" class="session-panel cardio"></div>
-      <div id="stretchPanel" class="session-panel stretch"></div>
-      <div class="session-panel caution" id="precautionsPanel">
-        <div class="panel-header" onclick="togglePanel('precautionsPanel')">
-          <div class="panel-title" style="color:#f87171">⚠️ 复健注意事项</div>
-          <div class="panel-toggle-icon">▼</div>
-        </div>
-        <div class="panel-content" style="font-size:11.5px;line-height:1.7">
-          <p style="margin-bottom:6px"><b>肩部弹响：</b>无痛弹响继续，刺痛/卡顿立即停。面拉和外旋维持轻量。</p>
-          <p style="margin-bottom:6px"><b>推类安全：</b>蝴蝶机和上斜推胸从最轻配重起步，至少2次无不适再加重。</p>
-          <p style="margin-bottom:6px"><b>推类发力cue：</b>肩胛贴死椅背→沉肩→收紧→推。肘不锁死、不放到底。</p>
-          <p><b>高蛋白保肌：</b>每天每公斤体重1.6-2.0g蛋白质。</p>
-        </div>
-      </div>
-      <div class="watch-card">
-        <h3><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="4"/><circle cx="12" cy="12" r="3"/></svg> Apple Watch 指标</h3>
-        <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;">🏋️ 无氧训练</div>
-        <div class="watch-grid" style="margin-bottom:14px">
-          <div class="watch-inp"><label>时长 (min)</label><input type="number" id="inpDur" placeholder="--"></div>
-          <div class="watch-inp"><label>心率 (bpm)</label><input type="number" id="inpHr" placeholder="--"></div>
-          <div class="watch-inp"><label>卡路里 (kcal)</label><input type="number" id="inpCal" placeholder="--"></div>
-        </div>
-        <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;">🏃 有氧训练</div>
-        <div class="watch-grid" style="margin-bottom:4px">
-          <div class="watch-inp"><label>时长 (min)</label><input type="number" id="inpDurC" placeholder="--"></div>
-          <div class="watch-inp"><label>心率 (bpm)</label><input type="number" id="inpHrC" placeholder="--"></div>
-          <div class="watch-inp"><label>卡路里 (kcal)</label><input type="number" id="inpCalC" placeholder="--"></div>
-        </div>
-        <button class="btn-submit" onclick="finishWorkout()">完成今日训练并归档</button>
-      </div>
-    </div>
-    <!-- Card View (hidden by default) -->
-    <div id="trainCard" style="display:none"></div>
-  </div>
-
-  <!-- View: History -->
-  <div class="view" id="view-history">
-    <h2 style="font-size:18px;font-weight:800;margin-bottom:14px;">历史归档</h2>
-    <div id="historyList"></div>
-  </div>
-
-  <!-- View: Settings -->
-  <div class="view" id="view-settings">
-    <h2 style="font-size:18px;font-weight:800;margin-bottom:14px;">数据管理</h2>
-    <div class="set-group">
-      <div class="set-title">传输</div>
-      <div class="set-row2"><div>导出备份 (JSON)</div><button class="set-action" onclick="exportJSON()">导出</button></div>
-      <div class="set-row2"><div>导入备份</div><button class="set-action" onclick="importJSON()">导入</button></div>
-    </div>
-    <div class="set-group" style="border-color:rgba(239,68,68,.15)">
-      <div class="set-title" style="color:#ef4444">危险区</div>
-      <div class="set-row2"><div>清空所有数据</div><button class="set-action" style="color:#ef4444;border-color:rgba(239,68,68,.3)" onclick="clearAll()">清除</button></div>
-    </div>
-    <div style="font-size:11px;color:var(--text3);padding:8px 0;line-height:1.8">
-      Training App v4 · Freya · Change Pro 龙之梦<br>
-      数据仅存本地浏览器，不会上传
-    </div>
-  </div>
-
-  <!-- View: Weight -->
-  <div class="view" id="view-weight">
-    <h2 style="font-size:18px;font-weight:800;margin-bottom:14px;">体重记录</h2>
-
-    <!-- Cycle settings -->
-    <div class="session-panel open" id="cyclePanel">
-      <div class="panel-header" onclick="togglePanel('cyclePanel')">
-        <div class="panel-title">🔄 生理周期设置</div>
-        <div class="panel-toggle-icon">▼</div>
-      </div>
-      <div class="panel-content">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-          <div class="watch-inp"><label>最近月经开始日</label><input type="date" id="inpCycleStart"></div>
-          <div class="watch-inp"><label>周期长度 (天)</label><input type="number" id="inpCycleLen" step="1"></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-          <div class="watch-inp"><label>基线体重 (kg)</label><input type="number" id="inpStartBase" step="0.1"></div>
-          <div class="watch-inp"><label>月减脂 (kg/月)</label><input type="number" id="inpFatLoss" step="0.1"></div>
-        </div>
-        <button class="btn-submit" onclick="saveCycleSettings()">保存设置</button>
-      </div>
-    </div>
-
-    <!-- Prediction card (JS rendered) -->
-    <div id="predictionCard"></div>
-
-    <!-- Add weight -->
-    <div class="ex-card" style="margin-bottom:16px">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-        <div class="watch-inp"><label>日期</label><input type="date" id="weightDate"></div>
-        <div class="watch-inp"><label>体重 (kg)</label><input type="number" id="weightValue" step="0.1" placeholder="--"></div>
-      </div>
-      <button class="btn-submit" onclick="addWeight()">记录体重</button>
-    </div>
-
-    <!-- History list (JS rendered) -->
-    <div id="weightList"></div>
-  </div>
-</div>
-
-<!-- Dock -->
-<div class="dock">
-  <button class="dock-item active" data-view="train"><svg viewBox="0 0 24 24"><path d="M6 3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3zm3 6h6m-6 3h6m-6 3h3"/></svg>训练</button>
-  <button class="dock-item" data-view="history"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>历史</button>
-  <button class="dock-item" data-view="weight"><svg viewBox="0 0 24 24"><path d="M12 3v4m0 0a8 8 0 0 0-8 8h16a8 8 0 0 0-8-8z"/></svg>体重</button>
-  <button class="dock-item" data-view="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>设置</button>
-</div>
-
-<div id="toast"></div>
-
-
-<script>
-// ============================================================
-// TRAINING DATA
-// ============================================================
-const DAYS = [
-  {id:1,label:'第一天',sub:'腿臀+核心',
-   warmup:[
-     {name:'跑步机快走/慢跑',detail:'3分钟，快走5-6km/h坡度1-2%或慢跑7-8km/h'},
-     {name:'猫牛式',detail:'10次，脊柱屈伸'},
-     {name:'前后踝摆动',detail:'每侧30s — 一脚在前膝盖前顶超脚尖，脚跟不离地，找踝关节活动度'},
-     {name:'站姿髂腰肌拉伸',detail:'每侧30s — 弓步压髋，同侧手举过头稍往对侧偏'},
-     {name:'空蹲',detail:'10次，髋膝踝联动'}
-   ],
-   exercises:[
-     {id:'d1-gb',name:'诺德士臀推机',target:'臀大肌',sets:4,reps:12,wt:50,unit:'kg',tips:['顶峰收缩2秒，臀部发力非腰部','上背靠稳，小腿垂直地面','不过度顶髋']},
-     {id:'d1-hs',name:'双向哈克深蹲(面向前)',target:'股四头肌',sets:3,reps:12,wt:100,tips:['窄站距(比肩稍窄)，加强股四头前侧','膝盖与脚尖方向一致','顶点不锁死']},
-     {id:'d1-lp',name:'坐姿腿蹬(多角度)',target:'臀腿',sets:4,reps:15,wt:80,initWts:[60,80,80,80],tips:['S1热身60lb','2组低脚位(窄→股四头)+2组高脚位(臀)','膝盖友好固定轨迹']},
-     {id:'d1-lc',name:'诺德士坐姿腿弯举',target:'腘绳肌',sets:3,reps:12,wt:40,tips:['感受腘绳肌收缩','控制离心慢放']},
-     {id:'d1-le',name:'诺德士坐姿腿屈伸',target:'股四头肌',sets:3,reps:12,wt:35,tips:['可相对加重，股四头专属孤立','顶峰收缩1秒','慢放不甩动']},
-     {id:'d1-ad',name:'内收肌(向内夹)',target:'大腿内侧',sets:3,reps:12,wt:60,tips:['大腿内侧发力','慢放控制']},
-     {id:'d1-ab',name:'外展(臀外侧)',target:'臀中肌',sets:4,reps:12,wt:60,tips:['前倾60lb×12+靠后45-50lb×10 (复合组)','若借力/不稳需降重','臀外侧发力']},
-     {id:'d1-rt',name:'坐姿旋转训练器',target:'腹斜肌',sets:2,reps:15,wt:30,tips:['核心稳定发力非腰部代偿','轻量控制']},
-     {id:'d1-cr',name:'诺德士卷腹器械',target:'腹直肌',sets:2,reps:15,wt:50,tips:['固定轨迹腰部有支撑','呼气卷起']}
-   ],
-   stretch:['站姿髂腰肌拉伸 每侧30s','腘绳肌 站姿单腿抬高 每侧30s×2','股四头肌 站姿单腿后屈 每侧30s×2','诺德士腰腿拉伸器 5min'],
-   cardio:[{name:'跑步机爬坡',detail:'25-30min,坡度6-7,速度3.5'},{name:'或划船机',detail:'替代方案'}]},
-  {id:2,label:'第二天',sub:'上肢推拉均衡',
-   warmup:[
-     {name:'跑步机快走/慢跑',detail:'3分钟'},
-     {name:'肩胛绕环',detail:'10次×2组，小幅画圆'},
-     {name:'收下巴(Chin tuck)',detail:'10次×2 — 手放下巴往后收(非低头)，感受颈后拉伸'},
-     {name:'极轻绳索面拉',detail:'15次×2组，激活肩袖'},
-     {name:'龙门架肩袖外旋',detail:'12次×2(5kg)，手肘夹紧90°，仅小臂外旋'},
-     {name:'前锯肌激活(站姿推举)',detail:'10次×1 — 徒手或最轻哑铃，手臂伸直向前推，最后肩胛骨前滑包出去'}
-   ],
-   exercises:[
-     {id:'d2-pd',name:'高位下拉(对握优先)',target:'背阔肌',sets:3,reps:12,wt:40,tips:['宽对握优先，拉到锁骨前','沉肩启动，不拉颈后','感受背阔发力']},
-     {id:'d2-pu',name:'辅助引体向上',target:'背阔肌',sets:3,reps:10,wt:60,tips:['沉肩下拉不耸肩','感受背阔发力','肩部不适立刻停']},
-     {id:'d2-sr',name:'诺德士坐姿划船',target:'中背部',sets:3,reps:12,wt:20,unit:'kg',tips:['沉肩挺胸，手肘贴身','感受肩胛内收','控制离心']},
-     {id:'d2-vr',name:'辅助Vertical Row',target:'上背部/肩胛',sets:3,reps:12,wt:20,unit:'kg',tips:['沉肩挺胸','感受背部收缩']},
-     {id:'d2-bf',name:'坐姿蝴蝶夹胸机',target:'胸肌',sets:3,reps:15,wt:5,tips:['最轻配重起步','手肘在肩前方活动，不拉到末端','感受胸肌挤压','⚠️肩前刺痛立即停']},
-     {id:'d2-ic',name:'诺德士上斜推胸',target:'上胸',sets:3,reps:12,wt:5,tips:['上斜比平板对肩更友好','最轻配重起步，肘不锁死不放到底','⚠️肩峰/肩前刺痛立即停']},
-     {id:'d2-pc',name:'牧师凳弯举',target:'肱二头肌',sets:3,reps:14,wt:30,tips:['大臂固定不借力','控制下放','顶峰收缩']},
-     {id:'d2-te',name:'臂屈伸机',target:'肱三头肌',sets:3,reps:12,wt:30,tips:['全程控制','离心慢放3秒增加张力','肘部不外张不甩动']}
-   ],
-   stretch:['龙门架胸小肌拉伸 每侧30s×2 — 手肘90°卡住竖杆，身体向外转','上斜方肌 头侧倾手轻压 每侧30s×2','背阔肌 抓固定物前倾悬挂 每侧30s×2'],
-   cardio:[{name:'跑步机爬坡',detail:'25-30min,坡度6-7,速度3.5'}]},
-  {id:3,label:'第三天',sub:'轻训+有氧',
-   warmup:[
-     {name:'跑步机慢走',detail:'3分钟，强度减半'},
-     {name:'肩胛绕环',detail:'10次×2组'},
-     {name:'前后踝摆动',detail:'每侧30s'},
-     {name:'收下巴(Chin tuck)',detail:'10次'}
-   ],
-   exercises:[
-     {id:'d3-pd',name:'高位下拉(宽对握)',target:'背阔肌',sets:3,reps:15,wt:30,tips:['轻量，D2没用对握的话这里体验','全程沉肩','感受背阔拉伸收缩']},
-     {id:'d3-lp',name:'坐姿腿蹬(轻量)',target:'股四头肌',sets:3,reps:15,wt:40,tips:['低配重高次数主动恢复','窄距股外侧角度补充']},
-     {id:'d3-le',name:'诺德士坐姿腿屈伸(轻量)',target:'股四头肌',sets:2,reps:15,wt:30,tips:['股四头频率补充','轻量控制']},
-     {id:'d3-rt',name:'坐姿旋转训练器',target:'腹斜肌',sets:2,reps:15,wt:20,tips:['轻量','主动恢复']},
-     {id:'d3-cr',name:'诺德士卷腹器械',target:'腹直肌',sets:2,reps:15,wt:30,tips:['轻量','慢放控制']}
-   ],
-   stretch:['以上所有拉伸各做一遍','诺德士腰腿拉伸器 5min','泡沫轴滚压背部和大腿 各1-2min'],
-   cardio:[{name:'跑步机爬坡',detail:'40-50min,坡度9-10,速度4'}]},
-];
-
-// ============================================================
-// SVG ENGINE — 胶囊体剪影 + 肌群发光
-// ============================================================
-function svgCapsule(type){
-  const base=`<svg viewBox="0 0 140 120" width="100%" height="120" style="background:#131316;border-radius:8px">`;
-  const foot=`</svg>`;
-  const d=`<defs><radialGradient id="g" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#f97316" stop-opacity=".9"/><stop offset="100%" stop-color="#ea580c" stop-opacity="0"/></radialGradient><filter id="s"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity=".5"/></filter></defs>`;
-  const B=(p,w=9)=>`<path d="${p}" stroke="#e4e4e7" stroke-width="${w}" stroke-linecap="round" fill="none" stroke-linejoin="round"/>`;
-  const G=(p,w=6)=>`<path d="${p}" stroke="#f97316" stroke-width="${w}" stroke-linecap="round" fill="none" filter="url(#s)" opacity=".9"/>`;
-  const M=(p,w=4)=>`<path d="${p}" stroke="#3f3f46" stroke-width="${w}" stroke-linecap="round" fill="none"/>`;
-  const A=(p)=>`<path d="${p}" stroke="#f97316" stroke-width="2" stroke-dasharray="3,2" fill="none"/>`;
-  const T=(t,s)=>`<text x="10" y="${s||22}" fill="#f97316" font-size="9" font-weight="800">${t}</text>`;
-  const ST=(t,s)=>`<text x="10" y="${s||34}" fill="#71717a" font-size="8">${t}</text>`;
-
-  let c='';
-  switch(type){
-    case 'hacksquat':
-      c = `${M('M84,4 L76,110',3)}${M('M62,4 L54,110',3)}` +  // 器械导轨
-          `<circle cx="78" cy="18" r="5" fill="#e4e4e7" filter="url(#s)"/>` +
-          `${B('M76,26 L72,48')}` +  // 躯干靠背
-          `${B('M72,48 L50,70')}` +  // 大腿前伸
-          `${B('M50,70 L56,96')}` +  // 小腿垂直
-          `${B('M76,28 L86,32',7)}` +  // 手臂握把
-          `${G('M72,50 L52,68',5)}` +  // 股四头肌发亮
-          `${T('股四头肌')}${ST('大腿前侧主导发力')}`;
-      break;
-    case 'hipthrust':
-      c = `<rect x="16" y="62" width="32" height="36" rx="3" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>` +
-          `<circle cx="44" cy="34" r="5" fill="#e4e4e7" filter="url(#s)"/>` +
-          `${B('M48,42 L70,50')}` +  // 躯干从凳到臀
-          `${B('M70,50 Q82,56 88,70')}` +  // 大腿前下
-          `${B('M88,70 L106,70')}` +  // 小腿水平
-          `${B('M50,48 L46,68',7)}` +  // 手臂下垂
-          `${G('M66,50 L84,62',6)}` +  // 臀肌发亮
-          `${T('臀大肌')}${ST('骨盆后倾，水平夹臀')}`;
-      break;
-    case 'legext':
-      c = `${M('M46,44 L46,80',3)}${M('M42,80 L72,80',3)}` +
-          `<circle cx="60" cy="26" r="5" fill="#e4e4e7" filter="url(#s)"/>` +
-          `${B('M58,34 L54,56')}` +  // 躯干
-          `${B('M54,56 L78,56')}` +  // 大腿在坐垫
-          `${B('M78,56 L98,38')}` +  // 小腿前伸
-          `${B('M58,36 L46,44',7)}` +  // 手臂
-          `${G('M58,56 L76,56',6)}` +  // 股四头肌发亮
-          `${T('股四头肌')}${ST('顶峰收缩1秒')}`;
-      break;
-    case 'hyperext':
-      c = `${M('M50,74 L50,108',3)}${M('M32,74 L68,74',3)}` +
-          `<circle cx="82" cy="26" r="5" fill="#e4e4e7" filter="url(#s)"/>` +
-          `${B('M80,34 L72,52')}` +  // 躯干左下
-          `${B('M72,52 L60,74')}` +  // 髋到垫
-          `${B('M60,74 L56,98')}` +  // 腿垂直
-          `${B('M80,36 L92,28',7)}` +  // 手臂前伸
-          `${G('M72,52 L62,70',5)}` +  // 下背发亮
-          `${T('臀腿后侧')}${ST('竖脊肌/腘绳肌发力')}`;
-      break;
-    case 'lats':
-    case 'latpulldown':
-      c = `${M('M44,6 L96,6',3)}` +  // 横杆
-          `<circle cx="70" cy="26" r="5" fill="#e4e4e7" filter="url(#s)"/>` +
-          `${B('M68,34 L64,60')}` +  // 躯干
-          `${B('M64,60 L64,88',7)}` +  // 腿
-          `${B('M68,34 L50,12',7)}` +  // 左手向上
-          `${B('M68,34 L88,12',7)}` +  // 右手向上
-          `${G('M56,34 L56,54',5)}${G('M76,34 L76,54',5)}` +  // 背阔肌发亮
-          `${T('背阔肌')}${ST('沉肩挺胸，拉到锁骨')}`;
-      break;
-    case 'rowing':
-      c = `${M('M36,84 L52,84',3)}` +  // 把手
-          `<circle cx="60" cy="30" r="5" fill="#e4e4e7" filter="url(#s)"/>` +
-          `${B('M58,38 L54,62')}` +  // 躯干竖直
-          `${B('M54,62 L54,88',7)}` +  // 腿
-          `${B('M58,38 L40,52',7)}` +  // 手臂前伸
-          `${B('M58,38 L38,44',7)}` +  // 另一手臂
-          `${G('M52,42 L50,58',6)}` +  // 背部发亮
-          `${T('背阔肌/中下斜方')}${ST('肩胛向中间收缩')}`;
-      break;
-    case 'facepull':
-      c = `<circle cx="68" cy="28" r="5" fill="#e4e4e7" filter="url(#s)"/>` +
-          `${B('M66,36 L64,62')}` +  // 躯干
-          `${B('M64,62 L64,90',7)}` +  // 腿
-          `${B('M66,36 L44,34',7)}` +  // 左臂外展
-          `${B('M66,36 L92,34',7)}` +  // 右臂外展
-          `${G('M56,34 L48,38',5)}${G('M80,34 L88,38',5)}` +  // 后束发亮
-          `${T('三角肌后束/肩袖')}${ST('肘部高于腕部，外展打开')}`;
-      break;
-    case 'curl':
-      c = `<circle cx="66" cy="26" r="5" fill="#e4e4e7" filter="url(#s)"/>` +
-          `${B('M64,34 L62,58')}` +  // 躯干
-          `${B('M62,58 L62,86',7)}` +  // 腿
-          `${B('M64,36 L50,50',7)}` +  // 上臂固定
-          `${B('M50,50 L40,36',7)}` +  // 前臂弯举
-          `${G('M50,48 L46,42',5)}` +  // 肱二头肌发亮
-          `${T('肱二头肌')}${ST('肘部固定锁死在垫面')}`;
-      break;
-    case 'triceps':
-      c = `${M('M34,12 L34,106',2)}` +  // 绳索
-          `<circle cx="68" cy="26" r="5" fill="#e4e4e7" filter="url(#s)"/>` +
-          `${B('M66,34 L64,58')}` +  // 躯干
-          `${B('M64,58 L64,86',7)}` +  // 腿
-          `${B('M66,36 L52,36',7)}` +  // 上臂水平
-          `${B('M52,36 L44,62',7)}` +  // 小臂下压
-          `${G('M52,38 L48,52',5)}` +  // 肱三头肌发亮
-          `${T('肱三头肌')}${ST('大臂夹紧，推到底')}`;
-      break;
-    case 'deadbug':
-      c = `${M('M20,106 L120,106',2)}` +  // 地面
-          `<circle cx="54" cy="80" r="5" fill="#e4e4e7" filter="url(#s)"/>` +
-          `${B('M58,84 L80,86')}` +  // 身体水平
-          `${B('M58,82 L38,60',7)}` +  // 手臂上举
-          `${B('M80,86 L100,64',7)}` +  // 腿上抬
-          `${G('M64,84 L76,86',6)}` +  // 核心发亮
-          `${T('核心深层肌群')}${ST('下背部死死贴地')}`;
-      break;
-    case 'crunch':
-      c = `${M('M20,106 L120,106',2)}` +  // 地面
-          `<circle cx="62" cy="68" r="5" fill="#e4e4e7" filter="url(#s)"/>` +
-          `${B('M66,74 Q72,82 80,88')}` +  // 躯干卷曲
-          `${B('M80,88 L80,106',7)}` +  // 腿
-          `${B('M66,76 L54,68',7)}` +  // 手臂前伸
-          `${G('M66,76 L74,84',6)}` +  // 腹肌发亮
-          `${T('腹直肌')}${ST('靠腹肌卷起，不借力')}`;
-      break;
-    case 'plank':
-      c = `${M('M16,106 L124,106',2)}` +  // 地面
-          `<circle cx="40" cy="68" r="5" fill="#e4e4e7" filter="url(#s)"/>` +
-          `${B('M46,72 L80,72')}` +  // 身体水平
-          `${B('M40,74 L40,100',7)}` +  // 脚/小腿
-          `${B('M80,72 L86,100',7)}` +  // 前臂支撑
-          `${G('M56,72 L70,72',6)}` +  // 核心发亮
-          `${T('核心腰带')}${ST('腹绷紧，不塌腰')}`;
-      break;
-    case 'calfraise':
-      c = `<rect x="66" y="96" width="24" height="8" rx="2" fill="#3f3f46"/>` +  // 踏板
-          `<circle cx="74" cy="22" r="5" fill="#e4e4e7" filter="url(#s)"/>` +
-          `${B('M72,30 L70,56')}` +  // 躯干
-          `${B('M70,56 L82,56')}` +  // 髋
-          `${B('M82,56 L82,90',8)}` +  // 腿到脚趾
-          `${G('M80,62 L80,86',6)}` +  // 小腿发亮
-          `${T('小腿三头肌')}${ST('顶峰收缩，慢放')}`;
-      break;
-    case 'cardio':
-      c=`<circle cx="70" cy="56" r="22" stroke="url(#g)" stroke-width="3" fill="none"/><circle cx="70" cy="56" r="30" stroke="#f97316" stroke-width="1" stroke-dasharray="4,4" fill="none"/><path d="M44 56 L58 56 L64 42 L68 70 L76 50 L80 58 L86 56 L98 56" stroke="#f4f4f5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>${T('温和有氧代谢')}${ST('划船机优先')}`;
-      break;
-    case 'stretch':
-      c=`<circle cx="70" cy="52" r="22" stroke="url(#g)" stroke-width="3" fill="none"/><circle cx="70" cy="52" r="30" stroke="#22c55e" stroke-width="1" stroke-dasharray="4,4" fill="none"/><path d="M46 52 L60 52 L66 38 L72 66 L78 48 L82 56 L88 52 L100 52" stroke="#f4f4f5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>${T('拉伸恢复',22,'#22c55e')}${ST('鼻吸口呼，每个30s','#71717a')}`;
-      break;
-    default:
-      c=`<circle cx="70" cy="54" r="22" stroke="url(#g)" stroke-width="3" fill="none"/><path d="M50 54 L62 54 L68 40 L74 68 L80 50 L84 58 L90 54 L100 54" stroke="#f4f4f5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>${T('核心稳定',22)}`;
-  }
-  return base+d+c+foot;
-}
-
-// ============================================================
-// STATE
-// ============================================================
-const SK_V3='tr_app_v3';
-const SK_V2='tr_app_v2';
-let state={currentDay:1,history:[],logs:{},weights:[],cycleStart:'2026-06-25',cycleLen:32,periodDays:5,fatLossPerMonth:0.5,startBase:62,dataVersion:3};
-loadState();
-let curDay=state.currentDay||1;
-let activeSet=null; // {exId, idx}
-
-function ensureV3Struct(p){
-  // Ensure all exercise logs have note + orderIndex
-  if(p.logs)Object.values(p.logs).forEach(function(log){
-    if(log.note===undefined)log.note='';
-    if(log.orderIndex===undefined)log.orderIndex=-1;
-  });
-  // Ensure history details have note + orderIndex
-  if(p.history)p.history.forEach(function(rec){
-    if(rec.details)rec.details.forEach(function(det,i){
-      if(det.note===undefined)det.note='';
-      if(det.orderIndex===undefined)det.orderIndex=i;
-    });
-  });
-  p.dataVersion=3;
-  // Clean up v2 internal fields
-  delete p.planVersion;
-  return p;
-}
-
-function loadState(){
-  // Auto-migrate from tr_app_v2 if tr_app_v3 doesn't exist
-  const v3raw=localStorage.getItem(SK_V3);
-  if(v3raw){
-    try{const p=JSON.parse(v3raw);if(p.logs)state=ensureV3Struct(p)}catch(e){}
-  }else{
-    const v2raw=localStorage.getItem(SK_V2);
-    if(v2raw){
-      try{const p=JSON.parse(v2raw);if(p.logs){state=ensureV3Struct(p);localStorage.setItem(SK_V3,JSON.stringify(state));localStorage.removeItem(SK_V2)}}catch(e){}
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Nunito', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            babyBlue: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+            },
+            babyPink: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              200: '#fecdd3',
+              300: '#fda4af',
+              400: '#fb7185',
+              500: '#f43f5e',
+            }
+          }
+        }
+      }
     }
-  }
-  // Defaults
-  if(!state.history)state.history=[];
-  if(!state.weights)state.weights=[];
-  if(!state.cycleStart){state.cycleStart='2026-06-25';state.cycleLen=32;state.periodDays=5;state.fatLossPerMonth=0.5;state.startBase=62}
-  if(state.cycleStart==='2026-05-23')state.cycleStart='2026-06-25';
-}
-function saveState(){state.currentDay=curDay;localStorage.setItem(SK_V3,JSON.stringify(state))}
-function todayKey(){return new Date().toISOString().slice(0,10)}
+  </script>
 
-// ============================================================
-// NAV
-// ============================================================
-function switchView(id){
-  closeTimer();
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.querySelectorAll('.dock-item').forEach(d=>d.classList.remove('active'));
-  document.getElementById('view-'+id).classList.add('active');
-  document.querySelector(`.dock-item[data-view="${id}"]`).classList.add('active');
-  if(id==='history')renderHistory();
-  if(id==='weight')renderWeight();
-}
+  <style>
+    body {
+      background-color: #f8fafc;
+      color: #334155;
+      -webkit-tap-highlight-color: transparent;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* 极致轻薄的空气感毛玻璃 */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+    .glass-nav {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+    }
+    /* 缓慢有氧呼吸的光晕动画 */
+    @keyframes slowPulse {
+      0%, 100% { transform: scale(1) translate(0px, 0px); opacity: 0.5; }
+      50% { transform: scale(1.08) translate(10px, -15px); opacity: 0.7; }
+    }
+    @keyframes slowPulseBlue {
+      0%, 100% { transform: scale(1.05) translate(0px, 0px); opacity: 0.6; }
+      50% { transform: scale(0.95) translate(-15px, 20px); opacity: 0.4; }
+    }
+    .animate-slow-pulse-pink {
+      animation: slowPulse 9s ease-in-out infinite;
+    }
+    .animate-slow-pulse-blue {
+      animation: slowPulseBlue 11s ease-in-out infinite 2.5s;
+    }
+    .panel-content {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  </style>
+</head>
+<body class="font-sans antialiased selection:bg-babyPink-200 selection:text-babyPink-500">
 
-function switchDay(n){
-  curDay=n;
-  cardExId=null;activeSet=null;
-  document.getElementById('trainList').style.display='';
-  document.getElementById('trainCard').style.display='none';
-  document.querySelectorAll('.day-tab').forEach(t=>t.classList.toggle('active',parseInt(t.dataset.day)===n));
-  saveState();
-  renderTrain();
-}
+  <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div class="absolute -top-[15%] -left-[10%] w-[80%] h-[70%] rounded-full bg-gradient-to-tr from-babyPink-100/60 to-babyPink-200/40 blur-[130px] animate-slow-pulse-pink"></div>
+    <div class="absolute top-[30%] -right-[15%] w-[85%] h-[80%] rounded-full bg-gradient-to-bl from-babyBlue-100/60 to-babyBlue-200/40 blur-[150px] animate-slow-pulse-blue"></div>
+  </div>
 
-// ============================================================
-// LIST VIEW
-// ============================================================
-function renderTrain(){
-  const day=DAYS.find(d=>d.id===curDay)||DAYS[0];
-  // Day tabs
-  document.getElementById('dayTabs').innerHTML=DAYS.map(d=>
-    `<button class="day-tab${d.id===curDay?' active':''}" data-day="${d.id}" onclick="switchDay(${d.id})">${d.label}<span class="sub">${d.sub}</span></button>`
-  ).join('');
-
-  // Summary
-  const allExes=getDayExercises(day);
-  const allSets=allExes.reduce((a,e)=>a+e.sets,0);
-  let doneSets=0;
-  allExes.forEach(e=>{
-    const log=state.logs[e.id];
-    if(log)log.sets.forEach(s=>{if(s.done)doneSets++});
-  });
-  document.getElementById('daySummary').innerHTML=
-    `<div class="day-summary"><div class="day-stat"><div class="num">${curDay}</div><div class="lbl">第${['一','二','三'][curDay-1]}天</div></div>
-     <div class="day-stat"><div class="num">${allSets}</div><div class="lbl">总组数</div></div>
-     <div class="day-stat"><div class="num">${doneSets}/${allSets}</div><div class="lbl">已完成</div></div></div>`;
-
-  // Warmup panel
-  let warmHtml='';
-  if(day.warmup){
-    const wu=day.warmup.filter(w=>!w.extra),wx=day.warmup.filter(w=>w.extra);
-    warmHtml=`<div class="panel-header" onclick="togglePanel('warmupPanel')"><div class="panel-title">🔥 热身 (${day.warmup.length}项)</div><div class="panel-toggle-icon">▼</div></div><div class="panel-content"><ul class="panel-list">`;
-    wu.forEach(w=>{warmHtml+=`<li>${w.name} — ${w.detail}</li>`});
-    if(wx.length){warmHtml+=`</ul><br><b>本日专用：</b><ul class="panel-list">`;wx.forEach(w=>{warmHtml+=`<li>${w.name} — ${w.detail}</li>`})}
-    warmHtml+=`</div>`;
-  }
-  document.getElementById('warmupPanel').innerHTML=warmHtml;
-
-  // Cardio panel
-  const cardioItems=day.cardio||[];
-  const cList=Array.isArray(cardioItems)?cardioItems:[{name:cardioItems,detail:''}];
-  document.getElementById('cardioPanel').innerHTML=
-    `<div class="panel-header" onclick="togglePanel('cardioPanel')">
-      <div class="panel-title">🏃 有氧训练 (${cList.length}项)</div>
-      <div class="panel-toggle-icon">▼</div>
-    </div>
-    <div class="panel-content"><ul class="panel-list">
-      ${cList.map(c=>'<li>'+c.name+' — '+c.detail+'</li>').join('')}
-    </ul></div>`;
-
-  // Stretch panel
-  document.getElementById('stretchPanel').innerHTML=
-    `<div class="panel-header" onclick="togglePanel('stretchPanel')"><div class="panel-title">🧘 拉伸放松 (${day.stretch.length}项)</div><div class="panel-toggle-icon">▼</div></div><div class="panel-content"><ul class="panel-list">${day.stretch.map(s=>'<li>'+s+'</li>').join('')}</ul></div>`;
-
-  // Exercise name list (v3)
-  renderExList();
-
-  // AW data
-  const rec=getTRec();
-  document.getElementById('inpDur').value=rec.dur||'';
-  document.getElementById('inpHr').value=rec.hr||'';
-  document.getElementById('inpCal').value=rec.cal||'';
-  document.getElementById('inpDurC').value=rec.durC||'';
-  document.getElementById('inpHrC').value=rec.hrC||'';
-  document.getElementById('inpCalC').value=rec.calC||'';
-}
-
-function renderExList(){
-  const day=DAYS.find(d=>d.id===curDay)||DAYS[0];
-  const allExes=getDayExercises(day);
-  const html=allExes.map(ex=>{
-    const log=state.logs[ex.id];
-    const completed=log&&(log.completed||log.sets.every(s=>s.done));
-    const inProgress=log&&!completed&&log.sets.some(s=>s.done);
-    let statusClass='pending',statusText='';
-    if(completed){statusClass='done';statusText='✓'}
-    else if(inProgress){statusClass='ip';statusText='⋯'}
-    // Extra exercise has a delete button
-    const isExtra=ex.id.startsWith('extra-');
-    const delBtn=isExtra?`<button class="ex-del" onclick="event.stopPropagation();delExtraEx('${ex.id}')">✕</button>`:'';
-    const cls=completed?'ex-item done'+(isExtra?' extra':''):'ex-item'+(isExtra?' extra':'');
-    return `<div class="${cls}" onclick="showCard('${ex.id}')">
-      ${delBtn}
-      <span class="ex-name">${ex.name}</span>
-      <span class="ex-target">${ex.target} · ${ex.sets}×${ex.reps}</span>
-      <span class="st-cir ${statusClass}">${statusText}</span>
-    </div>`;
-  }).join('');
-  document.getElementById('exerciseList').innerHTML=html;
-}
-
-function getDayExercises(day){
-  // DAYS exercises + any extra logs under this day
-  const exes=[...day.exercises];
-  // Add extra exercises that have logs
-  Object.keys(state.logs).forEach(function(id){
-    if(id.startsWith('extra-'))exes.push(getExById(id));
-  });
-  return exes;
-}
-
-function getExById(id){
-  // Check DAYS first
-  const fromDay=DAYS.flatMap(d=>d.exercises).find(e=>e.id===id);
-  if(fromDay)return fromDay;
-  // Extra exercise: reconstruct from log (name stored in target field workaround)
-  const log=state.logs[id];
-  if(!log)return null;
-  // For extra exercises we store metadata in the log
-  return {id:id,name:log._name||id,target:log._target||'',sets:log._totalSets||log.sets.length,reps:log._reps||12,unit:log._unit||'lb',tips:[]};
-}
-
-// ============================================================
-// CARD VIEW
-// ============================================================
-let cardExId=null;
-
-function showCard(exId){
-  closeTimer();
-  cardExId=exId;
-  document.getElementById('trainList').style.display='none';
-  document.getElementById('trainCard').style.display='block';
-  renderCard();
-}
-
-function hideCard(){
-  cardExId=null;activeSet=null;
-  document.getElementById('trainList').style.display='';
-  document.getElementById('trainCard').style.display='none';
-}
-
-function renderCard(){
-  const ex=getExById(cardExId);
-  if(!ex){hideCard();return;}
-  ensureLogExists(cardExId);
-  const log=state.logs[cardExId];
-  if(!log){hideCard();return;}
-
-  const unit=ex.unit||'lb';
-  const readOnly=!!(log.completed||log.sets.every(s=>s.done));
-
-  // Sets table
-  let setsHtml=log.sets.map((s,idx)=>{
-    const isA=!readOnly&&activeSet&&activeSet.exId===cardExId&&activeSet.idx===idx;
-    const doneCls=s.done?' done':'';
-    const valW=s.weight>0?s.weight+' <span>'+unit+'</span>':'—';
-    const valR=s.reps>0?s.reps+' <span>次</span>':'—';
-    const clk=readOnly?'':` onclick="activateSet('${cardExId}',${idx})"`;
-    const chk=readOnly?'':` onclick="event.stopPropagation();toggleSet('${cardExId}',${idx})"`;
-    return `<div class="set-row${doneCls}${isA?' active':''}"${clk}>
-      <div class="set-num">S${idx+1}</div>
-      <div class="set-val">${valW}</div>
-      <div class="set-val">${valR}</div>
-      <div class="set-chk"><button class="set-chk-btn"${chk}>${s.done?'✓':''}</button></div>
-    </div>`;
-  }).join('');
-
-  // Tips
-  const tipsHtml=ex.tips&&ex.tips.length?ex.tips.map(t=>'<li>'+t+'</li>').join(''):'';
-
-  // Buttons
-  const btnHtml=readOnly
-    ?`<button class="btn-done" onclick="hideCard()" style="flex:1">关闭</button>`
-    :`<button class="btn-reset" onclick="resetEx()">× 重置</button><button class="btn-done" onclick="completeEx()">✓ 完成此动作</button>`;
-
-  document.getElementById('trainCard').innerHTML=`
-    <div class="card-back" onclick="hideCard()">← 返回动作列表</div>
-
-    <div class="card-title">${ex.name}</div>
-    <div class="card-target">
-      <span>🎯 ${ex.target}</span>
-      <span>${ex.sets}×${ex.reps}</span>
-    </div>
-
-    ${tipsHtml?`<div class="tips-box"><div class="label">💡 发力要点</div><ul>${tipsHtml}</ul></div>`:''}
-
-    <div class="note-box">
-      <div class="label">📝 备注</div>
-      <textarea id="cardNote" placeholder="这组感觉如何？腰疼？重量轻松？记在这里…" oninput="saveNote()" ${readOnly?'readonly style="opacity:.6"':''}>${escHtml(log.note||'')}</textarea>
-    </div>
-
-    <div class="card-sets-box">
-      <div class="st-label">
-        <span>组次</span>
-        <span>${readOnly?'':'点按组行调整重量/次数'}</span>
+  <div id="customModal" class="fixed inset-0 z-[99999] flex items-center justify-center p-5 bg-slate-900/10 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+    <div class="bg-white/90 backdrop-blur-2xl border border-white rounded-[2.5rem] max-w-sm w-full p-6 shadow-[0_20px_50px_rgba(148,163,184,0.12)] transform scale-95 transition-all duration-300">
+      <div class="w-12 h-12 rounded-full bg-babyPink-50 flex items-center justify-center mb-4 text-xl">✨</div>
+      <h3 id="modalTitle" class="text-base font-extrabold text-slate-800 mb-2"></h3>
+      <p id="modalContent" class="text-xs text-slate-500 mb-6 leading-relaxed"></p>
+      <div class="flex gap-3">
+        <button id="modalCancelBtn" class="flex-1 py-3 px-4 bg-slate-100 hover:bg-slate-200 active:scale-[0.97] transition-all rounded-2xl text-xs font-bold text-slate-600">取消</button>
+        <button id="modalConfirmBtn" class="flex-1 py-3 px-4 bg-gradient-to-r from-babyPink-300 to-babyBlue-300 active:scale-[0.97] transition-all rounded-2xl text-xs font-bold text-white shadow-sm shadow-babyPink-200">确定</button>
       </div>
-      ${setsHtml}
-      ${!readOnly?`<div class="stepper-box${activeSet&&activeSet.exId===cardExId?' open':''}" id="stBox-${cardExId}"></div>`:''}
     </div>
+  </div>
 
-    <div class="card-actions">
-      ${btnHtml}
-    </div>`;
+  <header class="glass-nav sticky top-0 z-50 px-5 py-3 pt-[calc(0.5rem+env(safe-area-inset-top,0px))] flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <h1 class="text-sm font-extrabold tracking-tight text-slate-700">Hi, Freya 👋</h1>
+    </div>
+    <div class="bg-white/60 border border-white text-slate-400 px-3 py-1 rounded-full text-[10px] font-semibold shadow-sm" id="todayLabel"></div>
+  </header>
 
-  if(activeSet&&activeSet.exId===cardExId)renderStepper(cardExId,activeSet.idx);
-}
+  <main class="max-w-md mx-auto px-5 pt-5 pb-24 min-h-screen space-y-5">
+    
+    <!-- ================= VIEW: TRAIN ================= -->
+    <div class="view space-y-5" id="view-train">
+      <div id="trainList" class="space-y-5">
+        
+        <!-- 星期/选项卡导航 -->
+        <div class="day-tabs flex bg-white/60 p-1 rounded-2xl border border-white shadow-sm" id="dayTabs"></div>
 
-function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+        <!-- 每日简述卡片 -->
+        <div id="daySummary" class="grid grid-cols-3 gap-3"></div>
 
-function saveNote(){
-  const v=document.getElementById('cardNote').value;
-  if(state.logs[cardExId])state.logs[cardExId].note=v;
-  saveState();
-}
-
-function resetEx(){
-  if(!cardExId)return;
-  const log=state.logs[cardExId];
-  if(log){log.sets.forEach(s=>s.done=false);log.completed=false;log.note='';log.orderIndex=-1;}
-  activeSet=null;
-  saveState();
-  renderCard();
-  renderExList();
-}
-
-function completeEx(){
-  if(!cardExId)return;
-  const log=state.logs[cardExId];
-  if(!log)return;
-  // Auto-done all sets if none done
-  if(!log.sets.some(s=>s.done))log.sets.forEach(s=>s.done=true);
-  log.completed=true;
-  if(log.orderIndex<0)log.orderIndex=Date.now();
-  activeSet=null;
-  saveState();
-  hideCard();
-  renderExList();
-  showToast('✓ '+getExById(cardExId).name+' 已完成');
-}
-
-function getTRec(){
-  const k=todayKey();
-  if(!state.history[0]||state.history[0].date!==k){
-    // create or get today's working record
-    // We use state.logs as the working data, and the AW data is saved separately
-  }
-  if(!state._today)state._today={};
-  return state._today;
-}
-
-function saveAW(){
-  const t=getTRec();
-  t.dur=document.getElementById('inpDur').value;
-  t.hr=document.getElementById('inpHr').value;
-  t.cal=document.getElementById('inpCal').value;
-  t.durC=document.getElementById('inpDurC').value;
-  t.hrC=document.getElementById('inpHrC').value;
-  t.calC=document.getElementById('inpCalC').value;
-  state._today=t;
-  saveState();
-}
-
-// ============================================================
-// SET INTERACTIONS
-// ============================================================
-function ensureLogExists(exId){
-  if(!state.logs[exId]){
-    const ex=getExById(exId);
-    if(!ex)return;
-    const sets=Array.from({length:ex.sets},(_,i)=>({weight:ex.initWts?ex.initWts[i]:ex.wt,reps:ex.reps,done:false}));
-    state.logs[exId]={sets,completed:false,note:'',orderIndex:-1};
-    saveState();
-  }
-}
-
-function togglePanel(id){document.getElementById(id).classList.toggle('open')}
-
-function delExtraEx(id){
-  if(state.logs[id]){delete state.logs[id];saveState();renderExList();showToast('已删除');}
-}
-
-function showAddExForm(){
-  const units=['lb','kg'];
-  const overlay=document.createElement('div');
-  overlay.id='addExOverlay';
-  overlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:99999;display:flex;align-items:center;justify-content:center';
-  overlay.innerHTML=`
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;width:90%;max-width:360px">
-      <div style="font-size:16px;font-weight:800;margin-bottom:16px">+ 添加额外动作</div>
-
-      <div style="margin-bottom:10px">
-        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">动作名称</div>
-        <input id="aexName" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:10px" placeholder="如 Glute Press">
-      </div>
-
-      <div style="margin-bottom:10px">
-        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">练哪</div>
-        <input id="aexTarget" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:10px" placeholder="如 臀 / 大腿 / 背 / 核心">
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-        <div>
-          <div style="font-size:11px;color:var(--text2);margin-bottom:4px">组数</div>
-          <input id="aexSets" type="number" value="3" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:10px">
+        <!-- 当前序列 -->
+        <div class="space-y-2.5">
+          <h3 class="text-[9px] font-bold text-slate-400 tracking-wider uppercase px-1">今日动作序列</h3>
+          <div id="exerciseList" class="space-y-2.5"></div>
         </div>
-        <div>
-          <div style="font-size:11px;color:var(--text2);margin-bottom:4px">次数</div>
-          <input id="aexReps" type="number" value="12" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:10px">
+
+        <!-- 添加定制动作 -->
+        <button class="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl border-2 border-dashed border-slate-200 text-slate-400 hover:text-babyPink-400 hover:border-babyPink-200 active:scale-[0.98] transition-all text-xs font-bold bg-white/40" id="btnAddEx" onclick="showAddExForm()">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          添加定制动作
+        </button>
+
+        <!-- 训练辅助版面 (去掉 Emoji & 舒张内部间距) -->
+        <div class="space-y-3">
+          <div id="warmupPanel" class="glass-card rounded-2xl overflow-hidden shadow-sm"></div>
+          <div id="cardioPanel" class="glass-card rounded-2xl overflow-hidden shadow-sm"></div>
+          <div id="stretchPanel" class="glass-card rounded-2xl overflow-hidden shadow-sm"></div>
+
+          <!-- 复健注意事项 -->
+          <div class="glass-card rounded-2xl overflow-hidden shadow-sm" id="precautionsPanel">
+            <div class="px-5 py-4 flex justify-between items-center cursor-pointer select-none" onclick="togglePanel('precautionsPanel')">
+              <span class="font-bold text-xs text-babyPink-400">复健与体能补充建议</span>
+              <div class="panel-toggle-icon text-slate-400 text-[9px] transition-transform duration-300">▼</div>
+            </div>
+            <div class="panel-content hidden px-5 pb-5 border-t border-slate-100 pt-4 text-[11px] text-slate-500 space-y-2.5 leading-relaxed">
+              <p><b>肩部弹响：</b>无痛弹响继续，若有刺痛/卡顿立即终止。面拉和外旋维持轻量，动作务必轻慢。</p>
+              <p><b>推类安全：</b>蝴蝶机和上斜推胸从最轻配重起步，至少完成2次且无不适感再行加重。</p>
+              <p><b>发力口诀：</b>肩胛贴实椅背 → 沉肩 → 核心收紧 → 推。肘关节不锁死、下放不过深。</p>
+              <p class="text-babyPink-400 font-semibold"><b>高蛋白保肌：</b>每日每公斤体重摄入 1.6 - 2.0g 优质蛋白质。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Apple Watch体能指标卡 (扁平低高度设计) -->
+        <div class="glass-card rounded-2xl p-5 space-y-4 shadow-sm">
+          <div class="flex items-center gap-2 border-b border-slate-100/60 pb-2">
+            <h3 class="text-[11px] font-extrabold text-slate-600 tracking-wider uppercase">Apple Watch 运动体能指标</h3>
+          </div>
+
+          <!-- 无氧 -->
+          <div class="space-y-2">
+            <div class="text-[9px] font-bold text-babyPink-400 tracking-wider uppercase">无氧抗阻力训练</div>
+            <div class="grid grid-cols-3 gap-2">
+              <div class="bg-white/80 border border-slate-100 rounded-xl p-2.5 text-center focus-within:border-babyPink-200 transition-all">
+                <label class="block text-[8px] text-slate-400 font-bold mb-0.5">时长 (min)</label>
+                <input type="number" id="inpDur" class="w-full bg-transparent border-none text-slate-600 font-extrabold text-center text-xs outline-none placeholder-slate-300" placeholder="--">
+              </div>
+              <div class="bg-white/80 border border-slate-100 rounded-xl p-2.5 text-center focus-within:border-babyPink-200 transition-all">
+                <label class="block text-[8px] text-slate-400 font-bold mb-0.5">平均心率 (bpm)</label>
+                <input type="number" id="inpHr" class="w-full bg-transparent border-none text-slate-600 font-extrabold text-center text-xs outline-none placeholder-slate-300" placeholder="--">
+              </div>
+              <div class="bg-white/80 border border-slate-100 rounded-xl p-2.5 text-center focus-within:border-babyPink-200 transition-all">
+                <label class="block text-[8px] text-slate-400 font-bold mb-0.5">活跃能耗 (kcal)</label>
+                <input type="number" id="inpCal" class="w-full bg-transparent border-none text-slate-600 font-extrabold text-center text-xs outline-none placeholder-slate-300" placeholder="--">
+              </div>
+            </div>
+          </div>
+
+          <!-- 有氧 -->
+          <div class="space-y-2">
+            <div class="text-[9px] font-bold text-babyBlue-400 tracking-wider uppercase">有氧代谢体能</div>
+            <div class="grid grid-cols-3 gap-2">
+              <div class="bg-white/80 border border-slate-100 rounded-xl p-2.5 text-center focus-within:border-babyBlue-200 transition-all">
+                <label class="block text-[8px] text-slate-400 font-bold mb-0.5">时长 (min)</label>
+                <input type="number" id="inpDurC" class="w-full bg-transparent border-none text-slate-600 font-extrabold text-center text-xs outline-none placeholder-slate-300" placeholder="--">
+              </div>
+              <div class="bg-white/80 border border-slate-100 rounded-xl p-2.5 text-center focus-within:border-babyBlue-200 transition-all">
+                <label class="block text-[8px] text-slate-400 font-bold mb-0.5">平均心率 (bpm)</label>
+                <input type="number" id="inpHrC" class="w-full bg-transparent border-none text-slate-600 font-extrabold text-center text-xs outline-none placeholder-slate-300" placeholder="--">
+              </div>
+              <div class="bg-white/80 border border-slate-100 rounded-xl p-2.5 text-center focus-within:border-babyBlue-200 transition-all">
+                <label class="block text-[8px] text-slate-400 font-bold mb-0.5">活跃能耗 (kcal)</label>
+                <input type="number" id="inpCalC" class="w-full bg-transparent border-none text-slate-600 font-extrabold text-center text-xs outline-none placeholder-slate-300" placeholder="--">
+              </div>
+            </div>
+          </div>
+
+          <!-- 提交 -->
+          <button class="w-full bg-gradient-to-r from-babyPink-300 to-babyBlue-300 text-white font-extrabold py-3 px-5 rounded-2xl text-xs tracking-wide shadow-md shadow-babyPink-100 hover:shadow-lg active:scale-[0.98] transition-all" onclick="finishWorkout()">
+            完成今日训练并归档记录
+          </button>
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-        <div>
-          <div style="font-size:11px;color:var(--text2);margin-bottom:4px">默认重量</div>
-          <input id="aexWt" type="number" value="30" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:10px">
-        </div>
-        <div>
-          <div style="font-size:11px;color:var(--text2);margin-bottom:4px">单位</div>
-          <select id="aexUnit" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;padding:10px">
-            ${units.map(u=>'<option value="'+u+'">'+u+'</option>').join('')}
-          </select>
-        </div>
-      </div>
-
-      <div style="display:flex;gap:8px">
-        <button onclick="document.getElementById('addExOverlay').remove()" style="flex:1;padding:12px;border-radius:8px;font-size:14px;font-weight:700;border:1px solid var(--border);background:none;color:var(--text2);cursor:pointer">取消</button>
-        <button onclick="submitAddEx()" style="flex:2;padding:12px;border-radius:8px;font-size:14px;font-weight:700;border:none;background:var(--accent);color:#000;cursor:pointer">确认添加</button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
-}
-
-function submitAddEx(){
-  const name=document.getElementById('aexName').value.trim();
-  if(!name){showToast('请输入动作名称');return;}
-  const target=document.getElementById('aexTarget').value;
-  const sets=parseInt(document.getElementById('aexSets').value)||3;
-  const reps=parseInt(document.getElementById('aexReps').value)||12;
-  const wt=parseFloat(document.getElementById('aexWt').value)||30;
-  const unit=document.getElementById('aexUnit').value;
-  const id='extra-'+Date.now();
-  state.logs[id]={sets:Array.from({length:sets},()=>({weight:wt,reps,done:false})),completed:false,note:'',orderIndex:-1,_name:name,_target:target,_totalSets:sets,_reps:reps,_unit:unit};
-  saveState();
-  renderExList();
-  document.getElementById('addExOverlay').remove();
-  showToast('已添加 '+name);
-}
-
-function activateSet(exId,idx){
-  ensureLogExists(exId);
-  activeSet={exId,idx};
-  document.querySelectorAll('.stepper-box').forEach(b=>b.classList.remove('open'));
-  document.querySelectorAll('.set-row').forEach(r=>r.classList.remove('active'));
-  reRender();
-}
-
-function getRestSec(exId){
-  if(exId==='d2-pu')return 120;
-  const core=exId.replace(/^d\d-/,'');
-  if(['gb','hs','lp','sr','vr','pd','ic'].includes(core))return 90;
-  return 60;
-}
-function reRender(){
-  // Intelligently update the visible view
-  if(cardExId&&document.getElementById('trainCard').style.display==='block'){
-    renderCard();
-    renderExList();
-  }else{
-    renderTrain();
-  }
-}
-
-function toggleSet(exId,idx){
-  ensureLogExists(exId);
-  const s=state.logs[exId].sets[idx];
-  s.done=!s.done;
-  saveState();
-  if(s.done)triggerRest(getRestSec(exId));
-  reRender();
-}
-
-function renderStepper(exId,idx){
-  const box=document.getElementById('stBox-'+exId);
-  if(!box)return;
-  const s=state.logs[exId].sets[idx];
-  const ex=getExById(exId);
-  const unit=(ex&&ex.unit)||'lb';
-  const step=unit==='kg'?2.5:5;
-  const tagStep=unit==='kg'?5:10;
-  const bw=s.weight||(unit==='kg'?10:40);
-  const anchor=Math.round(bw/tagStep)*tagStep;
-  const qws=[anchor-tagStep*2,anchor-tagStep,anchor,anchor+tagStep,anchor+tagStep*2].filter(w=>w>0);
-  box.innerHTML=`
-    <div class="st-title"><span>第${idx+1}组 参数</span><span>点按调整</span></div>
-    <div style="font-size:10px;color:var(--text2);margin-bottom:4px">重量</div>
-    <div class="st-row">
-      <button class="st-btn" onclick="adj(${idx},-1,'${exId}')">−${step}</button>
-      <div class="st-val">${s.weight>0?s.weight:'BW'}<span>${unit}</span></div>
-      <button class="st-btn" onclick="adj(${idx},1,'${exId}')">+${step}</button>
+      <!-- Card View (动作详情卡 - 彻底去除了无用图示，优化边距与调值框引导) -->
+      <div id="trainCard" style="display:none" class="space-y-4"></div>
     </div>
-    <div class="quick-tags">${qws.map(w=>`<div class="qt${w===s.weight?' active':''}" onclick="setW(${w},${idx},'${exId}')"><span>${w}</span><span class="sub">${unit}</span></div>`).join('')}</div>
-    <div style="font-size:10px;color:var(--text2);margin-bottom:4px;margin-top:6px">次数</div>
-    <div class="st-row">
-      <button class="st-btn" onclick="adj(${idx},-1,'${exId}','reps')">−</button>
-      <div class="st-val">${s.reps}<span>次</span></div>
-      <button class="st-btn" onclick="adj(${idx},1,'${exId}','reps')">+</button>
-    </div>`;
-  box.classList.add('open');
-}
 
-function adj(idx,sign,exId,field='weight'){
-  const s=state.logs[exId].sets[idx];
-  if(field==='weight'){
-    const ex=getExById(exId);
-    const step=(ex&&ex.unit==='kg')?2.5:5;
-    s.weight=Math.max(0,Math.round((s.weight+sign*step)/step)*step);
-  }else{
-    s.reps=Math.max(1,s.reps+sign);
-  }
-  saveState();
-  renderStepper(exId,idx);
-  reRender();
-}
 
-function setW(w,idx,exId){
-  state.logs[exId].sets[idx].weight=w;
-  saveState();
-  renderStepper(exId,idx);
-  reRender();
-}
+    <!-- ================= VIEW: HISTORY ================= -->
+    <div class="view hidden space-y-4" id="view-history">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-extrabold text-slate-800 tracking-tight">训练历史</h2>
+        <span class="text-[8px] text-slate-400 font-semibold bg-white/60 border border-white px-2 py-0.5 rounded-full">本地独立储存</span>
+      </div>
+      <div id="historyList" class="space-y-4"></div>
+    </div>
 
-// ============================================================
-// TIMER
-// ============================================================
-let timerInt=null;
-let timerSec=0;
-let timerStart=0;
-function triggerRest(sec){
-  closeTimer();
-  timerSec=sec;
-  timerStart=Date.now();
-  var bar=document.createElement('div');
-  bar.id='restTimer';
-  bar.style.position='fixed';
-  bar.style.bottom='calc(56px + env(safe-area-inset-bottom, 0px))';
-  bar.style.left='0';
-  bar.style.width='100%';
-  bar.style.zIndex='99999';
-  bar.style.background='#f97316';
-  bar.style.color='#000';
-  bar.style.padding='12px 16px';
-  bar.style.fontSize='15px';
-  bar.style.fontWeight='700';
-  bar.style.display='flex';
-  bar.style.justifyContent='space-between';
-  bar.style.alignItems='center';
-  bar.style.boxSizing='border-box';
-  bar.innerHTML='<span>⏱ 组间休息 <b style="font-size:22px">'+sec+'</b>s</span><button id="restClose" style="background:none;border:none;font-size:20px;cursor:pointer;color:#000;padding:0 4px;line-height:1">✕</button>';
-  document.body.appendChild(bar);
-  document.getElementById('restClose').onclick=closeTimer;
-  timerInt=setInterval(tickTimer,200);
-  document.addEventListener('visibilitychange',onVisChange);
-}
-function tickTimer(){
-  var bar=document.getElementById('restTimer');
-  if(!bar)return;
-  var elapsed=Math.floor((Date.now()-timerStart)/1000);
-  var left=Math.max(0,timerSec-elapsed);
-  bar.innerHTML='<span>⏱ 组间休息 <b style="font-size:22px">'+left+'</b>s</span><button id="restClose" style="background:none;border:none;font-size:20px;cursor:pointer;color:#000;padding:0 4px;line-height:1">✕</button>';
-  var btn=document.getElementById('restClose');
-  if(btn)btn.onclick=closeTimer;
-  if(left<=0){
-    closeTimer();
-    if(navigator.vibrate)navigator.vibrate(400);
-    showToast('休息结束');
-  }
-}
-function onVisChange(){
-  if(document.visibilityState==='visible')tickTimer();
-}
-function closeTimer(){
-  clearInterval(timerInt);
-  timerInt=null;
-  document.removeEventListener('visibilitychange',onVisChange);
-  var tb=document.getElementById('restTimer');
-  if(tb)tb.remove();
-}
 
-// ============================================================
-// FINISH WORKOUT
-// ============================================================
-function finishWorkout(){
-  const day=DAYS.find(d=>d.id===curDay);
-  if(!day)return;
+    <!-- ================= VIEW: SETTINGS ================= -->
+    <div class="view hidden space-y-4" id="view-settings">
+      <h2 class="text-sm font-extrabold text-slate-800 tracking-tight">备份与系统设置</h2>
+      
+      <div class="glass-card rounded-2xl p-5 space-y-3">
+        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">数据双向备份</div>
+        
+        <div class="flex items-center justify-between py-2 border-b border-slate-50">
+          <span class="text-xs font-semibold text-slate-600">导出数据备份 (JSON)</span>
+          <button class="bg-gradient-to-r from-babyBlue-100 to-babyBlue-200 text-babyBlue-500 hover:opacity-90 font-bold text-[10px] py-1.5 px-4 rounded-xl active:scale-95 transition-all" onclick="exportJSON()">导出</button>
+        </div>
+        
+        <div class="flex items-center justify-between py-2">
+          <span class="text-xs font-semibold text-slate-600">导入历史备份</span>
+          <button class="bg-gradient-to-r from-babyPink-100 to-babyPink-200 text-babyPink-500 hover:opacity-90 font-bold text-[10px] py-1.5 px-4 rounded-xl active:scale-95 transition-all" onclick="importJSON()">导入</button>
+        </div>
+      </div>
 
-  // Collect all logs with done sets (DAYS exercises + extra)
-  const details=[];let totalSets=0;
-  Object.keys(state.logs).forEach(function(id){
-    const log=state.logs[id];
-    if(!log)return;
-    const done=log.sets.filter(s=>s.done);
-    if(done.length===0)return;
-    const ex=getExById(id);
-    if(!ex)return;
-    totalSets+=done.length;
-    details.push({
-      name:ex.name,
-      target:ex.target||'',
-      unit:ex.unit||'lb',
-      sets:done.map(function(s){return{weight:s.weight,reps:s.reps}}),
-      note:log.note||'',
-      orderIndex:log.orderIndex>=0?log.orderIndex:details.length
-    });
-  });
+      <div class="bg-rose-50/70 backdrop-blur-md border border-rose-100 rounded-2xl p-5 space-y-3">
+        <div class="text-[10px] font-bold text-rose-500 uppercase tracking-wider">数据高危管理</div>
+        
+        <div class="flex items-center justify-between py-1">
+          <div>
+            <div class="text-xs font-semibold text-rose-800">擦除本地数据</div>
+            <div class="text-[8px] text-rose-400 mt-0.5">此操作为物理重置，不可撤销</div>
+          </div>
+          <button class="bg-white hover:bg-rose-100 border border-rose-200 text-rose-500 font-bold text-[10px] py-1.5 px-4 rounded-xl active:scale-95 transition-all shadow-sm" onclick="clearAll()">重置</button>
+        </div>
+      </div>
 
-  const dur=parseInt(document.getElementById('inpDur').value)||0;
-  const hr=parseInt(document.getElementById('inpHr').value)||0;
-  const cal=parseInt(document.getElementById('inpCal').value)||0;
-  const durC=parseInt(document.getElementById('inpDurC').value)||0;
-  const hrC=parseInt(document.getElementById('inpHrC').value)||0;
-  const calC=parseInt(document.getElementById('inpCalC').value)||0;
+      <footer class="text-[8px] text-slate-400 space-y-0.5 px-1 py-4 leading-relaxed text-center">
+        <div>Training App v5 · Freya · Change Pro 龙之梦</div>
+        <div>所有健康与体征记录全部离线保存在当前浏览器中。</div>
+      </footer>
+    </div>
 
-  // Pure cardio: allow archive with only AW cardio data
-  const hasStrength=details.length>0;
-  const hasCardio=durC>0||hrC>0||calC>0;
-  if(!hasStrength&&!hasCardio){showToast('至少完成一组或记录有氧数据');return;}
 
-  const dayName=hasStrength?(day.label+' '+day.sub):'有氧日';
-  const dayId=hasStrength?day.id:0;
+    <!-- ================= VIEW: WEIGHT ================= -->
+    <div class="view hidden space-y-4" id="view-weight">
+      <h2 class="text-sm font-extrabold text-slate-800 tracking-tight">体重周期监测</h2>
 
-  state.history.unshift({
-    date:todayKey(),dayName,dayId,dur,hr,cal,durC,hrC,calC,totalSets,details,timestamp:Date.now()
-  });
-  // Clear ALL logs
-  state.logs={};
-  state._today={};
-  cardExId=null;activeSet=null;
-  document.getElementById('trainList').style.display='';
-  document.getElementById('trainCard').style.display='none';
-  saveState();
-  showToast('🎉 训练已归档');
-  renderTrain();
-  switchView('history');
-}
+      <!-- 周期基线折叠面板 -->
+      <div class="glass-card rounded-2xl overflow-hidden transition-all duration-300" id="cyclePanel">
+        <div class="px-5 py-3.5 flex justify-between items-center cursor-pointer select-none" onclick="togglePanel('cyclePanel')">
+          <span class="font-bold text-xs text-babyPink-400">女性生理周期与基线配置</span>
+          <div class="panel-toggle-icon text-slate-400 text-[9px] transition-transform duration-300">▼</div>
+        </div>
+        
+        <div class="panel-content hidden px-5 pb-5 border-t border-slate-100 pt-4 space-y-3.5">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white/80 border border-slate-100 rounded-xl p-2.5 focus-within:border-babyPink-200 transition-all">
+              <label class="block text-[8px] text-slate-400 font-bold mb-0.5">最近经期开始</label>
+              <input type="date" id="inpCycleStart" class="w-full bg-transparent border-none text-slate-600 font-bold text-xs outline-none">
+            </div>
+            <div class="bg-white/80 border border-slate-100 rounded-xl p-2.5 focus-within:border-babyPink-200 transition-all">
+              <label class="block text-[8px] text-slate-400 font-bold mb-0.5">正常周期长度 (天)</label>
+              <input type="number" id="inpCycleLen" step="1" class="w-full bg-transparent border-none text-slate-600 font-bold text-xs outline-none placeholder-slate-300">
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white/80 border border-slate-100 rounded-xl p-2.5 focus-within:border-babyPink-200 transition-all">
+              <label class="block text-[8px] text-slate-400 font-bold mb-0.5">基准目标体重 (kg)</label>
+              <input type="number" id="inpStartBase" step="0.1" class="w-full bg-transparent border-none text-slate-600 font-bold text-xs outline-none placeholder-slate-300">
+            </div>
+            <div class="bg-white/80 border border-slate-100 rounded-xl p-2.5 focus-within:border-babyPink-200 transition-all">
+              <label class="block text-[8px] text-slate-400 font-bold mb-0.5">月度计划减重 (kg)</label>
+              <input type="number" id="inpFatLoss" step="0.1" class="w-full bg-transparent border-none text-slate-600 font-bold text-xs outline-none placeholder-slate-300">
+            </div>
+          </div>
 
-// ============================================================
-// HISTORY
-// ============================================================
-function renderHistory(){
-  closeTimer();
-  const el=document.getElementById('historyList');
-  if(!state.history||state.history.length===0){
-    el.innerHTML='<div class="hist-empty">暂无训练记录<br>开始你的第一次训练吧</div>';return;
-  }
-  el.innerHTML=state.history.map((r,i)=>{
-    const exRows=r.details.map(function(ex){
-      var str=ex.summary||(ex.sets?ex.sets.map(function(s,i){return'S'+(i+1)+':'+(s.weight>0?s.weight+ex.unit:'BW')+'×'+s.reps}).join(', '):'');
-      var noteHtml=ex.note?'<div style="font-size:11px;color:var(--text2);padding:4px 0 0 0;border-top:1px solid rgba(255,255,255,.03);margin-top:4px">📝 '+escHtml(ex.note)+'</div>':'';
-      return '<div class="hist-ex-row"><span style="font-weight:700;color:var(--text)">'+ex.name+'</span><span style="font-family:monospace;font-size:10px">'+str+'</span></div>'+
-        (noteHtml?noteHtml:'');
-    }).join('');
-    return `<div class="hist-item">
-      <div class="hist-header"><div class="hist-date">${r.date} <span style="font-size:11px;color:var(--accent);margin-left:4px">${r.dayName}</span></div>
-        <button style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px" onclick="delHist(${i})">删除</button></div>
-      <div class="hist-tags">${r.dur?`<span class="hist-tag">🏋️ ${r.dur}min/${r.hr||'--'}bpm/${r.cal||'--'}kcal</span>`:''}${r.durC?`<span class="hist-tag">🏃 ${r.durC}min/${r.hrC||'--'}bpm/${r.calC||'--'}kcal</span>`:''}<span class="hist-tag">🎯 ${r.totalSets}组</span></div>
-      ${exRows}</div>`;
-  }).join('');
-}
+          <button class="w-full bg-gradient-to-r from-babyPink-200 to-babyBlue-200 text-white font-extrabold py-3 px-5 rounded-2xl text-xs active:scale-[0.98] transition-all shadow-sm" onclick="saveCycleSettings()">
+            保存周期与基准配置
+          </button>
+        </div>
+      </div>
 
-function delHist(i){if(confirm('删除这条记录？')){state.history.splice(i,1);saveState();renderHistory();showToast('已删除')}}
+      <!-- 生理周期卡片预测 -->
+      <div id="predictionCard"></div>
 
-// ============================================================
-// CYCLE & PREDICTION
-// ============================================================
-function getCycleDay(dateStr,cycleStart,cycleLen){
-  var d=new Date(dateStr+'T00:00:00'),s=new Date(cycleStart+'T00:00:00');
-  var diff=Math.floor((d-s)/86400000);
-  return diff<0?-1:(diff%cycleLen)+1;
-}
-function getPhase(cd,pd){
-  if(cd<=0)return 'unknown';
-  if(cd<=pd)return 'period';
-  if(cd<=14)return 'follicular';
-  if(cd<=16)return 'ovulation';
-  if(cd<=26)return 'luteal';
-  return 'late-luteal';
-}
-function phaseLabel(p){return{period:'月经期',follicular:'卵泡期',ovulation:'排卵期',luteal:'黄体期','late-luteal':'黄体晚期',unknown:'未设置'}[p]||p}
-function phaseColor(p){return{period:'#D85A30',follicular:'#1D9E75',ovulation:'#378ADD',luteal:'#EF9F27','late-luteal':'#D4537E',unknown:'#52525b'}[p]||'#52525b'}
-function phaseNote(p){return{period:'月经期体重偏高，经后消肿会明显下降',follicular:'卵泡期体重接近真实水平，训练状态好',ovulation:'排卵期体重平稳',luteal:'黄体期积水增加，体重缓慢回升','late-luteal':'黄体晚期水分高峰，秤上数字不代表真实体重',unknown:''}[p]||''}
-function getRetention(p){return{period:1.8,follicular:0.1,ovulation:0.3,luteal:0.7,'late-luteal':1.8,unknown:0}[p]||0}
-function getTrainingCode(dateStr,cs,cl,pd){
-  var base=new Date(2026,5,23),d=new Date(dateStr+'T00:00:00');
-  var diff=Math.floor((d-base)/86400000);
-  var idx=((diff%6)+6)%6;
-  var types=['D1','休息','D2','休息','D3','休息'];
-  var code=types[idx];
-  // Period D1-D3: D2/D3 may be rested
-  var cd=getCycleDay(dateStr,cs,cl);
-  if(cd>0&&cd<=3&&code!=='D1'&&code!=='休息')code='休息';
-  return code;
-}
-function getTrainingDay(dateStr,cs,cl,pd){
-  var labels={'D1':'D1腿臀+核心','D2':'D2背+肩胛+手臂','D3':'D3轻训+有氧','休息':'休息'};
-  return labels[getTrainingCode(dateStr,cs,cl,pd)]||'休息';
-}
-function getDOMS(dateStr,cs,cl,pd){
-  var d=new Date(dateStr+'T00:00:00');
-  d.setDate(d.getDate()-1);
-  var y=d.getFullYear(),m=d.getMonth()+1,dd=d.getDate();
-  var prev=y+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd;
-  var code=getTrainingCode(prev,cs,cl,pd);
-  return{'D1':0.5,'D2':0.15,'D3':0,'休息':0}[code]||0;
-}
-function predictWeight(dateStr,s){
-  // Lookup table (user's precise values)
-  var tbl={
-    '2026-06-23':{m:64.1,l:63.8,h:64.4,p:'late-luteal',cd:31},    // 实测
-    '2026-06-24':{m:63.0,l:62.7,h:63.3,p:'late-luteal',cd:32},    // 实测
-    '2026-06-25':{m:63.1,l:62.6,h:63.6,p:'late-luteal',cd:1},     // 实测，早秤仍为late-luteal，晚经期开始
-    '2026-06-26':{m:63.7,l:63.2,h:64.2,p:'period',cd:2},          // 实测
-    '2026-06-27':{m:63.85,l:63.35,h:64.35,p:'period',cd:3},    // 实测
-    '2026-06-28':{m:63.35,l:62.85,h:63.85,p:'period',cd:4},    // 实测
-    '2026-06-29':{m:63.5,l:63.0,h:64.0,p:'period',cd:5},        // 实测
-    '2026-06-30':{m:63.3,l:62.8,h:63.8,p:'follicular',cd:6},   // 实测
-    '2026-07-01':{m:63.0,l:62.5,h:63.5,p:'follicular',cd:7},    // 排水斜率修正
-    '2026-07-02':{m:62.7,l:62.2,h:63.2,p:'follicular',cd:8},
-    '2026-07-03':{m:62.5,l:62.0,h:63.0,p:'follicular',cd:9},
-    '2026-07-04':{m:62.3,l:61.8,h:62.8,p:'follicular',cd:10},
-    '2026-07-05':{m:62.3,l:61.8,h:62.8,p:'follicular',cd:11},
-    '2026-07-06':{m:62.3,l:61.8,h:62.8,p:'follicular',cd:12}
-  };
-  if(tbl[dateStr]){var e=tbl[dateStr];var lo=e.l===e.h?parseFloat((e.m-0.4).toFixed(1)):e.l;var hi=e.l===e.h?parseFloat((e.m+0.4).toFixed(1)):e.h;return{predicted:e.m,low:lo,high:hi,phase:e.p,cycleDay:e.cd};}
-  // Fallback model for dates beyond table
-  var ref=new Date('2026-06-25T00:00:00'),d=new Date(dateStr+'T00:00:00');
-  var dayOffset=Math.floor((d-ref)/86400000);
-  var base=s.startBase-(dayOffset*s.fatLossPerMonth/30);
-  var cd=getCycleDay(dateStr,s.cycleStart,s.cycleLen);
-  var p=getPhase(cd,s.periodDays);
-  var ret=getRetention(p);
-  var doms=getDOMS(dateStr,s.cycleStart,s.cycleLen,s.periodDays);
-  var predicted=base+ret+doms;
-  return{predicted:parseFloat(predicted.toFixed(1)),low:parseFloat((predicted-0.4).toFixed(1)),high:parseFloat((predicted+0.4).toFixed(1)),phase:p,cycleDay:cd};
-}
+      <!-- 录入体重 -->
+      <div class="glass-card rounded-2xl p-5 space-y-3.5">
+        <div class="text-[10px] font-bold text-slate-700 tracking-wider flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 bg-gradient-to-tr from-babyPink-400 to-babyBlue-400 rounded-full"></span>
+          <span>录入今日实际测重</span>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-white/80 border border-slate-100 rounded-xl p-2.5 focus-within:border-babyPink-200 transition-all">
+            <label class="block text-[8px] text-slate-400 font-bold mb-0.5">记录日期</label>
+            <input type="date" id="weightDate" class="w-full bg-transparent border-none text-slate-600 font-bold text-xs outline-none">
+          </div>
+          <div class="bg-white/80 border border-slate-100 rounded-xl p-2.5 focus-within:border-babyPink-200 transition-all">
+            <label class="block text-[8px] text-slate-400 font-bold mb-0.5">空腹体重 (kg)</label>
+            <input type="number" id="weightValue" step="0.1" class="w-full bg-transparent border-none text-slate-600 font-bold text-xs outline-none placeholder-slate-300" placeholder="--">
+          </div>
+        </div>
+        <button class="w-full bg-gradient-to-r from-babyPink-300 to-babyBlue-300 text-white font-extrabold py-3 px-5 rounded-2xl text-xs active:scale-[0.98] transition-all shadow-sm shadow-babyPink-100" onclick="addWeight()">
+          记录实测并比对预测值
+        </button>
+      </div>
 
-// ============================================================
-// WEIGHT
-// ============================================================
-function renderWeight(){
-  closeTimer();
-  var today=todayKey();
-  document.getElementById('weightDate').value=today;
-  document.getElementById('weightValue').value='';
+      <!-- 体重流水表 -->
+      <div id="weightList"></div>
+    </div>
+  </main>
 
-  // Cycle settings form
-  document.getElementById('inpCycleStart').value=state.cycleStart;
-  document.getElementById('inpCycleLen').value=state.cycleLen;
-  document.getElementById('inpStartBase').value=state.startBase;
-  document.getElementById('inpFatLoss').value=state.fatLossPerMonth;
+  <nav class="glass-nav fixed bottom-0 left-0 right-0 border-t border-slate-100/50 py-0.5 pb-[calc(2px+env(safe-area-inset-bottom,0px))] px-2 flex justify-around z-50 shadow-sm">
+    <button class="dock-item flex flex-col items-center justify-center text-slate-400 hover:text-babyPink-400 py-0.5 px-1 rounded-xl transition-all duration-300 w-1/4 active:scale-95" data-view="train">
+      <svg class="w-3.5 h-3.5 stroke-current stroke-[2.2] fill-none" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3zm3 6h6m-6 3h6m-6 3h3"/>
+      </svg>
+      <span class="text-[7px] font-bold tracking-wider mt-0.5">训练计划</span>
+    </button>
+    <button class="dock-item flex flex-col items-center justify-center text-slate-400 hover:text-babyPink-400 py-0.5 px-1 rounded-xl transition-all duration-300 w-1/4 active:scale-95" data-view="history">
+      <svg class="w-3.5 h-3.5 stroke-current stroke-[2.2] fill-none" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+      </svg>
+      <span class="text-[7px] font-bold tracking-wider mt-0.5">历史清单</span>
+    </button>
+    <button class="dock-item flex flex-col items-center justify-center text-slate-400 hover:text-babyPink-400 py-0.5 px-1 rounded-xl transition-all duration-300 w-1/4 active:scale-95" data-view="weight">
+      <svg class="w-3.5 h-3.5 stroke-current stroke-[2.2] fill-none" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v4m0 0a8 8 0 0 0-8 8h16a8 8 0 0 0-8-8z"/>
+      </svg>
+      <span class="text-[7px] font-bold tracking-wider mt-0.5">周期体重</span>
+    </button>
+    <button class="dock-item flex flex-col items-center justify-center text-slate-400 hover:text-babyPink-400 py-0.5 px-1 rounded-xl transition-all duration-300 w-1/4 active:scale-95" data-view="settings">
+      <svg class="w-3.5 h-3.5 stroke-current stroke-[2.2] fill-none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+      <span class="text-[8px] font-bold tracking-wider">系统管理</span>
+    </button>
+  </nav>
 
-  // Prediction card
-  var pred=predictWeight(today,state);
-  var trainDay=getTrainingDay(today,state.cycleStart,state.cycleLen,state.periodDays);
-  var pCn=phaseLabel(pred.phase);
-  var pColor=phaseColor(pred.phase);
-  var note=phaseNote(pred.phase);
-  var domsVal=getDOMS(today,state.cycleStart,state.cycleLen,state.periodDays);
-  var d=new Date(today+'T00:00:00');d.setDate(d.getDate()-1);
-  var prevTrain=getTrainingDay(d.toISOString().slice(0,10),state.cycleStart,state.cycleLen,state.periodDays);
-  var domsNote=domsVal>0?'昨日 '+prevTrain+' · DOMS +'+domsVal.toFixed(2).replace('0.','.')+'kg':'昨日 '+prevTrain+' · 无 DOMS 叠加';
-  var tRec=state.weights&&state.weights.find(function(w){return w.date===today});
+  <!-- 浮动通知 Toast 框 -->
+  <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 translate-y-4 bg-white/95 border border-slate-100 text-slate-700 text-[10px] font-extrabold py-2 px-5 rounded-full shadow-[0_10px_25px_rgba(148,163,184,0.12)] opacity-0 invisible transition-all duration-300 z-[99999]"></div>
 
-  var diffStr='';
-  if(tRec){
-    var diff=(tRec.weight-pred.predicted).toFixed(1);
-    var ds=diff>0?'+':'';
-    diffStr='<div style="text-align:center;border-left:1px solid var(--border);padding-left:12px">'+
-      '<div style="font-size:10px;color:var(--text2);margin-bottom:2px">实际体重</div>'+
-      '<div style="font-size:22px;font-weight:800;color:var(--text)">'+tRec.weight+'<span style="font-size:12px;color:var(--text2);font-weight:400"> kg</span></div>'+
-      '<div style="font-size:12px;font-weight:700;margin-top:2px;color:'+(diff>0?'#ef4444':'#22c55e')+'">差值 '+ds+diff+'kg</div>'+
-      '<div style="font-size:10px;color:var(--green);margin-top:1px">✓ 今日已记录</div></div>';
-  }else{
-    diffStr='<div style="text-align:center;border-left:1px solid var(--border);padding-left:12px">'+
-      '<div style="font-size:10px;color:var(--text2);margin-bottom:2px">实际体重</div>'+
-      '<div style="font-size:14px;color:var(--text3);font-weight:400">今日未记录</div></div>';
-  }
+  <script>
+    // ============================================================
+    // TRAINING DATA
+    // ============================================================
+    const DAYS = [
+      {id:1,label:'第一天',sub:'腿臀+核心',
+       warmup:[
+         {name:'跑步机快走/慢跑',detail:'3分钟，快走5-6km/h坡度1-2%或慢跑7-8km/h'},
+         {name:'猫牛式',detail:'10次，让脊柱进行充分屈伸'},
+         {name:'前后踝摆动',detail:'每侧30s — 一脚在前膝盖前顶超脚尖，脚跟不离地，找踝活动度'},
+         {name:'站姿髂腰肌拉伸',detail:'每侧30s — 深度弯跨，同侧手高举并朝斜后拉伸'},
+         {name:'自重空蹲',detail:'10次，启动髋膝踝三联动机制'}
+       ],
+       exercises:[
+         {id:'d1-gb',name:'诺德士臀推机',target:'臀大肌',sets:4,reps:12,wt:50,unit:'kg',tips:['顶峰时注意收紧发力并停留2s','主要感受臀部收拢而非腰部借力','腰背部贴死靠垫']},
+         {id:'d1-hs',name:'双向哈克深蹲(面向前)',target:'股四头肌',sets:3,reps:12,wt:100,tips:['采取比肩略窄的间距以深度强化大腿前侧','膝盖运动轨迹要和脚尖朝向绝对一致','顶点膝关节千万不要锁死']},
+         {id:'d1-lp',name:'坐姿腿蹬(多角度)',target:'臀腿整体',sets:4,reps:15,wt:80,initWts:[60,80,80,80],tips:['第一组用于肌肉热身','两组低位窄距(主练大腿外侧) + 两组高位(主练臀肌)','安全平稳的固定轨迹']},
+         {id:'d1-lc',name:'诺德士坐姿腿弯举',target:'腘绳肌',sets:3,reps:12,wt:40,tips:['体会腘绳肌在收敛状态下的控制感','小腿伸展离心过程要尽量慢放']},
+         {id:'d1-le',name:'诺德士坐姿腿屈伸',target:'股四头肌',sets:3,reps:12,wt:35,tips:['专注股四头肌离心舒张','在顶点极度挤压股四头肌1秒']},
+         {id:'d1-ad',name:'内收肌夹腿',target:'大腿内侧',sets:3,reps:12,wt:60,tips:['依靠大腿内侧肌发力靠拢','拉开离心时动作一定要受阻放慢']},
+         {id:'d1-ab',name:'外展机臀外侧',target:'臀中肌',sets:4,reps:12,wt:60,tips:['上身前倾12次 + 上身仰靠10次','一旦感觉其他部位代偿严重则立刻减小重量','着重在臀中肌挤压点感应']},
+         {id:'d1-rt',name:'坐姿旋转训练器',target:'腹外斜肌',sets:2,reps:15,wt:30,tips:['纯核心旋转掌控，切勿利用腰背甩动','轻重量找神经募集感']},
+         {id:'d1-cr',name:'诺德士卷腹机',target:'腹直肌',sets:2,reps:15,wt:50,tips:['臀和后背靠实，借肋骨向下压收腹部','呼气向上，吸气缓慢离心还原']}
+       ],
+       stretch:['站姿髂腰肌充分拉伸 每侧30s','腘绳肌 踩地单腿抬高 每侧30s','股四头肌 提脚背大腿拉伸 每侧30s','诺德士腰腿拉伸器 5min'],
+       cardio:[{name:'跑步机高坡度快走',detail:'25-30min，坡度6-7%，速度3.5'},{name:'或划船机',detail:'备选代偿手段'}]},
+      {id:2,label:'第二天',sub:'上肢推拉均衡',
+       warmup:[
+         {name:'跑步机慢速快走',detail:'3分钟'},
+         {name:'肩胛绕环',detail:'10次，尽量画大圆圈'},
+         {name:'收下巴(Chin tuck)',detail:'10次 — 感受脑户向正后方平移，体会枕后肌群被拉开的松快'},
+         {name:'绳索超轻阻力面拉',detail:'15次，唤醒肩关节后束旋转袖'},
+         {name:'龙门架肩袖外旋',detail:'12次 — 肘部死紧贴身体一侧，呈90°只旋动前臂'},
+         {name:'前锯肌激活(立姿推举)',detail:'10次 — 手臂前伸到顶点，肩胛骨向前送出以激活前锯肌'}
+       ],
+       exercises:[
+         {id:'d2-pd',name:'高位下拉(对握优先)',target:'背阔肌',sets:3,reps:12,wt:40,tips:['掌心相对，顺势拉至锁骨上方','沉肩带动手臂，肘部向下往腹部夹','感受中背和背阔肌的收紧']},
+         {id:'d2-pu',name:'辅助引体向上',target:'背阔肌',sets:3,reps:10,wt:60,tips:['沉下肩膀后再拉，不可缩头代偿','背部肌群主动收拢拉起','若肩膀深层产生刺痛立刻中止']},
+         {id:'d2-sr',name:'诺德士坐姿划船',target:'中背部',sets:3,reps:12,wt:20,unit:'kg',tips:['挺胸收腹，双肘顺肋骨两侧后拉','感受两个肩胛骨向脊柱靠拢','控制回落时间在3秒']},
+         {id:'d2-vr',name:'辅助Vertical Row',target:'上背/中缝',sets:3,reps:12,wt:20,unit:'kg',tips:['肩胛后缩锁定，小臂自然握持','动作需平稳流畅']},
+         {id:'d2-bf',name:'坐姿蝴蝶夹胸机',target:'胸大肌',sets:3,reps:15,wt:5,tips:['采用极轻安全配重作为基点','双臂在微屈状态夹至胸前，动作顶点不撞击','若肩前袖口部感到刺痛请随时放下']},
+         {id:'d2-ic',name:'诺德士上斜推胸',target:'上胸部',sets:3,reps:12,wt:5,tips:['斜板结构对女性肩关节极度温和','起步配重设定在最低档，动作底部不落回最低点','若有尖锐卡压感及时呼救']},
+         {id:'d2-pc',name:'牧师凳弯举',target:'肱二头肌',sets:3,reps:14,wt:30,tips:['整条大臂完全卡紧在靠板，避免依靠躯干摆动借力','下落过程要慢，手肘留有一丝微曲角度']},
+         {id:'d2-te',name:'下推臂屈伸器械',target:'肱三头肌',sets:3,reps:12,wt:30,tips:['背部靠紧，下沉肩部不耸肩','双肘夹紧身体两侧推至手臂笔直但肘不锁死','手臂慢还原']}
+       ],
+       stretch:['龙门架胸大肌转体拉伸 每侧30s','上斜方肌 歪头配合手部微沉 每侧30s','背阔肌 握持固定件后坐拉伸 每侧30s'],
+       cardio:[{name:'跑步机斜坡走',detail:'25-30min，坡度6-7%，速度3.5'}]},
+      {id:3,label:'第三天',sub:'轻训+有氧',
+       warmup:[
+         {name:'跑步机慢步温和慢走',detail:'3分钟'},
+         {name:'慢速肩胛绕环',detail:'10次'},
+         {name:'前后踝部画圈',detail:'每侧30s'},
+         {name:'枕骨下肌拉伸收下巴',detail:'10次'}
+       ],
+       exercises:[
+         {id:'d3-pd',name:'高位下拉(宽对握)',target:'背阔肌',sets:3,reps:15,wt:30,tips:['轻量，以舒张背阔肌为主','维持极简沉肩','全程感受张力顺滑变化']},
+         {id:'d3-lp',name:'坐姿腿蹬(无负荷恢复性)',target:'股四头肌',sets:3,reps:15,wt:40,tips:['超轻负荷高频次，帮助腿部乳酸排出','窄脚位补充训练']},
+         {id:'d3-le',name:'诺德士腿屈伸(恢复性)',target:'股四头肌',sets:2,reps:15,wt:30,tips:['温和雕刻大腿前侧肌肉分离度','注意均匀呼吸']},
+         {id:'d3-rt',name:'坐姿旋转训练器',target:'腹斜肌',sets:2,reps:15,wt:20,tips:['轻量核心维持','深吸慢呼控制控制']},
+         {id:'d3-cr',name:'诺德士卷腹器械',target:'腹直肌',sets:2,reps:15,wt:30,tips:['极轻柔顺发力','背肌不借力']}
+       ],
+       stretch:['将前两日的主要拉伸动作完整循环','诺德士腰腿拉伸器 5min','使用泡沫轴滚动放松背部及腿部肌群 各1-2分钟'],
+       cardio:[{name:'跑步机大角度坡度爬行',detail:'40-50min，坡度9-10%，速度4.0'}]},
+    ];
 
-  document.getElementById('predictionCard').innerHTML=
-    '<div class="ex-card" style="margin-bottom:16px">'+
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
-        '<span style="font-size:14px;font-weight:700">📊 今日预测</span>'+
-        '<span style="font-size:11px;padding:2px 10px;border-radius:10px;background:'+pColor+'22;color:'+pColor+';font-weight:600">'+pCn+' 第'+pred.cycleDay+'天</span></div>'+
-      '<div style="font-size:11px;color:var(--text2);margin-bottom:10px">'+trainDay+' · 预测区间 '+pred.low+'-'+pred.high+'kg</div>'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px">'+
-        '<div style="text-align:center"><div style="font-size:10px;color:var(--text2);margin-bottom:2px">预测体重</div>'+
-        '<div style="font-size:22px;font-weight:800;color:var(--accent)">'+pred.predicted+'<span style="font-size:12px;color:var(--text2);font-weight:400"> kg</span></div></div>'+
-        diffStr+'</div>'+
-      '<div style="font-size:11px;color:var(--text3);padding-top:6px;border-top:1px solid var(--border);line-height:1.7">'+domsNote+'<br>💡 '+note+'</div></div>';
-
-  // History table
-  var el=document.getElementById('weightList');
-  var aw=state.weights||[];
-  if(!aw.length){
-    el.innerHTML='<div class="hist-empty">暂无体重记录<br>记录后会自动与本日预测对比</div>';return;
-  }
-  aw.sort(function(a,b){return b.timestamp-a.timestamp});
-  el.innerHTML='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">'+
-    '<thead><tr>'+
-      '<th style="text-align:left;padding:8px 6px;border-bottom:1px solid var(--border);color:var(--text2);font-weight:500;font-size:11px">日期</th>'+
-      '<th style="text-align:right;padding:8px 6px;border-bottom:1px solid var(--border);color:var(--text2);font-weight:500;font-size:11px">实际</th>'+
-      '<th style="text-align:right;padding:8px 6px;border-bottom:1px solid var(--border);color:var(--text2);font-weight:500;font-size:11px">预测</th>'+
-      '<th style="text-align:right;padding:8px 6px;border-bottom:1px solid var(--border);color:var(--text2);font-weight:500;font-size:11px">差值</th>'+
-      '<th style="text-align:center;padding:8px 6px;border-bottom:1px solid var(--border);color:var(--text2);font-weight:500;font-size:11px">周期</th>'+
-      '<th style="padding:8px 6px;border-bottom:1px solid var(--border);width:30px"></th>'+
-    '</tr></thead><tbody>'+
-    aw.map(function(w,i){
-      var wp=getCycleDay(w.date,state.cycleStart,state.cycleLen);
-      var wpPhase=getPhase(wp,state.periodDays);
-      var wpCn=phaseLabel(wpPhase);
-      var wpColor=phaseColor(wpPhase);
-      var wPred=predictWeight(w.date,state);
-      var diff=(w.weight-wPred.predicted).toFixed(1);
-      var ds=diff>0?'+':'';
-      var diffColor=diff>0?'#ef4444':(diff<0?'#22c55e':'var(--text3)');
-      return '<tr>'+
-        '<td style="padding:10px 6px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap">'+w.date.replace(/-/g,'/')+'</td>'+
-        '<td style="padding:10px 6px;border-bottom:1px solid var(--border);text-align:right;font-weight:700;font-size:15px;color:var(--text)">'+w.weight+'</td>'+
-        '<td style="padding:10px 6px;border-bottom:1px solid var(--border);text-align:right;color:var(--text2)">'+wPred.predicted+'</td>'+
-        '<td style="padding:10px 6px;border-bottom:1px solid var(--border);text-align:right;font-weight:600;color:'+diffColor+'">'+ds+diff+'</td>'+
-        '<td style="padding:10px 6px;border-bottom:1px solid var(--border);text-align:center"><span style="font-size:10px;padding:1px 8px;border-radius:8px;background:'+wpColor+'22;color:'+wpColor+';white-space:nowrap">'+wpCn+'</span></td>'+
-        '<td style="padding:10px 6px;border-bottom:1px solid var(--border);text-align:center"><button style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0" onclick="delWeight('+i+')">✕</button></td>'+
-      '</tr>';
-    }).join('')+'</tbody></table></div>';
-  saveState();
-}
-
-function addWeight(){
-  var date=document.getElementById('weightDate').value;
-  var weight=parseFloat(document.getElementById('weightValue').value);
-  if(!date||!weight||weight<=0){showToast('请输入有效日期和体重');return;}
-  if(!state.weights)state.weights=[];
-  state.weights.push({date:date,weight:weight,timestamp:Date.now()});
-  saveState();
-  renderWeight();
-  showToast('已记录');
-}
-
-function delWeight(i){
-  if(!state.weights[i])return;
-  if(confirm('删除此条体重记录？')){
-    state.weights.splice(i,1);
-    saveState();
-    renderWeight();
-  }
-}
-
-function saveCycleSettings(){
-  state.cycleStart=document.getElementById('inpCycleStart').value;
-  state.cycleLen=parseInt(document.getElementById('inpCycleLen').value)||32;
-  state.startBase=parseFloat(document.getElementById('inpStartBase').value)||62;
-  state.fatLossPerMonth=parseFloat(document.getElementById('inpFatLoss').value)||0.5;
-  saveState();
-  renderWeight();
-  showToast('设置已保存');
-}
-
-// ============================================================
-// SETTINGS
-// ============================================================
-function exportJSON(){
-  const b=new Blob([JSON.stringify(state)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`training_backup_${todayKey()}.json`;a.click();
-  showToast('已导出');
-}
-function importJSON(){
-  const inp=document.createElement('input');inp.type='file';inp.accept='.json';
-  inp.onchange=e=>{
-    const reader=new FileReader();
-    reader.onload=ev=>{
-      try{
-        const p=JSON.parse(ev.target.result);
-        if(p.history&&p.logs){
-          state=ensureV3Struct(p);
-          saveState();
-          showToast('导入成功');
-          renderAll();
-        }else showToast('格式错误');
-      }catch(e){showToast('解析失败')}
+    // ============================================================
+    // STATE & STORAGE ENGINE
+    // ============================================================
+    const SK_V3='tr_app_v3';
+    const SK_V2='tr_app_v2';
+    let state={
+      currentDay:1,
+      history:[],
+      logs:{},
+      weights:[],
+      cycleStart:'2026-06-25',
+      cycleLen:32,
+      periodDays:5,
+      fatLossPerMonth:0.5,
+      startBase:62,
+      dataVersion:3
     };
-    reader.readAsText(e.target.files[0]);
-  };
-  inp.click();
-}
-function clearAll(){
-  if(confirm('确定清除所有数据？不可恢复！')){localStorage.removeItem(SK_V3);localStorage.removeItem(SK_V2);location.reload()}
-}
 
-// ============================================================
-// TOAST
-// ============================================================
-let tt=null;
-function showToast(msg){
-  const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');
-  clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2000);
-}
+    loadState();
+    let curDay=state.currentDay||1;
+    let activeSet=null;
 
-// ============================================================
-// RENDER ALL & INIT
-// ============================================================
-function renderAll(){
-  renderTrain();
-  renderHistory();
-  // Today label
-  const now=new Date();
-  document.getElementById('todayLabel').textContent=`${now.getMonth()+1}/${now.getDate()} 周${['日','一','二','三','四','五','六'][now.getDay()]}`;
-}
+    // Custom non-blocking Promise Confirm dialog
+    function customConfirm(title, message) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('customModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalContent = document.getElementById('modalContent');
+        const confirmBtn = document.getElementById('modalConfirmBtn');
+        const cancelBtn = document.getElementById('modalCancelBtn');
 
-document.addEventListener('DOMContentLoaded',()=>{
-  document.querySelectorAll('.dock-item').forEach(t=>{
-    t.addEventListener('click',()=>switchView(t.dataset.view));
-  });
-  // AW input auto-save
-  ['inpDur','inpHr','inpCal','inpDurC','inpHrC','inpCalC'].forEach(id=>{
-    document.getElementById(id)?.addEventListener('input',saveAW);
-  });
-  switchDay(state.currentDay||1);
-  renderAll();
-});
-</script>
+        modalTitle.textContent = title;
+        modalContent.textContent = message;
+
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.firstElementChild.classList.remove('scale-95');
+
+        function cleanup(val) {
+          modal.classList.add('opacity-0', 'pointer-events-none');
+          modal.firstElementChild.classList.add('scale-95');
+          confirmBtn.onclick = null;
+          cancelBtn.onclick = null;
+          resolve(val);
+        }
+
+        confirmBtn.onclick = () => cleanup(true);
+        cancelBtn.onclick = () => cleanup(false);
+      });
+    }
+
+    function ensureV3Struct(p){
+      if(p.logs) Object.values(p.logs).forEach(function(log){
+        if(log.note===undefined)log.note='';
+        if(log.orderIndex===undefined)log.orderIndex=-1;
+      });
+      if(p.history) p.history.forEach(function(rec){
+        if(rec.details)rec.details.forEach(function(det,i){
+          if(det.note===undefined)det.note='';
+          if(det.orderIndex===undefined)det.orderIndex=i;
+        });
+      });
+      p.dataVersion=3;
+      delete p.planVersion;
+      return p;
+    }
+
+    function loadState(){
+      const v3raw=localStorage.getItem(SK_V3);
+      if(v3raw){
+        try{const p=JSON.parse(v3raw);if(p.logs)state=ensureV3Struct(p)}catch(e){}
+      }else{
+        const v2raw=localStorage.getItem(SK_V2);
+        if(v2raw){
+          try{const p=JSON.parse(v2raw);if(p.logs){state=ensureV3Struct(p);localStorage.setItem(SK_V3,JSON.stringify(state));localStorage.removeItem(SK_V2)}}catch(e){}
+        }
+      }
+      if(!state.history)state.history=[];
+      if(!state.weights)state.weights=[];
+      if(!state.cycleStart){state.cycleStart='2026-06-25';state.cycleLen=32;state.periodDays=5;state.fatLossPerMonth=0.5;state.startBase=62}
+      if(state.cycleStart==='2026-05-23')state.cycleStart='2026-06-25';
+    }
+
+    function saveState(){
+      state.currentDay=curDay;
+      localStorage.setItem(SK_V3,JSON.stringify(state));
+    }
+
+    function todayKey(){
+      return new Date().toISOString().slice(0,10);
+    }
+
+    // ============================================================
+    // NAVIGATION ROUTING
+    // ============================================================
+    function switchView(id){
+      closeTimer();
+      document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
+      document.querySelectorAll('.dock-item').forEach(d=>{
+        d.classList.remove('text-babyPink-400', 'bg-white/75', 'shadow-sm');
+        d.classList.add('text-slate-400');
+      });
+      
+      document.getElementById('view-'+id).classList.remove('hidden');
+      const activeBtn = document.querySelector(`.dock-item[data-view="${id}"]`);
+      activeBtn.classList.add('text-babyPink-400', 'bg-white/75', 'shadow-sm');
+      activeBtn.classList.remove('text-slate-400');
+      
+      if(id==='history') renderHistory();
+      if(id==='weight') renderWeight();
+    }
+
+    function switchDay(n){
+      curDay=n;
+      cardExId=null;
+      activeSet=null;
+      document.getElementById('trainList').style.display='';
+      document.getElementById('trainCard').style.display='none';
+      saveState();
+      renderTrain();
+    }
+
+    // ============================================================
+    // RENDER TRAIN
+    // ============================================================
+    function renderTrain(){
+      const day=DAYS.find(d=>d.id===curDay)||DAYS[0];
+
+      // 切换星期标签
+      document.getElementById('dayTabs').innerHTML=DAYS.map(d=> {
+        const isActive = d.id===curDay;
+        const activeCls = isActive ? 'bg-gradient-to-r from-babyPink-200 to-babyBlue-200 text-white shadow font-bold' : 'text-slate-400 hover:text-slate-600';
+        return `<button class="day-tab flex-1 text-center py-2 rounded-xl text-[10px] transition-all duration-200 ${activeCls}" onclick="switchDay(${d.id})">
+          ${d.label}
+          <span class="block text-[8px] opacity-80 font-normal mt-0.5">${d.sub}</span>
+        </button>`;
+      }).join('');
+
+      // 今日总结统计 (增强呼吸感)
+      const allExes=getDayExercises(day);
+      const allSets=allExes.reduce((a,e)=>a+e.sets,0);
+      let doneSets=0;
+      allExes.forEach(e=>{
+        const log=state.logs[e.id];
+        if(log)log.sets.forEach(s=>{if(s.done)doneSets++});
+      });
+
+      document.getElementById('daySummary').innerHTML= `
+        <div class="bg-white/60 border border-white rounded-2xl p-4 text-center shadow-sm">
+          <div class="text-[8px] text-slate-400 font-bold mb-1">第${['一','二','三'][curDay-1]}天</div>
+          <div class="text-[11px] font-extrabold text-slate-700 truncate">${day.sub}</div>
+        </div>
+        <div class="bg-white/60 border border-white rounded-2xl p-4 text-center shadow-sm">
+          <div class="text-[8px] text-slate-400 font-bold mb-1">计划总组</div>
+          <div class="text-xs font-extrabold text-babyPink-400">${allSets} <span class="text-[8px] font-medium text-slate-400">组</span></div>
+        </div>
+        <div class="bg-white/60 border border-white rounded-2xl p-4 text-center shadow-sm">
+          <div class="text-[8px] text-slate-400 font-bold mb-1">已完成组</div>
+          <div class="text-xs font-extrabold text-babyBlue-400">${doneSets}/${allSets}</div>
+        </div>`;
+
+      // 暖身激活卡 (移除了标题前的 Emoji)
+      let warmHtml='';
+      if(day.warmup){
+        const wu=day.warmup.filter(w=>!w.extra),wx=day.warmup.filter(w=>w.extra);
+        warmHtml=`
+          <div class="px-5 py-3.5 flex justify-between items-center cursor-pointer select-none" onclick="togglePanel('warmupPanel')">
+            <span class="font-bold text-xs text-slate-600">核心前激活与热身 (${day.warmup.length}项)</span>
+            <div class="panel-toggle-icon text-slate-400 text-[9px] transition-transform duration-300">▼</div>
+          </div>
+          <div class="panel-content hidden px-5 pb-5 border-t border-slate-100 pt-3 text-[11px] text-slate-500 space-y-2.5">
+            <ul class="space-y-2">`;
+        wu.forEach(w=>{warmHtml+=`<li class="flex items-start gap-1.5"><span class="text-babyPink-300">✦</span><span><b>${w.name}</b> — ${w.detail}</span></li>`});
+        if(wx.length){
+          warmHtml+=`</ul><div class="h-px bg-slate-100 my-2.5"></div><div class="text-babyPink-400 text-[9px] font-bold mb-1.5">本日专用激活：</div><ul class="space-y-2">`;
+          wx.forEach(w=>{warmHtml+=`<li class="flex items-start gap-1.5"><span class="text-babyPink-300">✦</span><span><b>${w.name}</b> — ${w.detail}</span></li>`});
+        }
+        warmHtml+=`</ul></div>`;
+      }
+      document.getElementById('warmupPanel').innerHTML=warmHtml;
+
+      // 有氧面板 (移除了 Emoji & 增加内部 padding 呼吸感)
+      const cardioItems=day.cardio||[];
+      const cList=Array.isArray(cardioItems)?cardioItems:[{name:cardioItems,detail:''}];
+      document.getElementById('cardioPanel').innerHTML= `
+        <div class="px-5 py-3.5 flex justify-between items-center cursor-pointer select-none" onclick="togglePanel('cardioPanel')">
+          <span class="font-bold text-xs text-slate-600">有氧代谢选择 (${cList.length}项)</span>
+          <div class="panel-toggle-icon text-slate-400 text-[9px] transition-transform duration-300">▼</div>
+        </div>
+        <div class="panel-content hidden px-5 pb-5 border-t border-slate-100 pt-3 text-[11px] text-slate-500">
+          <ul class="space-y-2">
+            ${cList.map(c=>`<li class="flex items-start gap-1.5"><span class="text-babyBlue-300">✦</span><span><b>${c.name}</b> — ${c.detail}</span></li>`).join('')}
+          </ul>
+        </div>`;
+
+      // 拉伸面板 (移除了 Emoji)
+      document.getElementById('stretchPanel').innerHTML= `
+        <div class="px-5 py-3.5 flex justify-between items-center cursor-pointer select-none" onclick="togglePanel('stretchPanel')">
+          <span class="font-bold text-xs text-slate-600">拉伸放松与恢复 (${day.stretch.length}项)</span>
+          <div class="panel-toggle-icon text-slate-400 text-[9px] transition-transform duration-300">▼</div>
+        </div>
+        <div class="panel-content hidden px-5 pb-5 border-t border-slate-100 pt-3 text-[11px] text-slate-500">
+          <ul class="space-y-2">
+            ${day.stretch.map(s=>`<li class="flex items-start gap-1.5"><span class="text-babyPink-300">✦</span><span>${s}</span></li>`).join('')}
+          </ul>
+        </div>`;
+
+      renderExList();
+
+      // 同步Apple Watch输入值
+      const rec=getTRec();
+      document.getElementById('inpDur').value=rec.dur||'';
+      document.getElementById('inpHr').value=rec.hr||'';
+      document.getElementById('inpCal').value=rec.cal||'';
+      document.getElementById('inpDurC').value=rec.durC||'';
+      document.getElementById('inpHrC').value=rec.hrC||'';
+      document.getElementById('inpCalC').value=rec.calC||'';
+    }
+
+    function renderExList(){
+      const day=DAYS.find(d=>d.id===curDay)||DAYS[0];
+      const allExes=getDayExercises(day);
+      
+      const html=allExes.map(ex=>{
+        const log=state.logs[ex.id];
+        const completed=log&&(log.completed||log.sets.every(s=>s.done));
+        const inProgress=log&&!completed&&log.sets.some(s=>s.done);
+        
+        let statusClass='', statusText='', pillClass='';
+        if(completed){
+          statusClass='bg-babyBlue-300 text-white border-transparent';
+          statusText='✓';
+          pillClass='opacity-65 border-white bg-white/40 shadow-xs';
+        } else if(inProgress){
+          statusClass='border-babyPink-300 bg-babyPink-50 text-babyPink-400';
+          statusText='⋯';
+          pillClass='border-babyPink-200 bg-white/95 shadow-md shadow-pink-100/10';
+        } else {
+          statusClass='border-slate-200 text-transparent';
+          statusText='';
+          pillClass='border-white bg-white/70 hover:bg-white/90 shadow-sm';
+        }
+        
+        const isExtra=ex.id.startsWith('extra-');
+        const delBtn=isExtra?`<button class="p-1 text-slate-300 hover:text-rose-400 active:scale-75 transition-all mr-2" onclick="event.stopPropagation();delExtraEx('${ex.id}')">✕</button>`:'';
+        
+        return `<div class="flex items-center justify-between border rounded-2xl px-5 py-4 transition-all duration-200 cursor-pointer ${pillClass}" onclick="showCard('${ex.id}')">
+          <div class="flex items-center flex-1 min-w-0">
+            ${delBtn}
+            <div class="min-w-0">
+              <h4 class="text-xs font-bold text-slate-700 truncate">${ex.name}</h4>
+              <div class="text-[9px] text-slate-400 font-medium mt-1 flex items-center gap-1.5 flex-wrap">
+                <span class="bg-slate-50/50 px-2 py-0.5 rounded-full border border-slate-100">${ex.target}</span>
+                <span>•</span>
+                <span>${ex.sets} 组 × ${ex.reps} 次</span>
+              </div>
+            </div>
+          </div>
+          <span class="w-5.5 h-5.5 rounded-full border-2 flex items-center justify-center text-[10px] font-black transition-all ml-3 shrink-0 ${statusClass}">${statusText}</span>
+        </div>`;
+      }).join('');
+
+      document.getElementById('exerciseList').innerHTML=html;
+    }
+
+    function getDayExercises(day){
+      const exes=[...day.exercises];
+      Object.keys(state.logs).forEach(function(id){
+        if(id.startsWith('extra-')) exes.push(getExById(id));
+      });
+      return exes;
+    }
+
+    function getExById(id){
+      const fromDay=DAYS.flatMap(d=>d.exercises).find(e=>e.id===id);
+      if(fromDay)return fromDay;
+      const log=state.logs[id];
+      if(!log)return null;
+      return {id:id,name:log._name||id,target:log._target||'',sets:log._totalSets||log.sets.length,reps:log._reps||12,unit:log._unit||'lb',tips:[]};
+    }
+
+    // ============================================================
+    // EXERCISE DETAILS (CARD VIEW) — Completely removed illustrations
+    // ============================================================
+    let cardExId=null;
+
+    function showCard(exId){
+      closeTimer();
+      cardExId=exId;
+      document.getElementById('trainList').style.display='none';
+      document.getElementById('trainCard').style.display='block';
+      renderCard();
+    }
+
+    function hideCard(){
+      cardExId=null;
+      activeSet=null;
+      document.getElementById('trainList').style.display='';
+      document.getElementById('trainCard').style.display='none';
+    }
+
+    function renderCard(){
+      const ex=getExById(cardExId);
+      if(!ex){hideCard();return;}
+      ensureLogExists(cardExId);
+      const log=state.logs[cardExId];
+      if(!log){hideCard();return;}
+
+      const unit=ex.unit||'lb';
+      const readOnly=!!(log.completed||log.sets.every(s=>s.done));
+
+      // 渲染各组次列表
+      let setsHtml=log.sets.map((s,idx)=>{
+        const isA=!readOnly&&activeSet&&activeSet.exId===cardExId&&activeSet.idx===idx;
+        
+        let rowClass='', numClass='', checkBtnClass='';
+        if(s.done) {
+          rowClass = 'bg-gradient-to-r from-babyPink-50/20 to-babyBlue-50/20 border-babyPink-200/40';
+          numClass = 'text-slate-500';
+          checkBtnClass = 'bg-babyBlue-300 text-white border-transparent shadow-sm font-bold';
+        } else if(isA) {
+          // 当前活动编辑行：增加醒目的浅色底和轻度外发光
+          rowClass = 'bg-babyPink-50/30 border-babyPink-200 ring-2 ring-babyPink-100/50 shadow-sm';
+          numClass = 'text-babyPink-400 font-extrabold';
+          checkBtnClass = 'border-babyPink-300 bg-white text-babyPink-400';
+        } else {
+          rowClass = 'bg-white/80 border-slate-100 hover:bg-white';
+          numClass = 'text-slate-400';
+          checkBtnClass = 'border-slate-300 bg-white text-transparent';
+        }
+
+        const valW=s.weight>0?`${s.weight} <span class="text-[9px] text-slate-400 font-normal ml-0.5">${unit}</span>`:'—';
+        const valR=s.reps>0?`${s.reps} <span class="text-[9px] text-slate-400 font-normal ml-0.5">次</span>`:'—';
+        const clk=readOnly?'':` onclick="activateSet('${cardExId}',${idx})"`;
+        const chk=readOnly?'':` onclick="event.stopPropagation();toggleSet('${cardExId}',${idx})"`;
+        
+        return `<div class="border flex items-center justify-between p-3 rounded-2xl transition-all duration-150 cursor-pointer ${rowClass}"${clk}>
+          <div class="flex items-center gap-4">
+            <span class="text-xs font-bold w-6 text-center ${numClass}">S${idx+1}</span>
+            <div class="flex items-center gap-6">
+              <div class="text-xs font-extrabold text-slate-700 w-16 text-center">${valW}</div>
+              <div class="text-xs font-extrabold text-slate-700 w-16 text-center">${valR}</div>
+            </div>
+          </div>
+          <button class="w-7 h-7 rounded-xl border-2 flex items-center justify-center text-xs font-black active:scale-75 transition-all ${checkBtnClass}"${chk}>
+            ${s.done?'✓':''}
+          </button>
+        </div>`;
+      }).join('');
+
+      const tipsHtml=ex.tips&&ex.tips.length?ex.tips.map(t=>`<li>${t}</li>`).join(''):'';
+
+      const btnHtml=readOnly
+        ?`<button class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold rounded-2xl text-xs active:scale-[0.98] transition-all" onclick="hideCard()">关闭动作面板</button>`
+        :`<button class="flex-1 py-3 bg-slate-50 border border-slate-200/60 hover:bg-slate-100 text-slate-400 font-bold rounded-2xl text-xs active:scale-[0.98] transition-all" onclick="resetEx()">× 重置</button>
+          <button class="flex-1 py-3 px-6 bg-gradient-to-r from-babyPink-300 to-babyBlue-300 text-white font-extrabold rounded-2xl text-xs active:scale-[0.98] transition-all shadow-md shadow-babyPink-100" onclick="completeEx()">✓ 完成动作</button>`;
+
+      document.getElementById('trainCard').innerHTML=`
+        <button class="flex items-center gap-1 text-babyPink-400 hover:opacity-85 text-xs font-bold py-2 mb-2 active:scale-95 transition-all" onclick="hideCard()">
+          ← 返回动作列表
+        </button>
+
+        <div class="glass-card rounded-2xl p-5 space-y-4 shadow-sm">
+          <div>
+            <h2 class="text-sm font-extrabold text-slate-800 tracking-tight">${ex.name}</h2>
+            <div class="flex items-center gap-2 text-[9px] text-slate-400 font-bold mt-1.5">
+              <span class="bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-full">目标: ${ex.target}</span>
+              <span>•</span>
+              <span>计划: ${ex.sets}组 × ${ex.reps}次</span>
+            </div>
+          </div>
+
+          ${tipsHtml?`
+          <div class="bg-babyPink-50/20 border border-babyPink-100 rounded-xl p-3.5">
+            <div class="text-[9px] font-extrabold text-babyPink-400 tracking-wider uppercase mb-1">发力技巧与安全要点</div>
+            <ul class="list-disc pl-4 text-[11px] text-slate-500 space-y-1 leading-relaxed">${tipsHtml}</ul>
+          </div>`:''}
+
+          <div class="bg-slate-50/50 border border-slate-100 rounded-xl p-3">
+            <label class="block text-[8px] text-slate-400 font-extrabold tracking-wider uppercase mb-1.5">动作与关节体感备注</label>
+            <textarea id="cardNote" placeholder="记下此组的肌肉泵感、受阻阻力或关节反馈..." class="w-full bg-white/70 border border-slate-100 rounded-xl text-[11px] text-slate-600 p-2 outline-none focus:border-babyPink-200 resize-none h-14 transition-all" oninput="saveNote()" ${readOnly?'readonly style="opacity:.6"':''}>${escHtml(log.note||'')}</textarea>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-[8px] font-bold text-slate-400 tracking-wider uppercase px-1">
+              <span>组次明细</span>
+              <span>${readOnly?'':'点按组行快速调整值'}</span>
+            </div>
+            <div class="space-y-1.5">${setsHtml}</div>
+            
+            <!-- 快速调值框（Stepper Box）锚点，保证弹出位置极为显眼且明确 -->
+            ${!readOnly?`<div class="hidden" id="stBox-${cardExId}"></div>`:''}
+          </div>
+
+          <div class="flex gap-3 pt-2">
+            ${btnHtml}
+          </div>
+        </div>`;
+
+      if(activeSet&&activeSet.exId===cardExId) renderStepper(cardExId,activeSet.idx);
+    }
+
+    function escHtml(s){
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function saveNote(){
+      const v=document.getElementById('cardNote').value;
+      if(state.logs[cardExId])state.logs[cardExId].note=v;
+      saveState();
+    }
+
+    function resetEx(){
+      if(!cardExId)return;
+      const log=state.logs[cardExId];
+      if(log){
+        log.sets.forEach(s=>s.done=false);
+        log.completed=false;
+        log.note='';
+        log.orderIndex=-1;
+      }
+      activeSet=null;
+      saveState();
+      renderCard();
+      renderExList();
+    }
+
+    function completeEx(){
+      if(!cardExId)return;
+      const log=state.logs[cardExId];
+      if(!log)return;
+      log.sets.forEach(s=>s.done=true);
+      log.completed=true;
+      if(log.orderIndex<0)log.orderIndex=Date.now();
+      activeSet=null;
+      saveState();
+      hideCard();
+      renderExList();
+      showToast('✓ '+getExById(cardExId).name+' 已成功记录');
+    }
+
+    function getTRec(){
+      if(!state._today)state._today={};
+      return state._today;
+    }
+
+    function saveAW(){
+      const t=getTRec();
+      t.dur=document.getElementById('inpDur').value;
+      t.hr=document.getElementById('inpHr').value;
+      t.cal=document.getElementById('inpCal').value;
+      t.durC=document.getElementById('inpDurC').value;
+      t.hrC=document.getElementById('inpHrC').value;
+      t.calC=document.getElementById('inpCalC').value;
+      state._today=t;
+      saveState();
+    }
+
+    // ============================================================
+    // INTERACTION MECHANISMS
+    // ============================================================
+    function ensureLogExists(exId){
+      if(!state.logs[exId]){
+        const ex=getExById(exId);
+        if(!ex)return;
+        const sets=Array.from({length:ex.sets},(_,i)=>({weight:ex.initWts?ex.initWts[i]:ex.wt,reps:ex.reps,done:false}));
+        state.logs[exId]={sets,completed:false,note:'',orderIndex:-1};
+        saveState();
+      }
+    }
+
+    function togglePanel(id){
+      const content = document.querySelector(`#${id} .panel-content`);
+      const icon = document.querySelector(`#${id} .panel-toggle-icon`);
+      if(content.classList.contains('hidden')){
+        content.classList.remove('hidden');
+        icon.style.transform = 'rotate(180deg)';
+      } else {
+        content.classList.add('hidden');
+        icon.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    async function delExtraEx(id){
+      const confirmed = await customConfirm('确认删除', '是否将此定制训练动作从列表中移除？');
+      if (confirmed) {
+        if(state.logs[id]){
+          delete state.logs[id];
+          saveState();
+          renderExList();
+          showToast('动作已删除');
+        }
+      }
+    }
+
+    function showAddExForm(){
+      const units=['lb','kg'];
+      const overlay=document.createElement('div');
+      overlay.id='addExOverlay';
+      overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-5 bg-slate-900/10 backdrop-blur-md';
+      overlay.innerHTML=`
+        <div class="bg-white/95 border border-white rounded-[2rem] p-5 max-w-sm w-full space-y-4 shadow-xl">
+          <div class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
+            <span>➕</span> 增加定制训练动作
+          </div>
+
+          <div class="space-y-2.5">
+            <div class="bg-slate-50 border border-slate-100 rounded-xl p-2.5 focus-within:border-babyPink-200 transition-all">
+              <label class="block text-[8px] text-slate-400 font-bold mb-0.5">动作名称</label>
+              <input id="aexName" class="w-full bg-transparent border-none text-slate-600 font-bold text-xs outline-none" placeholder="例如: 哑铃单臂侧平举">
+            </div>
+
+            <div class="bg-slate-50 border border-slate-100 rounded-xl p-2.5 focus-within:border-babyPink-200 transition-all">
+              <label class="block text-[8px] text-slate-400 font-bold mb-0.5">目标肌群</label>
+              <input id="aexTarget" class="w-full bg-transparent border-none text-slate-600 font-bold text-xs outline-none" placeholder="例如: 三角肌中束">
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div class="bg-slate-50 border border-slate-100 rounded-xl p-2.5 focus-within:border-babyPink-200 transition-all">
+                <label class="block text-[8px] text-slate-400 font-bold mb-0.5">计划组数</label>
+                <input id="aexSets" type="number" value="3" class="w-full bg-transparent border-none text-slate-600 font-bold text-xs outline-none">
+              </div>
+              <div class="bg-slate-50 border border-slate-100 rounded-xl p-2.5 focus-within:border-babyPink-200 transition-all">
+                <label class="block text-[8px] text-slate-400 font-bold mb-0.5">计划次数</label>
+                <input id="aexReps" type="number" value="12" class="w-full bg-transparent border-none text-slate-600 font-bold text-xs outline-none">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div class="bg-slate-50 border border-slate-100 rounded-xl p-2.5 focus-within:border-babyPink-200 transition-all">
+                <label class="block text-[8px] text-slate-400 font-bold mb-0.5">起步重量</label>
+                <input id="aexWt" type="number" value="15" class="w-full bg-transparent border-none text-slate-600 font-bold text-xs outline-none">
+              </div>
+              <div class="bg-slate-50 border border-slate-100 rounded-xl p-2.5 focus-within:border-babyPink-200 transition-all">
+                <label class="block text-[8px] text-slate-400 font-bold mb-0.5">重量单位</label>
+                <select id="aexUnit" class="w-full bg-transparent border-none text-slate-600 font-bold text-xs outline-none">
+                  ${units.map(u=>'<option value="'+u+'" class="bg-white">'+u+'</option>').join('')}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex gap-3 pt-1">
+            <button onclick="document.getElementById('addExOverlay').remove()" class="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-xl active:scale-95 transition-all">取消</button>
+            <button onclick="submitAddEx()" class="flex-1 py-2.5 px-4 bg-gradient-to-r from-babyPink-200 to-babyBlue-200 text-white font-extrabold text-xs rounded-xl active:scale-95 transition-all">确认创建</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+    }
+
+    function submitAddEx(){
+      const name=document.getElementById('aexName').value.trim();
+      if(!name){showToast('请输入动作名称');return;}
+      const target=document.getElementById('aexTarget').value;
+      const sets=parseInt(document.getElementById('aexSets').value)||3;
+      const reps=parseInt(document.getElementById('aexReps').value)||12;
+      const wt=parseFloat(document.getElementById('aexWt').value)||30;
+      const unit=document.getElementById('aexUnit').value;
+      const id='extra-'+Date.now();
+      
+      state.logs[id]={
+        sets:Array.from({length:sets},()=>({weight:wt,reps,done:false})),
+        completed:false,
+        note:'',
+        orderIndex:-1,
+        _name:name,
+        _target:target,
+        _totalSets:sets,
+        _reps:reps,
+        _unit:unit
+      };
+      
+      saveState();
+      renderExList();
+      document.getElementById('addExOverlay').remove();
+      showToast('已成功增加 ' + name);
+    }
+
+    function activateSet(exId,idx){
+      ensureLogExists(exId);
+      activeSet={exId,idx};
+      const stBox=document.getElementById('stBox-'+exId);
+      if(stBox) stBox.classList.remove('hidden');
+      reRender();
+    }
+
+    function getRestSec(exId){
+      if(exId==='d2-pu')return 120;
+      const core=exId.replace(/^d\d-/,'');
+      if(['gb','hs','lp','sr','vr','pd','ic'].includes(core))return 90;
+      return 60;
+    }
+
+    function reRender(){
+      if(cardExId&&document.getElementById('trainCard').style.display==='block'){
+        renderCard();
+        renderExList();
+      }else{
+        renderTrain();
+      }
+    }
+
+    function toggleSet(exId,idx){
+      ensureLogExists(exId);
+      const s=state.logs[exId].sets[idx];
+      s.done=!s.done;
+      saveState();
+      if(s.done) triggerRest(getRestSec(exId));
+      reRender();
+    }
+
+    // ============================================================
+    // STEPPER ADJUSTER — REDESIGNED (Extremely visible with micro cues)
+    // ============================================================
+    function renderStepper(exId,idx){
+      const box=document.getElementById('stBox-'+exId);
+      if(!box)return;
+      box.classList.remove('hidden');
+      const s=state.logs[exId].sets[idx];
+      const ex=getExById(exId);
+      const unit=(ex&&ex.unit)||'lb';
+      const step=unit==='kg'?2.5:5;
+      const tagStep=unit==='kg'?5:10;
+      const bw=s.weight||(unit==='kg'?10:40);
+      const anchor=Math.round(bw/tagStep)*tagStep;
+      const qws=[anchor-tagStep*2,anchor-tagStep,anchor,anchor+tagStep,anchor+tagStep*2].filter(w=>w>0);
+      
+      box.innerHTML=`
+        <div class="bg-gradient-to-b from-babyPink-50/20 to-white rounded-2xl border-2 border-babyPink-200/80 p-4 space-y-3.5 mt-2.5 shadow-md relative overflow-hidden">
+          
+          <div class="flex justify-between items-center text-[9px] text-slate-400 font-extrabold uppercase">
+            <span class="text-babyPink-400 font-extrabold">第 S${idx+1} 组参数正在调整</span>
+            <span>点按快速改值</span>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <div class="text-[8px] text-slate-400 font-bold mb-1.5">训练负重 (${unit})</div>
+              <div class="flex items-center justify-between bg-white border border-slate-100 rounded-xl p-1 shadow-sm">
+                <button class="w-9 h-9 bg-slate-50 text-slate-600 font-black text-sm rounded-lg active:scale-95 transition-all" onclick="adj(${idx},-1,'${exId}')">-${step}</button>
+                <div class="text-xs font-extrabold text-slate-700 text-center flex-1">${s.weight>0?s.weight:'自重'}<span class="text-[8px] text-slate-400 font-normal ml-0.5">${unit}</span></div>
+                <button class="w-9 h-9 bg-slate-50 text-slate-600 font-black text-sm rounded-lg active:scale-95 transition-all" onclick="adj(${idx},1,'${exId}')">+${step}</button>
+              </div>
+            </div>
+
+            <div class="quick-tags flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+              ${qws.map(w=>`
+                <button class="qt shrink-0 flex items-center gap-1 py-1 px-3 rounded-full border text-[9px] font-bold active:scale-95 transition-all ${w===s.weight?'border-babyPink-300 text-babyPink-400 bg-babyPink-50/50':'border-slate-100 text-slate-400 bg-white/70 hover:bg-white'}" onclick="setW(${w},${idx},'${exId}')">
+                  <span>${w}</span>
+                  <span class="text-[7px] opacity-75">${unit}</span>
+                </button>
+              `).join('')}
+            </div>
+
+            <div>
+              <div class="text-[8px] text-slate-400 font-bold mb-1.5">每组动作次数 (reps)</div>
+              <div class="flex items-center justify-between bg-white border border-slate-100 rounded-xl p-1 shadow-sm">
+                <button class="w-9 h-9 bg-slate-50 text-slate-600 font-black text-sm rounded-lg active:scale-95 transition-all" onclick="adj(${idx},-1,'${exId}','reps')">－</button>
+                <div class="text-xs font-extrabold text-slate-700 text-center flex-1">${s.reps}<span class="text-[8px] text-slate-400 font-normal ml-0.5">次</span></div>
+                <button class="w-9 h-9 bg-slate-50 text-slate-600 font-black text-sm rounded-lg active:scale-95 transition-all" onclick="adj(${idx},1,'${exId}','reps')">＋</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function adj(idx,sign,exId,field='weight'){
+      const s=state.logs[exId].sets[idx];
+      if(field==='weight'){
+        const ex=getExById(exId);
+        const step=(ex&&ex.unit==='kg')?2.5:5;
+        s.weight=Math.max(0,Math.round((s.weight+sign*step)/step)*step);
+      }else{
+        s.reps=Math.max(1,s.reps+sign);
+      }
+      saveState();
+      renderStepper(exId,idx);
+      reRender();
+    }
+
+    function setW(w,idx,exId){
+      state.logs[exId].sets[idx].weight=w;
+      saveState();
+      renderStepper(exId,idx);
+      reRender();
+    }
+
+    // ============================================================
+    // TIMER
+    // ============================================================
+    let timerInt=null;
+    let timerSec=0;
+    let timerStart=0;
+
+    function triggerRest(sec){
+      closeTimer();
+      timerSec=sec;
+      timerStart=Date.now();
+      
+      const bar=document.createElement('div');
+      bar.id='restTimer';
+      bar.className = 'fixed top-[52px] left-0 right-0 z-50 bg-white/95 border-b border-slate-100/50 p-3 shadow-sm flex items-center justify-between';
+      bar.innerHTML=`
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-babyPink-200 to-babyBlue-200 flex items-center justify-center">
+            <span class="text-white text-[10px] animate-bounce">⏱</span>
+          </div>
+          <div>
+            <div class="text-[8px] font-bold text-slate-400 uppercase tracking-wide">组间恢复中</div>
+            <div class="text-[10px] font-bold text-slate-600 mt-0.5"><span id="restTimerVal" class="text-xs text-babyPink-400 font-black font-mono mr-0.5">${sec}</span>秒后继续冲刺</div>
+          </div>
+        </div>
+        <button id="restClose" class="w-7 h-7 rounded-full bg-slate-50 text-slate-400 hover:text-slate-600 flex items-center justify-center text-xs font-bold active:scale-75 transition-all">✕</button>
+      `;
+      document.body.appendChild(bar);
+      document.getElementById('restClose').onclick=closeTimer;
+      timerInt=setInterval(tickTimer,200);
+      document.addEventListener('visibilitychange',onVisChange);
+    }
+
+    function tickTimer(){
+      const bar=document.getElementById('restTimer');
+      if(!bar)return;
+      const elapsed=Math.floor((Date.now()-timerStart)/1000);
+      const left=Math.max(0,timerSec-elapsed);
+      
+      const valEl = document.getElementById('restTimerVal');
+      if(valEl) valEl.textContent = left;
+      
+      if(left<=0){
+        closeTimer();
+        if(navigator.vibrate)navigator.vibrate(400);
+        showToast('休息完成，开始冲刺下一组！');
+      }
+    }
+
+    function onVisChange(){
+      if(document.visibilityState==='visible')tickTimer();
+    }
+
+    function closeTimer(){
+      clearInterval(timerInt);
+      timerInt=null;
+      document.removeEventListener('visibilitychange',onVisChange);
+      const tb=document.getElementById('restTimer');
+      if(tb)tb.remove();
+    }
+
+    // ============================================================
+    // WORKOUT FINISH
+    // ============================================================
+    function finishWorkout(){
+      const day=DAYS.find(d=>d.id===curDay);
+      if(!day)return;
+
+      const details=[];
+      let totalSets=0;
+      Object.keys(state.logs).forEach(function(id){
+        const log=state.logs[id];
+        if(!log)return;
+        const done=log.sets.filter(s=>s.done);
+        if(done.length===0)return;
+        const ex=getExById(id);
+        if(!ex)return;
+        totalSets+=done.length;
+        details.push({
+          name:ex.name,
+          target:ex.target||'',
+          unit:ex.unit||'lb',
+          sets:done.map(function(s){return{weight:s.weight,reps:s.reps}}),
+          note:log.note||'',
+          orderIndex:log.orderIndex>=0?log.orderIndex:details.length
+        });
+      });
+
+      const dur=parseInt(document.getElementById('inpDur').value)||0;
+      const hr=parseInt(document.getElementById('inpHr').value)||0;
+      const cal=parseInt(document.getElementById('inpCal').value)||0;
+      const durC=parseInt(document.getElementById('inpDurC').value)||0;
+      const hrC=parseInt(document.getElementById('inpHrC').value)||0;
+      const calC=parseInt(document.getElementById('inpCalC').value)||0;
+
+      const hasStrength=details.length>0;
+      const hasCardio=durC>0||hrC>0||calC>0;
+      if(!hasStrength&&!hasCardio){showToast('请至少完成一组训练或录入有氧指标数据');return;}
+
+      const dayName=hasStrength?(day.label+' '+day.sub) : '有氧体能日';
+      const dayId=hasStrength?day.id:0;
+
+      state.history.unshift({
+        date:todayKey(),
+        dayName,
+        dayId,
+        dur,
+        hr,
+        cal,
+        durC,
+        hrC,
+        calC,
+        totalSets,
+        details,
+        timestamp:Date.now()
+      });
+      
+      state.logs={};
+      state._today={};
+      cardExId=null;
+      activeSet=null;
+      document.getElementById('trainList').style.display='';
+      document.getElementById('trainCard').style.display='none';
+      saveState();
+      showToast('🎉 恭喜！今日训练已完美归档保存');
+      renderTrain();
+      switchView('history');
+    }
+
+    // ============================================================
+    // HISTORY VIEW
+    // ============================================================
+    function renderHistory(){
+      closeTimer();
+      const el=document.getElementById('historyList');
+      if(!state.history||state.history.length===0){
+        el.innerHTML='<div class="text-center py-14 text-slate-400 font-semibold space-y-2 text-xs"><div>暂无历史归档记录</div><div class="text-[9px] font-normal opacity-80">点击下方训练开始记录！</div></div>';
+        return;
+      }
+      
+      el.innerHTML=state.history.map((r,i)=>{
+        const exRows=r.details.map(function(ex){
+          const str=ex.summary||(ex.sets?ex.sets.map(function(s,i){return'S'+(i+1)+':'+(s.weight>0?s.weight+ex.unit:'BW')+'×'+s.reps}).join(', '):'');
+          const noteHtml=ex.note?`<div class="text-[9px] text-babyPink-400 border-t border-slate-50 pt-1.5 mt-1.5 flex items-start gap-1"><span>📝</span><span>${escHtml(ex.note)}</span></div>`:'';
+          return `<div class="bg-white/50 border border-white rounded-xl p-3 space-y-1">
+            <div class="flex items-start justify-between gap-4">
+              <span class="text-[11px] font-bold text-slate-700">${ex.name}</span>
+              <span class="text-[8.5px] font-bold text-slate-400 break-all text-right">${str}</span>
+            </div>
+            ${noteHtml}
+          </div>`;
+        }).join('');
+
+        return `<div class="glass-card rounded-2xl p-5 space-y-3.5 shadow-sm">
+          <div class="flex justify-between items-start gap-4">
+            <div>
+              <div class="text-xs font-extrabold text-slate-800">${r.date}</div>
+              <div class="text-[11px] font-bold text-babyPink-400 mt-0.5">${r.dayName}</div>
+            </div>
+            <button class="text-[10px] font-bold text-slate-400 hover:text-rose-500 active:scale-90 transition-all py-1 px-2.5 bg-slate-50 border border-slate-100 rounded-lg" onclick="delHist(${i})">删除</button>
+          </div>
+
+          <div class="flex gap-1.5 flex-wrap">
+            ${r.dur?`<span class="bg-white/80 border border-slate-100 text-[8px] text-slate-500 px-2 py-0.5 rounded-full shadow-sm">🏋️ ${r.dur}min / ${r.hr||'--'}bpm / ${r.cal||'--'}kcal</span>`:''}
+            ${r.durC?`<span class="bg-white/80 border border-slate-100 text-[8px] text-slate-500 px-2 py-0.5 rounded-full shadow-sm">🏃 ${r.durC}min / ${r.hrC||'--'}bpm / ${r.calC||'--'}kcal</span>`:''}
+            <span class="bg-white/80 border border-slate-100 text-[8px] text-slate-500 px-2 py-0.5 rounded-full shadow-sm">🎯 总计 ${r.totalSets} 组</span>
+          </div>
+
+          <div class="space-y-1.5">${exRows}</div>
+        </div>`;
+      }).join('');
+    }
+
+    async function delHist(i){
+      const confirmed = await customConfirm('确认删除', '是否彻底删除此条训练历史数据？此操作不可撤销。');
+      if (confirmed) {
+        state.history.splice(i,1);
+        saveState();
+        renderHistory();
+        showToast('记录已成功删除');
+      }
+    }
+
+    // ============================================================
+    // WEIGHT & CYCLE MONITORS
+    // ============================================================
+    function getCycleDay(dateStr,cycleStart,cycleLen){
+      const d=new Date(dateStr+'T00:00:00'),s=new Date(cycleStart+'T00:00:00');
+      const diff=Math.floor((d-s)/86400000);
+      return diff<0?-1:(diff%cycleLen)+1;
+    }
+
+    function getPhase(cd,pd){
+      if(cd<=0)return 'unknown';
+      if(cd<=pd)return 'period';
+      if(cd<=14)return 'follicular';
+      if(cd<=16)return 'ovulation';
+      if(cd<=26)return 'luteal';
+      return 'late-luteal';
+    }
+
+    function phaseLabel(p){
+      return{period:'月经期',follicular:'卵泡期',ovulation:'排卵期',luteal:'黄体期','late-luteal':'黄体晚期',unknown:'未设置'}[p]||p;
+    }
+
+    function phaseColor(p){
+      return{period:'#fda4af',follicular:'#6ee7b7',ovulation:'#93c5fd',luteal:'#fde047','late-luteal':'#f472b6',unknown:'#cbd5e1'}[p]||'#cbd5e1';
+    }
+
+    function phaseTextColor(p){
+      return{period:'#e11d48',follicular:'#047857',ovulation:'#1d4ed8',luteal:'#a16207','late-luteal':'#be185d',unknown:'#475569'}[p]||'#475569';
+    }
+
+    function phaseNote(p){
+      return{
+        period:'身体极易锁水滞留，体重秤偏高属极正常现象，经后会明显自然走低。',
+        follicular:'体内激素走向平缓，体重最能反馈真实水准，体能和训练表现优越。',
+        ovulation:'总体保持平稳，为减脂红利期，建议维持正常热量缺口。',
+        luteal:'孕酮升高致水潴留开始上升，体重可能温和走高，控制食盐摄入。',
+        'late-luteal':'锁水表现达到月度峰值，秤上上涨与脂肪无关，无需过分焦虑。',
+        unknown:''
+      }[p]||'';
+    }
+
+    function getRetention(p){
+      return{period:1.8,follicular:0.1,ovulation:0.3,luteal:0.7,'late-luteal':1.8,unknown:0}[p]||0;
+    }
+
+    function getTrainingCode(dateStr,cs,cl,pd){
+      const base=new Date(2026,5,23),d=new Date(dateStr+'T00:00:00');
+      const diff=Math.floor((d-base)/86400000);
+      const idx=((diff%6)+6)%6;
+      const types=['D1','休息','D2','休息','D3','休息'];
+      let code=types[idx];
+      const cd=getCycleDay(dateStr,cs,cl);
+      if(cd>0&&cd<=3&&code!=='D1'&&code!=='休息') code='休息';
+      return code;
+    }
+
+    function getTrainingDay(dateStr,cs,cl,pd){
+      const labels={'D1':'D1 腿臀+核心','D2':'D2 上肢推拉均衡','D3':'D3 轻训+有氧','休息':'主动拉伸/低压有氧恢复'};
+      return labels[getTrainingCode(dateStr,cs,cl,pd)]||'休息';
+    }
+
+    function getDOMS(dateStr,cs,cl,pd){
+      const d=new Date(dateStr+'T00:00:00');
+      d.setDate(d.getDate()-1);
+      const y=d.getFullYear(),m=d.getMonth()+1,dd=d.getDate();
+      const prev=y+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd;
+      const code=getTrainingCode(prev,cs,cl,pd);
+      return{'D1':0.5,'D2':0.15,'D3':0,'休息':0}[code]||0;
+    }
+
+    function predictWeight(dateStr,s){
+      const tbl={
+        '2026-06-23':{m:64.1,l:63.8,h:64.4,p:'late-luteal',cd:31},
+        '2026-06-24':{m:63.0,l:62.7,h:63.3,p:'late-luteal',cd:32},
+        '2026-06-25':{m:63.1,l:62.6,h:63.6,p:'late-luteal',cd:1},
+        '2026-06-26':{m:63.7,l:63.2,h:64.2,p:'period',cd:2},
+        '2026-06-27':{m:63.85,l:63.35,h:64.35,p:'period',cd:3},
+        '2026-06-28':{m:63.35,l:62.85,h:63.85,p:'period',cd:4},
+        '2026-06-29':{m:63.5,l:63.0,h:64.0,p:'period',cd:5},
+        '2026-06-30':{m:63.3,l:62.8,h:63.8,p:'follicular',cd:6},
+        '2026-07-01':{m:63.0,l:62.5,h:63.5,p:'follicular',cd:7},
+        '2026-07-02':{m:62.7,l:62.2,h:63.2,p:'follicular',cd:8},
+        '2026-07-03':{m:62.5,l:62.0,h:63.0,p:'follicular',cd:9},
+        '2026-07-04':{m:62.3,l:61.8,h:62.8,p:'follicular',cd:10},
+        '2026-07-05':{m:62.3,l:61.8,h:62.8,p:'follicular',cd:11},
+        '2026-07-06':{m:62.3,l:61.8,h:62.8,p:'follicular',cd:12}
+      };
+      
+      if(tbl[dateStr]){
+        const e=tbl[dateStr];
+        const lo=e.l===e.h?parseFloat((e.m-0.4).toFixed(1)):e.l;
+        const hi=e.l===e.h?parseFloat((e.m+0.4).toFixed(1)):e.h;
+        return{predicted:e.m,low:lo,high:hi,phase:e.p,cycleDay:e.cd};
+      }
+      
+      const ref=new Date('2026-06-25T00:00:00'),d=new Date(dateStr+'T00:00:00');
+      const dayOffset=Math.floor((d-ref)/86400000);
+      const base=s.startBase-(dayOffset*s.fatLossPerMonth/30);
+      const cd=getCycleDay(dateStr,s.cycleStart,s.cycleLen);
+      const p=getPhase(cd,s.periodDays);
+      const ret=getRetention(p);
+      const doms=getDOMS(dateStr,s.cycleStart,s.cycleLen,s.periodDays);
+      const predicted=base+ret+doms;
+      
+      return{
+        predicted:parseFloat(predicted.toFixed(1)),
+        low:parseFloat((predicted-0.4).toFixed(1)),
+        high:parseFloat((predicted+0.4).toFixed(1)),
+        phase:p,
+        cycleDay:cd
+      };
+    }
+
+    // ============================================================
+    // WEIGHT LIST & FORM GENERATORS
+    // ============================================================
+    function renderWeight(){
+      closeTimer();
+      const today=todayKey();
+      document.getElementById('weightDate').value=today;
+      document.getElementById('weightValue').value='';
+
+      document.getElementById('inpCycleStart').value=state.cycleStart;
+      document.getElementById('inpCycleLen').value=state.cycleLen;
+      document.getElementById('inpStartBase').value=state.startBase;
+      document.getElementById('inpFatLoss').value=state.fatLossPerMonth;
+
+      // 获取今日期望
+      const pred=predictWeight(today,state);
+      const trainDay=getTrainingDay(today,state.cycleStart,state.cycleLen,state.periodDays);
+      const pCn=phaseLabel(pred.phase);
+      const pColor=phaseColor(pred.phase);
+      const pTextColorVal=phaseTextColor(pred.phase);
+      const note=phaseNote(pred.phase);
+      const domsVal=getDOMS(today,state.cycleStart,state.cycleLen,state.periodDays);
+      
+      const d=new Date(today+'T00:00:00');
+      d.setDate(d.getDate()-1);
+      const prevTrain=getTrainingDay(d.toISOString().slice(0,10),state.cycleStart,state.cycleLen,state.periodDays);
+      const domsNote=domsVal>0?`昨日 ${prevTrain} 触发肌肉 DOMS 额外影响 +${domsVal.toFixed(2).replace('0.','.')}kg`:`昨日 ${prevTrain} · 无额外肌肉 DOMS 水潴留`;
+      const tRec=state.weights&&state.weights.find(function(w){return w.date===today});
+
+      let diffStr='';
+      if(tRec){
+        const diff=(tRec.weight-pred.predicted).toFixed(1);
+        const ds=diff>0?'+':'';
+        diffStr=`
+          <div class="text-center border-l border-slate-100 pl-4">
+            <div class="text-[8px] text-slate-400 font-extrabold uppercase mb-1">今日实测记录</div>
+            <div class="text-lg font-extrabold text-slate-700">${tRec.weight}<span class="text-[10px] font-normal text-slate-400 ml-0.5">kg</span></div>
+            <div class="text-[9px] font-bold mt-1 ${diff>0?'text-rose-400':'text-emerald-500'}">相比预测 ${ds}${diff}kg</div>
+            <div class="text-[8px] text-emerald-400 font-bold mt-0.5 flex items-center justify-center gap-1"><span>✓</span><span>已入库</span></div>
+          </div>`;
+      } else {
+        diffStr=`
+          <div class="text-center border-l border-slate-100 pl-4 flex flex-col justify-center">
+            <div class="text-[8px] text-slate-400 font-extrabold uppercase mb-1">今日实际体重</div>
+            <div class="text-[9px] text-slate-300 font-semibold mt-1">空腹待记录...</div>
+          </div>`;
+      }
+
+      document.getElementById('predictionCard').innerHTML= `
+        <div class="glass-card rounded-2xl p-5 space-y-3 shadow-sm">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-extrabold text-slate-700 tracking-wider">智能周期预测</span>
+            <span class="text-[9px] font-bold px-2.5 py-0.5 rounded-full shadow-sm" style="background:${pColor}25; color:${pTextColorVal}">${pCn} · 第${pred.cycleDay}天</span>
+          </div>
+          
+          <div class="text-[11px] font-semibold text-slate-500">今日推荐: <span class="text-babyPink-400 font-bold">${trainDay}</span> <br> <span class="text-[9px] text-slate-400">理论预测范围: ${pred.low} - ${pred.high}kg</span></div>
+          
+          <div class="grid grid-cols-2 gap-4 border-t border-slate-50 pt-2.5">
+            <div class="text-center">
+              <div class="text-[8px] text-slate-400 font-extrabold uppercase mb-1">今日预测期望</div>
+              <div class="text-lg font-extrabold text-babyBlue-400">${pred.predicted}<span class="text-[10px] font-normal text-slate-400 ml-0.5">kg</span></div>
+            </div>
+            ${diffStr}
+          </div>
+
+          <div class="border-t border-slate-100 pt-2.5 text-[9px] text-slate-400 leading-relaxed space-y-1">
+            <div class="font-medium">${domsNote}</div>
+            <div class="text-slate-500">💡 ${note}</div>
+          </div>
+        </div>`;
+
+      // 渲染测重流水表
+      const el=document.getElementById('weightList');
+      const aw=state.weights||[];
+      if(!aw.length){
+        el.innerHTML='<div class="text-center py-10 text-slate-300 font-semibold text-[9px] leading-loose">暂无测重数据<br>记录后将自动在下方绘制对比表</div>';
+        return;
+      }
+      
+      aw.sort(function(a,b){return b.timestamp-a.timestamp});
+      
+      el.innerHTML=`
+        <div class="overflow-hidden border border-white bg-white/50 rounded-2xl p-4 shadow-sm">
+          <div class="text-[8px] font-extrabold text-slate-400 uppercase tracking-wider mb-2.5 px-0.5">体重监测流水日志</div>
+          <div class="overflow-x-auto no-scrollbar">
+            <table class="w-full text-left border-collapse text-[10px]">
+              <thead>
+                <tr class="border-b border-slate-100">
+                  <th class="pb-2.5 text-slate-400 font-bold">日期</th>
+                  <th class="pb-2.5 text-right text-slate-400 font-bold">实测 (kg)</th>
+                  <th class="pb-2.5 text-right text-slate-400 font-bold">预测</th>
+                  <th class="pb-2.5 text-right text-slate-400 font-bold">差值</th>
+                  <th class="pb-2.5 text-center text-slate-400 font-bold">周期位置</th>
+                  <th class="pb-2.5 w-6"></th>
+                </tr>
+              </thead>
+              <tbody>
+                ${aw.map(function(w,i){
+                  const wp=getCycleDay(w.date,state.cycleStart,state.cycleLen);
+                  const wpPhase=getPhase(wp,state.periodDays);
+                  const wpCn=phaseLabel(wpPhase);
+                  const wpColor=phaseColor(wpPhase);
+                  const wpTextColorVal=phaseTextColor(wpPhase);
+                  const wPred=predictWeight(w.date,state);
+                  const diff=(w.weight-wPred.predicted).toFixed(1);
+                  const ds=diff>0?'+':'';
+                  const diffColor=diff>0?'text-rose-400':(diff<0?'text-emerald-500':'text-slate-400');
+                  
+                  return `<tr class="border-b border-slate-50/50 last:border-0 hover:bg-white/50">
+                    <td class="py-2.5 text-slate-600 font-semibold">${w.date.replace(/-/g,'/')}</td>
+                    <td class="py-2.5 text-right font-extrabold text-slate-700">${w.weight}</td>
+                    <td class="py-2.5 text-right text-slate-400">${wPred.predicted}</td>
+                    <td class="py-2.5 text-right font-bold ${diffColor}">${ds}${diff}</td>
+                    <td class="py-2.5 text-center">
+                      <span class="text-[7.5px] font-bold px-1.5 py-0.5 rounded-full" style="background:${wpColor}25; color:${wpTextColorVal}">${wpCn}</span>
+                    </td>
+                    <td class="py-2.5 text-center">
+                      <button class="text-slate-300 hover:text-rose-400 active:scale-75 transition-all text-xs" onclick="delWeight(${i})">✕</button>
+                    </td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+      saveState();
+    }
+
+    function addWeight(){
+      const date=document.getElementById('weightDate').value;
+      const weight=parseFloat(document.getElementById('weightValue').value);
+      if(!date||!weight||weight<=0){showToast('请输入有效日期和测得的体重数');return;}
+      if(!state.weights)state.weights=[];
+      state.weights.push({date:date,weight:weight,timestamp:Date.now()});
+      saveState();
+      renderWeight();
+      showToast('体重数据已记录');
+    }
+
+    async function delWeight(i){
+      if(!state.weights[i])return;
+      const confirmed = await customConfirm('确认删除', '确认彻底删除本条实测体重记录吗？');
+      if (confirmed) {
+        state.weights.splice(i,1);
+        saveState();
+        renderWeight();
+        showToast('数据已删除');
+      }
+    }
+
+    function saveCycleSettings(){
+      state.cycleStart=document.getElementById('inpCycleStart').value;
+      state.cycleLen=parseInt(document.getElementById('inpCycleLen').value)||32;
+      state.startBase=parseFloat(document.getElementById('inpStartBase').value)||62;
+      state.fatLossPerMonth=parseFloat(document.getElementById('inpFatLoss').value)||0.5;
+      saveState();
+      renderWeight();
+      showToast('生理周期配置保存成功');
+    }
+
+    // ============================================================
+    // SYSTEM AND EXPORT DATA
+    // ============================================================
+    function exportJSON(){
+      const b=new Blob([JSON.stringify(state)],{type:'application/json'});
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(b);
+      a.download=`training_backup_${todayKey()}.json`;
+      a.click();
+      showToast('备份文件已成功导出并下载');
+    }
+
+    function importJSON(){
+      const inp=document.createElement('input');
+      inp.type='file';
+      inp.accept='.json';
+      inp.onchange=e=>{
+        const reader=new FileReader();
+        reader.onload=ev=>{
+          try{
+            const p=JSON.parse(ev.target.result);
+            if(p.history&&p.logs){
+              state=ensureV3Struct(p);
+              saveState();
+              showToast('数据备份文件导入成功');
+              renderAll();
+            }else showToast('文件内容结构不兼容');
+          }catch(e){showToast('文件解析失败，请检查文件格式');}
+        };
+        reader.readAsText(e.target.files[0]);
+      };
+      inp.click();
+    }
+
+    async function clearAll(){
+      const confirmed = await customConfirm('彻底清除数据', '确定要清除所有的本地训练和测重数据吗？这将不可恢复，建议先备份。');
+      if (confirmed) {
+        localStorage.removeItem(SK_V3);
+        localStorage.removeItem(SK_V2);
+        location.reload();
+      }
+    }
+
+    // ============================================================
+    // TOAST MESSAGING POPUPS
+    // ============================================================
+    let tt=null;
+    function showToast(msg){
+      const el=document.getElementById('toast');
+      el.textContent=msg;
+      el.classList.remove('opacity-0', 'invisible', 'translate-y-4');
+      el.classList.add('opacity-100', 'visible', 'translate-y-0');
+      
+      clearTimeout(tt);
+      tt=setTimeout(()=>{
+        el.classList.add('opacity-0', 'invisible', 'translate-y-4');
+        el.classList.remove('opacity-100', 'visible', 'translate-y-0');
+      },2200);
+    }
+
+    // ============================================================
+    // INITIALIZATION RENDERERS
+    // ============================================================
+    function renderAll(){
+      renderTrain();
+      renderHistory();
+      
+      const now=new Date();
+      document.getElementById('todayLabel').textContent=`${now.getMonth()+1}/${now.getDate()} 周${['日','一','二','三','四','五','六'][now.getDay()]}`;
+    }
+
+    document.addEventListener('DOMContentLoaded',()=>{
+      document.querySelectorAll('.dock-item').forEach(t=>{
+        t.addEventListener('click',()=>switchView(t.dataset.view));
+      });
+      
+      ['inpDur','inpHr','inpCal','inpDurC','inpHrC','inpCalC'].forEach(id=>{
+        document.getElementById(id)?.addEventListener('input',saveAW);
+      });
+      
+      switchDay(state.currentDay||1);
+      renderAll();
+      
+      switchView('train');
+    });
+  </script>
 </body>
 </html>
