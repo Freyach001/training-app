@@ -232,9 +232,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);padding-bott
           <div class="panel-toggle-icon">▼</div>
         </div>
         <div class="panel-content" style="font-size:11.5px;line-height:1.7">
-          <p style="margin-bottom:6px"><b>肩部弹响：</b>面拉和外旋用极轻重量。若弹响伴随刺痛或卡顿，立即停止。</p>
-          <p style="margin-bottom:6px"><b>进阶节奏：</b>前2周适应期不加重量，2周后无不适再加5-10%。</p>
-          <p style="margin-bottom:6px"><b>推胸动作：</b>至少坚持4-6周、弹响明显减少且无痛后再考虑尝试。</p>
+          <p style="margin-bottom:6px"><b>肩部弹响：</b>无痛弹响继续，刺痛/卡顿立即停。面拉和外旋维持轻量。</p>
+          <p style="margin-bottom:6px"><b>推类安全：</b>蝴蝶机和上斜推胸从最轻配重起步，至少2次无不适再加重。</p>
+          <p style="margin-bottom:6px"><b>推类发力cue：</b>肩胛贴死椅背→沉肩→收紧→推。肘不锁死、不放到底。</p>
           <p><b>高蛋白保肌：</b>每天每公斤体重1.6-2.0g蛋白质。</p>
         </div>
       </div>
@@ -278,7 +278,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);padding-bott
       <div class="set-row2"><div>清空所有数据</div><button class="set-action" style="color:#ef4444;border-color:rgba(239,68,68,.3)" onclick="clearAll()">清除</button></div>
     </div>
     <div style="font-size:11px;color:var(--text3);padding:8px 0;line-height:1.8">
-      Training App v2.0 · Change Pro 龙之梦<br>
+      Training App v4 · Freya · Change Pro 龙之梦<br>
       数据仅存本地浏览器，不会上传
     </div>
   </div>
@@ -342,60 +342,58 @@ const DAYS = [
   {id:1,label:'第一天',sub:'腿臀+核心',
    warmup:[
      {name:'跑步机快走/慢跑',detail:'3分钟，快走5-6km/h坡度1-2%或慢跑7-8km/h'},
-     {name:'肩胛绕环',detail:'10次×2组，小幅画圆'},
      {name:'猫牛式',detail:'10次，脊柱屈伸'},
-     {name:'臀桥',detail:'15次，自重激活，顶峰夹臀停1秒'},
-     {name:'空蹲',detail:'10次，髋膝踝联动'},
-     {name:'侧卧蚌式开合',detail:'每侧15次，臀中肌激活',extra:true}
+     {name:'前后踝摆动',detail:'每侧30s — 一脚在前膝盖前顶超脚尖，脚跟不离地，找踝关节活动度'},
+     {name:'站姿髂腰肌拉伸',detail:'每侧30s — 弓步压髋，同侧手举过头稍往对侧偏'},
+     {name:'空蹲',detail:'10次，髋膝踝联动'}
    ],
    exercises:[
-     {id:'d1-gb',name:'诺德士臀推机',target:'臀大肌',sets:4,reps:12,wt:45,unit:'kg',tips:['顶峰收缩2秒，臀部发力非腰部','上背靠稳，小腿垂直地面','不要过度顶髋']},
-     {id:'d1-hs',name:'双向哈克深蹲(面向前)',target:'股四头肌',sets:3,reps:12,wt:100,tips:['下蹲至大腿平行地面即可','膝盖与脚尖方向一致','顶点不锁死','避免膝内扣']},
-     {id:'d1-lp',name:'坐姿腿蹬(多角度)',target:'臀腿',sets:4,reps:15,wt:80,initWts:[60,80,80,80],tips:['S1热身60lb; S2高脚位(臀); S3标准(股四头); S4宽脚位脚尖朝外(内收)','膝盖友好固定轨迹','单组不重复，一触即走']},
-     {id:'d1-lc',name:'诺德士坐姿腿弯举',target:'腘绳肌',sets:3,reps:12,wt:40,tips:['先确认是否与上次同一器械','感受腘绳肌收缩','控制离心慢放']},
-	     {id:'d1-le',name:'诺德士坐姿腿屈伸',target:'股四头肌',sets:3,reps:12,wt:30,tips:['30-40lb递增','顶峰收缩1秒','慢放不甩动']},
-     {id:'d1-ad',name:'内收肌(向内夹)',target:'大腿内侧',sets:3,reps:12,wt:60,tips:['大腿内侧发力','慢放控制','最后吃力说明重量合适']},
-     {id:'d1-ab',name:'外展(臀外侧)',target:'臀中肌',sets:4,reps:12,wt:60,tips:['前倾60lb×12+靠后45-50lb×10 (复合组)','若借力/不稳需降重，不必改坐直','臀外侧发力']},
-     {id:'d1-he',name:'山羊挺身',target:'臀腿后侧',sets:4,reps:12,wt:5,unit:'kg',tips:['竖脊肌/腘绳肌发力','控制慢放','观察中第2轮']}
+     {id:'d1-gb',name:'诺德士臀推机',target:'臀大肌',sets:4,reps:12,wt:50,unit:'kg',tips:['顶峰收缩2秒，臀部发力非腰部','上背靠稳，小腿垂直地面','不过度顶髋']},
+     {id:'d1-hs',name:'双向哈克深蹲(面向前)',target:'股四头肌',sets:3,reps:12,wt:100,tips:['窄站距(比肩稍窄)，加强股四头前侧','膝盖与脚尖方向一致','顶点不锁死']},
+     {id:'d1-lp',name:'坐姿腿蹬(多角度)',target:'臀腿',sets:4,reps:15,wt:80,initWts:[60,80,80,80],tips:['S1热身60lb','2组低脚位(窄→股四头)+2组高脚位(臀)','膝盖友好固定轨迹']},
+     {id:'d1-lc',name:'诺德士坐姿腿弯举',target:'腘绳肌',sets:3,reps:12,wt:40,tips:['感受腘绳肌收缩','控制离心慢放']},
+     {id:'d1-le',name:'诺德士坐姿腿屈伸',target:'股四头肌',sets:3,reps:12,wt:35,tips:['可相对加重，股四头专属孤立','顶峰收缩1秒','慢放不甩动']},
+     {id:'d1-ad',name:'内收肌(向内夹)',target:'大腿内侧',sets:3,reps:12,wt:60,tips:['大腿内侧发力','慢放控制']},
+     {id:'d1-ab',name:'外展(臀外侧)',target:'臀中肌',sets:4,reps:12,wt:60,tips:['前倾60lb×12+靠后45-50lb×10 (复合组)','若借力/不稳需降重','臀外侧发力']},
+     {id:'d1-rt',name:'坐姿旋转训练器',target:'腹斜肌',sets:2,reps:15,wt:30,tips:['核心稳定发力非腰部代偿','轻量控制']},
+     {id:'d1-cr',name:'诺德士卷腹器械',target:'腹直肌',sets:2,reps:15,wt:50,tips:['固定轨迹腰部有支撑','呼气卷起']}
    ],
-   stretch:['臀肌拉伸 仰卧4字 每侧30s×2','腘绳肌 仰卧单腿抬高 每侧30s×2','髋屈肌 弓步压髋 每侧30s×2','股四头肌 站姿单腿后屈 每侧30s×2','诺德士腰腿拉伸器 5min'],
+   stretch:['站姿髂腰肌拉伸 每侧30s','腘绳肌 站姿单腿抬高 每侧30s×2','股四头肌 站姿单腿后屈 每侧30s×2','诺德士腰腿拉伸器 5min'],
    cardio:[{name:'跑步机爬坡',detail:'25-30min,坡度6-7,速度3.5'},{name:'或划船机',detail:'替代方案'}]},
-  {id:2,label:'第二天',sub:'背+肩胛稳定+手臂',
+  {id:2,label:'第二天',sub:'上肢推拉均衡',
    warmup:[
-     {name:'跑步机快走/慢跑',detail:'3分钟，快走5-6km/h坡度1-2%或慢跑7-8km/h'},
+     {name:'跑步机快走/慢跑',detail:'3分钟'},
      {name:'肩胛绕环',detail:'10次×2组，小幅画圆'},
-     {name:'猫牛式',detail:'10次'},
-     {name:'臀桥',detail:'15次，自重激活'},
-     {name:'空蹲',detail:'10次'},
-     {name:'极轻绳索面拉',detail:'15次×2组，激活肩袖',extra:true},
-     {name:'手臂小幅环绕',detail:'前后各10次',extra:true}
+     {name:'收下巴(Chin tuck)',detail:'10次×2 — 手放下巴往后收(非低头)，感受颈后拉伸'},
+     {name:'极轻绳索面拉',detail:'15次×2组，激活肩袖'},
+     {name:'龙门架肩袖外旋',detail:'12次×2(5kg)，手肘夹紧90°，仅小臂外旋'},
+     {name:'前锯肌激活(站姿推举)',detail:'10次×1 — 徒手或最轻哑铃，手臂伸直向前推，最后肩胛骨前滑包出去'}
    ],
    exercises:[
-     {id:'d2-sr',name:'诺德士坐姿划船',target:'中背部',sets:4,reps:12,wt:20,unit:'kg',tips:['沉肩挺胸，感受肩胛内收','手肘贴身','控制离心']},
+     {id:'d2-pd',name:'高位下拉(对握优先)',target:'背阔肌',sets:3,reps:12,wt:40,tips:['宽对握优先，拉到锁骨前','沉肩启动，不拉颈后','感受背阔发力']},
      {id:'d2-pu',name:'辅助引体向上',target:'背阔肌',sets:3,reps:10,wt:60,tips:['沉肩下拉不耸肩','感受背阔发力','肩部不适立刻停']},
-     {id:'d2-vr',name:'辅助Vertical Row',target:'上背部/肩胛',sets:4,reps:12,wt:20,unit:'kg',tips:['辅助机器，重量越大越省力','沉肩挺胸','感受背部收缩，可探索25kg']},
-     {id:'d2-rp',name:'反向蝴蝶机(替代面拉)',target:'三角肌后束/肩袖',sets:2,reps:15,wt:5,tips:['最小配重起，观察弹响','手肘向外打开，感受肩胛后缩','弹响伴随刺痛立刻停']},
-     {id:'d2-er',name:'龙门架肩袖外旋',target:'肩袖',sets:2,reps:12,wt:5,unit:'kg',tips:['手肘夹紧90°','仅小臂外旋','极轻重量，刺痛立刻停']},
-     {id:'d2-br',name:'俯身分动划船机',target:'背阔肌(左右差异纠正)',sets:2,reps:12,wt:10,tips:['轻重量起','单侧独立运动，纠正左右肩差异','感受背阔肌发力']},
+     {id:'d2-sr',name:'诺德士坐姿划船',target:'中背部',sets:3,reps:12,wt:20,unit:'kg',tips:['沉肩挺胸，手肘贴身','感受肩胛内收','控制离心']},
+     {id:'d2-vr',name:'辅助Vertical Row',target:'上背部/肩胛',sets:3,reps:12,wt:20,unit:'kg',tips:['沉肩挺胸','感受背部收缩']},
+     {id:'d2-bf',name:'坐姿蝴蝶夹胸机',target:'胸肌',sets:3,reps:15,wt:5,tips:['最轻配重起步','手肘在肩前方活动，不拉到末端','感受胸肌挤压','⚠️肩前刺痛立即停']},
+     {id:'d2-ic',name:'诺德士上斜推胸',target:'上胸',sets:3,reps:12,wt:5,tips:['上斜比平板对肩更友好','最轻配重起步，肘不锁死不放到底','⚠️肩峰/肩前刺痛立即停']},
      {id:'d2-pc',name:'牧师凳弯举',target:'肱二头肌',sets:3,reps:14,wt:30,tips:['大臂固定不借力','控制下放','顶峰收缩']},
-     {id:'d2-te',name:'臂屈伸机',target:'肱三头肌',sets:3,reps:12,wt:30,tips:['30-40lb递增','全程控制','肘部不外张不甩动']}
+     {id:'d2-te',name:'臂屈伸机',target:'肱三头肌',sets:3,reps:12,wt:30,tips:['全程控制','离心慢放3秒增加张力','肘部不外张不甩动']}
    ],
-   stretch:['胸大肌 靠墙单臂展开 每侧30s×2','胸小肌 双手扣头肘向后拉 30s×2','上斜方肌 头侧倾手轻压 每侧30s×2','背阔肌 抓固定物前倾悬挂 30s×2','手臂交叉拉伸 每侧30s'],
+   stretch:['龙门架胸小肌拉伸 每侧30s×2 — 手肘90°卡住竖杆，身体向外转','上斜方肌 头侧倾手轻压 每侧30s×2','背阔肌 抓固定物前倾悬挂 每侧30s×2'],
    cardio:[{name:'跑步机爬坡',detail:'25-30min,坡度6-7,速度3.5'}]},
   {id:3,label:'第三天',sub:'轻训+有氧',
    warmup:[
      {name:'跑步机慢走',detail:'3分钟，强度减半'},
      {name:'肩胛绕环',detail:'10次×2组'},
-     {name:'猫牛式',detail:'10次'},
-     {name:'臀桥',detail:'15次'},
-     {name:'空蹲',detail:'10次'}
+     {name:'前后踝摆动',detail:'每侧30s'},
+     {name:'收下巴(Chin tuck)',detail:'10次'}
    ],
    exercises:[
-     {id:'d3-lp',name:'诺德士倒蹬器(多角度)',target:'臀腿',sets:4,reps:15,wt:60,tips:['2组标准脚位+2组新角度','控制为主','感受发力模式']},
-     {id:'d3-pd',name:'高位下拉',target:'背阔肌',sets:3,reps:15,wt:40,tips:['2组标准+1组宽握','全程沉肩','感受背阔拉伸收缩']},
-     {id:'d3-sl',name:'坐姿腿蹬(轻量)',target:'股四头肌',sets:2,reps:15,wt:45,tips:['40-50lb，窄距股外侧角度补充','轻量控制','组数按状态调整']},
-     {id:'d3-rt',name:'坐姿旋转训练器',target:'腹斜肌',sets:2,reps:15,wt:20,tips:['轻量','主动恢复','控制核心稳定']},
-     {id:'d3-cr',name:'诺德士卷腹器械',target:'腹直肌',sets:3,reps:12,wt:20,tips:['2组标准+1组慢离心','感受腹直肌收缩','慢放控制']}
+     {id:'d3-pd',name:'高位下拉(宽对握)',target:'背阔肌',sets:3,reps:15,wt:30,tips:['轻量，D2没用对握的话这里体验','全程沉肩','感受背阔拉伸收缩']},
+     {id:'d3-lp',name:'坐姿腿蹬(轻量)',target:'股四头肌',sets:3,reps:15,wt:40,tips:['低配重高次数主动恢复','窄距股外侧角度补充']},
+     {id:'d3-le',name:'诺德士坐姿腿屈伸(轻量)',target:'股四头肌',sets:2,reps:15,wt:30,tips:['股四头频率补充','轻量控制']},
+     {id:'d3-rt',name:'坐姿旋转训练器',target:'腹斜肌',sets:2,reps:15,wt:20,tips:['轻量','主动恢复']},
+     {id:'d3-cr',name:'诺德士卷腹器械',target:'腹直肌',sets:2,reps:15,wt:30,tips:['轻量','慢放控制']}
    ],
    stretch:['以上所有拉伸各做一遍','诺德士腰腿拉伸器 5min','泡沫轴滚压背部和大腿 各1-2min'],
    cardio:[{name:'跑步机爬坡',detail:'40-50min,坡度9-10,速度4'}]},
@@ -618,10 +616,6 @@ function switchView(id){
 
 function switchDay(n){
   curDay=n;
-  // Clear extra exercises when switching days
-  Object.keys(state.logs).forEach(function(id){
-    if(id.startsWith('extra-'))delete state.logs[id];
-  });
   cardExId=null;activeSet=null;
   document.getElementById('trainList').style.display='';
   document.getElementById('trainCard').style.display='none';
@@ -975,7 +969,7 @@ function activateSet(exId,idx){
 function getRestSec(exId){
   if(exId==='d2-pu')return 120;
   const core=exId.replace(/^d\d-/,'');
-  if(['gb','hs','lp','sr','vr'].includes(core))return 90;
+  if(['gb','hs','lp','sr','vr','pd','ic'].includes(core))return 90;
   return 60;
 }
 function reRender(){
