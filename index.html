@@ -708,13 +708,30 @@
       if(fromDay)return fromDay;
       const log=state.logs[id];
       if(!log)return null;
-      return {id:id,name:log._name||id,target:log._target||'',sets:log._totalSets||log.sets.length,reps:log._reps||12,unit:log._unit||'lb',tips:[]};
+      return {id:id,name:log._name||id,target:log._target||'',sets:log._totalSets||log.sets.length,reps:log._reps||12,unit:getUnitForEx(id),tips:[]};
+    }
+
+    function getUnitForEx(id){
+      const log=state.logs[id];
+      if(log&&log._unit) return log._unit;
+      const ex=DAYS.flatMap(d=>d.exercises).find(e=>e.id===id);
+      if(ex&&ex.unit) return ex.unit;
+      return 'lb';
     }
 
     // ============================================================
     // EXERCISE DETAILS (CARD VIEW) — Completely removed illustrations
     // ============================================================
     let cardExId=null;
+
+    function toggleUnit(exId){
+      const cur=getUnitForEx(exId);
+      const next=cur==='lb'?'kg':'lb';
+      if(!state.logs[exId])return;
+      state.logs[exId]._unit=next;
+      saveState();
+      renderCard();
+    }
 
     function showCard(exId){
       closeTimer();
@@ -738,7 +755,7 @@
       const log=state.logs[cardExId];
       if(!log){hideCard();return;}
 
-      const unit=ex.unit||'lb';
+      const unit=getUnitForEx(cardExId);
       const readOnly=!!(log.completed||log.sets.every(s=>s.done));
 
       // 渲染各组次列表
@@ -799,6 +816,8 @@
               <span class="bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-full">目标: ${ex.target}</span>
               <span>•</span>
               <span>计划: ${ex.sets}组 × ${ex.reps}次</span>
+              <span>•</span>
+              <button class="px-2 py-0.5 rounded-full font-extrabold text-[9px] transition-all active:scale-90 ${readOnly?'text-slate-300 cursor-default':'text-babyPink-400 hover:bg-babyPink-50 border border-babyPink-200 bg-babyPink-50/30'}" onclick="${readOnly?'':'toggleUnit(\''+cardExId+'\')'}" ${readOnly?'disabled':''}>${unit}</button>
             </div>
           </div>
 
@@ -901,7 +920,7 @@
         const ex=getExById(exId);
         if(!ex)return;
         const sets=Array.from({length:ex.sets},(_,i)=>({weight:ex.initWts?ex.initWts[i]:ex.wt,reps:ex.reps,done:false}));
-        state.logs[exId]={sets,completed:false,note:'',orderIndex:-1};
+        state.logs[exId]={sets,completed:false,note:'',_unit:ex.unit||'lb',orderIndex:-1};
         saveState();
       }
     }
@@ -1054,8 +1073,7 @@
       if(!box)return;
       box.classList.remove('hidden');
       const s=state.logs[exId].sets[idx];
-      const ex=getExById(exId);
-      const unit=(ex&&ex.unit)||'lb';
+      const unit=getUnitForEx(exId);
       const step=unit==='kg'?2.5:5;
       const tagStep=unit==='kg'?5:10;
       const bw=s.weight||(unit==='kg'?10:40);
@@ -1106,8 +1124,7 @@
     function adj(idx,sign,exId,field='weight'){
       const s=state.logs[exId].sets[idx];
       if(field==='weight'){
-        const ex=getExById(exId);
-        const step=(ex&&ex.unit==='kg')?2.5:5;
+        const step=(getUnitForEx(exId)==='kg')?2.5:5;
         s.weight=Math.max(0,Math.round((s.weight+sign*step)/step)*step);
       }else{
         s.reps=Math.max(1,s.reps+sign);
@@ -1230,7 +1247,7 @@
         details.push({
           name:ex.name,
           target:ex.target||'',
-          unit:ex.unit||'lb',
+          unit:getUnitForEx(id),
           sets:done.map(function(s){return{weight:s.weight,reps:s.reps}}),
           note:log.note||'',
           orderIndex:log.orderIndex>=0?log.orderIndex:details.length
